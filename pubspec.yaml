@@ -1,0 +1,37 @@
+name: study_buddy
+description: "Study Buddy app"
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.7.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # UI
+  cupertino_icons: ^1.0.8
+
+  # Firebase + Google Sign-In
+  firebase_core: ^2.27.0
+  firebase_auth: ^4.16.0
+  google_sign_in: ^6.2.1
+  cloud_firestore: ^4.15.8
+  firebase_storage: ^11.6.9
+
+  # NEW — Needed for record + upload test
+  permission_handler: ^11.3.1
+  record: ^5.1.2
+  path_provider: ^2.1.4
+  http: ^1.2.2
+  googleapis: ^13.2.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+
+flutter:
+  uses-material-design: true
