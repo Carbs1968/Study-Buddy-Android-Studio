@@ -1,0 +1,13 @@
+{
+  "@@locale": "es",
+  "appTitle": "Study Buddy",
+  "signInWithGoogle": "Iniciar sesión con Google",
+  "welcome": "Bienvenido",
+  "profile": "Perfil",
+  "save": "Guardar",
+  "logout": "Cerrar sesión",
+  "language": "Idioma",
+  "school": "Escuela / Universidad",
+  "accountType": "Tipo de cuenta",
+  "freemium": "Freemium"
+}

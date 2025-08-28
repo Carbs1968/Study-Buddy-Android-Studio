@@ -15,16 +15,26 @@
 	<key>STORAGE_BUCKET</key>
 	<string>study-buddy-dev-25a7a.firebasestorage.app</string>
 	<key>IS_ADS_ENABLED</key>
-	<false></false>
+	<false/>
 	<key>IS_ANALYTICS_ENABLED</key>
-	<false></false>
+	<false/>
 	<key>IS_APPINVITE_ENABLED</key>
-	<true></true>
+	<true/>
 	<key>IS_GCM_ENABLED</key>
-	<true></true>
+	<true/>
 	<key>IS_SIGNIN_ENABLED</key>
-	<true></true>
+	<true/>
 	<key>GOOGLE_APP_ID</key>
 	<string>1:905658157082:ios:06d17e3c75f9a1dd3369a3</string>
+	<key>SMAuthorizedClients</key>
+	<array>
+		<string></string>
+	</array>
+	<key>CFBundleExecutable</key>
+	<string></string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleIdentifier</key>
+	<string></string>
 </dict>
 </plist>

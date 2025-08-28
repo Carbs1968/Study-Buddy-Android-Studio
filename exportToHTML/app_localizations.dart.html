@@ -1,0 +1,229 @@
+<html>
+<head>
+<title>app_localizations.dart</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+.s0 { color: #bcbec4;}
+.s1 { color: #6aab73;}
+.s2 { color: #bcbec4;}
+.s3 { color: #7a7e85;}
+.s4 { color: #5f826b; font-style: italic;}
+.s5 { color: #cf8e6d;}
+</style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060" >
+<tr><td><center>
+<font face="Arial, Helvetica" color="#000000">
+app_localizations.dart</font>
+</center></td></tr></table>
+<pre><span class="s0">import </span><span class="s1">'dart:async'</span><span class="s2">;</span>
+
+<span class="s0">import </span><span class="s1">'package:flutter/foundation.dart'</span><span class="s2">;</span>
+<span class="s0">import </span><span class="s1">'package:flutter/widgets.dart'</span><span class="s2">;</span>
+<span class="s0">import </span><span class="s1">'package:flutter_localizations/flutter_localizations.dart'</span><span class="s2">;</span>
+<span class="s0">import </span><span class="s1">'package:intl/intl.dart' </span><span class="s0">as intl</span><span class="s2">;</span>
+
+<span class="s0">import </span><span class="s1">'app_localizations_en.dart'</span><span class="s2">;</span>
+<span class="s0">import </span><span class="s1">'app_localizations_es.dart'</span><span class="s2">;</span>
+
+<span class="s3">// ignore_for_file: type=lint</span>
+
+<span class="s4">/// Callers can lookup localized strings with an instance of AppLocalizations</span>
+<span class="s4">/// returned by `AppLocalizations.of(context)`.</span>
+<span class="s4">///</span>
+<span class="s4">/// Applications need to include `AppLocalizations.delegate()` in their app's</span>
+<span class="s4">/// `localizationDelegates` list, and the locales they support in the app's</span>
+<span class="s4">/// `supportedLocales` list. For example:</span>
+<span class="s4">///</span>
+<span class="s4">/// ```dart</span>
+<span class="s4">/// import 'l10n/app_localizations.dart';</span>
+<span class="s4">///</span>
+<span class="s4">/// return MaterialApp(</span>
+<span class="s4">///   localizationsDelegates: AppLocalizations.localizationsDelegates,</span>
+<span class="s4">///   supportedLocales: AppLocalizations.supportedLocales,</span>
+<span class="s4">///   home: MyApplicationHome(),</span>
+<span class="s4">/// );</span>
+<span class="s4">/// ```</span>
+<span class="s4">///</span>
+<span class="s4">/// ## Update pubspec.yaml</span>
+<span class="s4">///</span>
+<span class="s4">/// Please make sure to update your pubspec.yaml to include the following</span>
+<span class="s4">/// packages:</span>
+<span class="s4">///</span>
+<span class="s4">/// ```yaml</span>
+<span class="s4">/// dependencies:</span>
+<span class="s4">///   # Internationalization support.</span>
+<span class="s4">///   flutter_localizations:</span>
+<span class="s4">///     sdk: flutter</span>
+<span class="s4">///   intl: any # Use the pinned version from flutter_localizations</span>
+<span class="s4">///</span>
+<span class="s4">///   # Rest of dependencies</span>
+<span class="s4">/// ```</span>
+<span class="s4">///</span>
+<span class="s4">/// ## iOS Applications</span>
+<span class="s4">///</span>
+<span class="s4">/// iOS applications define key application metadata, including supported</span>
+<span class="s4">/// locales, in an Info.plist file that is built into the application bundle.</span>
+<span class="s4">/// To configure the locales supported by your app, you’ll need to edit this</span>
+<span class="s4">/// file.</span>
+<span class="s4">///</span>
+<span class="s4">/// First, open your project’s ios/Runner.xcworkspace Xcode workspace file.</span>
+<span class="s4">/// Then, in the Project Navigator, open the Info.plist file under the Runner</span>
+<span class="s4">/// project’s Runner folder.</span>
+<span class="s4">///</span>
+<span class="s4">/// Next, select the Information Property List item, select Add Item from the</span>
+<span class="s4">/// Editor menu, then select Localizations from the pop-up menu.</span>
+<span class="s4">///</span>
+<span class="s4">/// Select and expand the newly-created Localizations item then, for each</span>
+<span class="s4">/// locale your application supports, add a new item and select the locale</span>
+<span class="s4">/// you wish to add from the pop-up menu in the Value field. This list should</span>
+<span class="s4">/// be consistent with the languages listed in the AppLocalizations.supportedLocales</span>
+<span class="s4">/// property.</span>
+<span class="s0">abstract </span><span class="s5">class </span><span class="s0">AppLocalizations </span><span class="s2">{</span>
+  <span class="s0">AppLocalizations</span><span class="s2">(</span><span class="s0">String locale</span><span class="s2">) : </span><span class="s0">localeName </span><span class="s2">= </span><span class="s0">intl</span><span class="s2">.</span><span class="s0">Intl</span><span class="s2">.</span><span class="s0">canonicalizedLocale</span><span class="s2">(</span><span class="s0">locale</span><span class="s2">.</span><span class="s0">toString</span><span class="s2">());</span>
+
+  <span class="s5">final </span><span class="s0">String localeName</span><span class="s2">;</span>
+
+  <span class="s0">static AppLocalizations</span><span class="s2">? </span><span class="s0">of</span><span class="s2">(</span><span class="s0">BuildContext context</span><span class="s2">) {</span>
+    <span class="s5">return </span><span class="s0">Localizations</span><span class="s2">.</span><span class="s0">of</span><span class="s2">&lt;</span><span class="s0">AppLocalizations</span><span class="s2">&gt;(</span><span class="s0">context</span><span class="s2">, </span><span class="s0">AppLocalizations</span><span class="s2">);</span>
+  <span class="s2">}</span>
+
+  <span class="s0">static </span><span class="s5">const </span><span class="s0">LocalizationsDelegate</span><span class="s2">&lt;</span><span class="s0">AppLocalizations</span><span class="s2">&gt; </span><span class="s0">delegate </span><span class="s2">= </span><span class="s0">_AppLocalizationsDelegate</span><span class="s2">();</span>
+
+  <span class="s4">/// A list of this localizations delegate along with the default localizations</span>
+  <span class="s4">/// delegates.</span>
+  <span class="s4">///</span>
+  <span class="s4">/// Returns a list of localizations delegates containing this delegate along with</span>
+  <span class="s4">/// GlobalMaterialLocalizations.delegate, GlobalCupertinoLocalizations.delegate,</span>
+  <span class="s4">/// and GlobalWidgetsLocalizations.delegate.</span>
+  <span class="s4">///</span>
+  <span class="s4">/// Additional delegates can be added by appending to this list in</span>
+  <span class="s4">/// MaterialApp. This list does not have to be used at all if a custom list</span>
+  <span class="s4">/// of delegates is preferred or required.</span>
+  <span class="s0">static </span><span class="s5">const </span><span class="s0">List</span><span class="s2">&lt;</span><span class="s0">LocalizationsDelegate</span><span class="s2">&lt;</span><span class="s0">dynamic</span><span class="s2">&gt;&gt; </span><span class="s0">localizationsDelegates </span><span class="s2">= &lt;</span><span class="s0">LocalizationsDelegate</span><span class="s2">&lt;</span><span class="s0">dynamic</span><span class="s2">&gt;&gt;[</span>
+    <span class="s0">delegate</span><span class="s2">,</span>
+    <span class="s0">GlobalMaterialLocalizations</span><span class="s2">.</span><span class="s0">delegate</span><span class="s2">,</span>
+    <span class="s0">GlobalCupertinoLocalizations</span><span class="s2">.</span><span class="s0">delegate</span><span class="s2">,</span>
+    <span class="s0">GlobalWidgetsLocalizations</span><span class="s2">.</span><span class="s0">delegate</span><span class="s2">,</span>
+  <span class="s2">];</span>
+
+  <span class="s4">/// A list of this localizations delegate's supported locales.</span>
+  <span class="s0">static </span><span class="s5">const </span><span class="s0">List</span><span class="s2">&lt;</span><span class="s0">Locale</span><span class="s2">&gt; </span><span class="s0">supportedLocales </span><span class="s2">= &lt;</span><span class="s0">Locale</span><span class="s2">&gt;[</span>
+    <span class="s0">Locale</span><span class="s2">(</span><span class="s1">'en'</span><span class="s2">),</span>
+    <span class="s0">Locale</span><span class="s2">(</span><span class="s1">'es'</span><span class="s2">)</span>
+  <span class="s2">];</span>
+
+  <span class="s4">/// No description provided for @appTitle.</span>
+  <span class="s4">///</span>
+  <span class="s4">/// In en, this message translates to:</span>
+  <span class="s4">/// **'Study Buddy'**</span>
+  <span class="s0">String get appTitle</span><span class="s2">;</span>
+
+  <span class="s4">/// No description provided for @signInWithGoogle.</span>
+  <span class="s4">///</span>
+  <span class="s4">/// In en, this message translates to:</span>
+  <span class="s4">/// **'Sign in with Google'**</span>
+  <span class="s0">String get signInWithGoogle</span><span class="s2">;</span>
+
+  <span class="s4">/// No description provided for @welcome.</span>
+  <span class="s4">///</span>
+  <span class="s4">/// In en, this message translates to:</span>
+  <span class="s4">/// **'Welcome'**</span>
+  <span class="s0">String get welcome</span><span class="s2">;</span>
+
+  <span class="s4">/// No description provided for @profile.</span>
+  <span class="s4">///</span>
+  <span class="s4">/// In en, this message translates to:</span>
+  <span class="s4">/// **'Profile'**</span>
+  <span class="s0">String get profile</span><span class="s2">;</span>
+
+  <span class="s4">/// No description provided for @save.</span>
+  <span class="s4">///</span>
+  <span class="s4">/// In en, this message translates to:</span>
+  <span class="s4">/// **'Save'**</span>
+  <span class="s0">String get save</span><span class="s2">;</span>
+
+  <span class="s4">/// No description provided for @logout.</span>
+  <span class="s4">///</span>
+  <span class="s4">/// In en, this message translates to:</span>
+  <span class="s4">/// **'Logout'**</span>
+  <span class="s0">String get logout</span><span class="s2">;</span>
+
+  <span class="s4">/// No description provided for @language.</span>
+  <span class="s4">///</span>
+  <span class="s4">/// In en, this message translates to:</span>
+  <span class="s4">/// **'Language'**</span>
+  <span class="s0">String get language</span><span class="s2">;</span>
+
+  <span class="s4">/// No description provided for @school.</span>
+  <span class="s4">///</span>
+  <span class="s4">/// In en, this message translates to:</span>
+  <span class="s4">/// **'School / University'**</span>
+  <span class="s0">String get school</span><span class="s2">;</span>
+
+  <span class="s4">/// No description provided for @accountType.</span>
+  <span class="s4">///</span>
+  <span class="s4">/// In en, this message translates to:</span>
+  <span class="s4">/// **'Account Type'**</span>
+  <span class="s0">String get accountType</span><span class="s2">;</span>
+
+  <span class="s4">/// No description provided for @freemium.</span>
+  <span class="s4">///</span>
+  <span class="s4">/// In en, this message translates to:</span>
+  <span class="s4">/// **'Freemium'**</span>
+  <span class="s0">String get freemium</span><span class="s2">;</span>
+
+  <span class="s4">/// No description provided for @changePhoto.</span>
+  <span class="s4">///</span>
+  <span class="s4">/// In en, this message translates to:</span>
+  <span class="s4">/// **'Change Photo'**</span>
+  <span class="s0">String get changePhoto</span><span class="s2">;</span>
+
+  <span class="s4">/// No description provided for @signOut.</span>
+  <span class="s4">///</span>
+  <span class="s4">/// In en, this message translates to:</span>
+  <span class="s4">/// **'Sign Out'**</span>
+  <span class="s0">String get signOut</span><span class="s2">;</span>
+
+  <span class="s4">/// No description provided for @loading.</span>
+  <span class="s4">///</span>
+  <span class="s4">/// In en, this message translates to:</span>
+  <span class="s4">/// **'Loading...'**</span>
+  <span class="s0">String get loading</span><span class="s2">;</span>
+<span class="s2">}</span>
+
+<span class="s5">class </span><span class="s0">_AppLocalizationsDelegate </span><span class="s5">extends </span><span class="s0">LocalizationsDelegate</span><span class="s2">&lt;</span><span class="s0">AppLocalizations</span><span class="s2">&gt; {</span>
+  <span class="s5">const </span><span class="s0">_AppLocalizationsDelegate</span><span class="s2">();</span>
+
+  <span class="s0">@override</span>
+  <span class="s0">Future</span><span class="s2">&lt;</span><span class="s0">AppLocalizations</span><span class="s2">&gt; </span><span class="s0">load</span><span class="s2">(</span><span class="s0">Locale locale</span><span class="s2">) {</span>
+    <span class="s5">return </span><span class="s0">SynchronousFuture</span><span class="s2">&lt;</span><span class="s0">AppLocalizations</span><span class="s2">&gt;(</span><span class="s0">lookupAppLocalizations</span><span class="s2">(</span><span class="s0">locale</span><span class="s2">));</span>
+  <span class="s2">}</span>
+
+  <span class="s0">@override</span>
+  <span class="s0">bool isSupported</span><span class="s2">(</span><span class="s0">Locale locale</span><span class="s2">) =&gt; &lt;</span><span class="s0">String</span><span class="s2">&gt;[</span><span class="s1">'en'</span><span class="s2">, </span><span class="s1">'es'</span><span class="s2">].</span><span class="s0">contains</span><span class="s2">(</span><span class="s0">locale</span><span class="s2">.</span><span class="s0">languageCode</span><span class="s2">);</span>
+
+  <span class="s0">@override</span>
+  <span class="s0">bool shouldReload</span><span class="s2">(</span><span class="s0">_AppLocalizationsDelegate old</span><span class="s2">) =&gt; </span><span class="s5">false</span><span class="s2">;</span>
+<span class="s2">}</span>
+
+<span class="s0">AppLocalizations lookupAppLocalizations</span><span class="s2">(</span><span class="s0">Locale locale</span><span class="s2">) {</span>
+
+
+  <span class="s3">// Lookup logic when only language code is specified.</span>
+  <span class="s5">switch </span><span class="s2">(</span><span class="s0">locale</span><span class="s2">.</span><span class="s0">languageCode</span><span class="s2">) {</span>
+    <span class="s5">case </span><span class="s1">'en'</span><span class="s2">: </span><span class="s5">return </span><span class="s0">AppLocalizationsEn</span><span class="s2">();</span>
+    <span class="s5">case </span><span class="s1">'es'</span><span class="s2">: </span><span class="s5">return </span><span class="s0">AppLocalizationsEs</span><span class="s2">();</span>
+  <span class="s2">}</span>
+
+  <span class="s5">throw </span><span class="s0">FlutterError</span><span class="s2">(</span>
+    <span class="s1">'AppLocalizations.delegate failed to load unsupported locale &quot;</span><span class="s2">$</span><span class="s0">locale</span><span class="s1">&quot;. This is likely '</span>
+    <span class="s1">'an issue with the localizations generation tool. Please file an issue '</span>
+    <span class="s1">'on GitHub with a reproducible sample app and the gen-l10n configuration '</span>
+    <span class="s1">'that was used.'</span>
+  <span class="s2">);</span>
+<span class="s2">}</span>
+</pre>
+</body>
+</html>

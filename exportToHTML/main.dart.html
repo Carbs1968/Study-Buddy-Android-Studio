@@ -1,0 +1,493 @@
+<html>
+<head>
+<title>main.dart</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+.s0 { color: #bcbec4;}
+.s1 { color: #6aab73;}
+.s2 { color: #bcbec4;}
+.s3 { color: #cf8e6d;}
+.s4 { color: #2aacb8;}
+.s5 { color: #7a7e85;}
+</style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060" >
+<tr><td><center>
+<font face="Arial, Helvetica" color="#000000">
+main.dart</font>
+</center></td></tr></table>
+<pre><span class="s0">import </span><span class="s1">'dart:io'</span><span class="s2">;</span>
+
+<span class="s0">import </span><span class="s1">'package:cloud_firestore/cloud_firestore.dart'</span><span class="s2">;</span>
+<span class="s0">import </span><span class="s1">'package:firebase_auth/firebase_auth.dart'</span><span class="s2">;</span>
+<span class="s0">import </span><span class="s1">'package:firebase_core/firebase_core.dart'</span><span class="s2">;</span>
+<span class="s0">import </span><span class="s1">'package:firebase_storage/firebase_storage.dart'</span><span class="s2">;</span>
+<span class="s0">import </span><span class="s1">'package:flutter/material.dart'</span><span class="s2">;</span>
+<span class="s0">import </span><span class="s1">'package:flutter_localizations/flutter_localizations.dart'</span><span class="s2">;</span>
+<span class="s0">import </span><span class="s1">'package:image_picker/image_picker.dart'</span><span class="s2">;</span>
+<span class="s0">import </span><span class="s1">'package:study_buddy/firebase_options.dart'</span><span class="s2">;</span>
+<span class="s0">import </span><span class="s1">'package:study_buddy/locale_provider.dart'</span><span class="s2">;</span>
+<span class="s0">import </span><span class="s1">'package:study_buddy/l10n/app_localizations.dart'</span><span class="s2">;</span>
+<span class="s0">import </span><span class="s1">'package:provider/provider.dart'</span><span class="s2">;</span>
+<span class="s0">import </span><span class="s1">'package:google_sign_in/google_sign_in.dart'</span><span class="s2">;</span>
+<span class="s0">import </span><span class="s1">'package:flutter_sound/flutter_sound.dart'</span><span class="s2">;</span>
+<span class="s0">import </span><span class="s1">'package:path_provider/path_provider.dart'</span><span class="s2">;</span>
+<span class="s0">import </span><span class="s1">'package:permission_handler/permission_handler.dart'</span><span class="s2">;</span>
+<span class="s0">import </span><span class="s1">'package:googleapis/drive/v3.dart' </span><span class="s0">as drive</span><span class="s2">;</span>
+<span class="s0">import </span><span class="s1">'package:extension_google_sign_in_as_googleapis_auth/extension_google_sign_in_as_googleapis_auth.dart'</span><span class="s2">;</span>
+
+<span class="s3">void </span><span class="s0">main</span><span class="s2">() </span><span class="s0">async </span><span class="s2">{</span>
+  <span class="s0">WidgetsFlutterBinding</span><span class="s2">.</span><span class="s0">ensureInitialized</span><span class="s2">();</span>
+  <span class="s0">await Firebase</span><span class="s2">.</span><span class="s0">initializeApp</span><span class="s2">(</span>
+    <span class="s0">options</span><span class="s2">: </span><span class="s0">DefaultFirebaseOptions</span><span class="s2">.</span><span class="s0">currentPlatform</span><span class="s2">,</span>
+  <span class="s2">);</span>
+  <span class="s0">runApp</span><span class="s2">(</span>
+    <span class="s0">ChangeNotifierProvider</span><span class="s2">(</span>
+      <span class="s0">create</span><span class="s2">: (</span><span class="s0">context</span><span class="s2">) =&gt; </span><span class="s0">LocaleProvider</span><span class="s2">(),</span>
+      <span class="s0">child</span><span class="s2">: </span><span class="s3">const </span><span class="s0">MyApp</span><span class="s2">(),</span>
+    <span class="s2">),</span>
+  <span class="s2">);</span>
+<span class="s2">}</span>
+
+<span class="s3">class </span><span class="s0">MyApp </span><span class="s3">extends </span><span class="s0">StatelessWidget </span><span class="s2">{</span>
+  <span class="s3">const </span><span class="s0">MyApp</span><span class="s2">({</span><span class="s3">super</span><span class="s2">.</span><span class="s0">key</span><span class="s2">});</span>
+
+  <span class="s0">@override</span>
+  <span class="s0">Widget build</span><span class="s2">(</span><span class="s0">BuildContext context</span><span class="s2">) {</span>
+    <span class="s3">final </span><span class="s0">provider </span><span class="s2">= </span><span class="s0">Provider</span><span class="s2">.</span><span class="s0">of</span><span class="s2">&lt;</span><span class="s0">LocaleProvider</span><span class="s2">&gt;(</span><span class="s0">context</span><span class="s2">);</span>
+
+    <span class="s3">return </span><span class="s0">MaterialApp</span><span class="s2">(</span>
+      <span class="s0">title</span><span class="s2">: </span><span class="s1">'Study Buddy'</span><span class="s2">,</span>
+      <span class="s0">debugShowCheckedModeBanner</span><span class="s2">: </span><span class="s3">false</span><span class="s2">,</span>
+      <span class="s0">theme</span><span class="s2">: </span><span class="s0">ThemeData</span><span class="s2">(</span>
+        <span class="s0">primarySwatch</span><span class="s2">: </span><span class="s0">Colors</span><span class="s2">.</span><span class="s0">indigo</span><span class="s2">,</span>
+        <span class="s0">scaffoldBackgroundColor</span><span class="s2">: </span><span class="s0">Colors</span><span class="s2">.</span><span class="s0">white</span><span class="s2">,</span>
+        <span class="s0">inputDecorationTheme</span><span class="s2">: </span><span class="s3">const </span><span class="s0">InputDecorationTheme</span><span class="s2">(</span>
+          <span class="s0">border</span><span class="s2">: </span><span class="s0">OutlineInputBorder</span><span class="s2">(),</span>
+        <span class="s2">),</span>
+      <span class="s2">),</span>
+      <span class="s0">locale</span><span class="s2">: </span><span class="s0">provider</span><span class="s2">.</span><span class="s0">locale</span><span class="s2">,</span>
+      <span class="s0">supportedLocales</span><span class="s2">: </span><span class="s3">const </span><span class="s2">[</span>
+        <span class="s0">Locale</span><span class="s2">(</span><span class="s1">'en'</span><span class="s2">),</span>
+        <span class="s0">Locale</span><span class="s2">(</span><span class="s1">'es'</span><span class="s2">),</span>
+      <span class="s2">],</span>
+      <span class="s0">localizationsDelegates</span><span class="s2">: </span><span class="s3">const </span><span class="s2">[</span>
+        <span class="s0">AppLocalizations</span><span class="s2">.</span><span class="s0">delegate</span><span class="s2">,</span>
+        <span class="s0">GlobalMaterialLocalizations</span><span class="s2">.</span><span class="s0">delegate</span><span class="s2">,</span>
+        <span class="s0">GlobalWidgetsLocalizations</span><span class="s2">.</span><span class="s0">delegate</span><span class="s2">,</span>
+        <span class="s0">GlobalCupertinoLocalizations</span><span class="s2">.</span><span class="s0">delegate</span><span class="s2">,</span>
+      <span class="s2">],</span>
+      <span class="s0">home</span><span class="s2">: </span><span class="s3">const </span><span class="s0">AuthGate</span><span class="s2">(),</span>
+    <span class="s2">);</span>
+  <span class="s2">}</span>
+<span class="s2">}</span>
+
+<span class="s3">class </span><span class="s0">AuthGate </span><span class="s3">extends </span><span class="s0">StatelessWidget </span><span class="s2">{</span>
+  <span class="s3">const </span><span class="s0">AuthGate</span><span class="s2">({</span><span class="s3">super</span><span class="s2">.</span><span class="s0">key</span><span class="s2">});</span>
+
+  <span class="s0">@override</span>
+  <span class="s0">Widget build</span><span class="s2">(</span><span class="s0">BuildContext context</span><span class="s2">) {</span>
+    <span class="s3">final </span><span class="s0">t </span><span class="s2">= </span><span class="s0">AppLocalizations</span><span class="s2">.</span><span class="s0">of</span><span class="s2">(</span><span class="s0">context</span><span class="s2">)!;</span>
+    <span class="s3">return </span><span class="s0">StreamBuilder</span><span class="s2">&lt;</span><span class="s0">User</span><span class="s2">?&gt;(</span>
+      <span class="s0">stream</span><span class="s2">: </span><span class="s0">FirebaseAuth</span><span class="s2">.</span><span class="s0">instance</span><span class="s2">.</span><span class="s0">authStateChanges</span><span class="s2">(),</span>
+      <span class="s0">builder</span><span class="s2">: (</span><span class="s0">context</span><span class="s2">, </span><span class="s0">snapshot</span><span class="s2">) {</span>
+        <span class="s3">if </span><span class="s2">(</span><span class="s0">snapshot</span><span class="s2">.</span><span class="s0">connectionState </span><span class="s2">== </span><span class="s0">ConnectionState</span><span class="s2">.</span><span class="s0">waiting</span><span class="s2">) {</span>
+          <span class="s3">return const </span><span class="s0">Scaffold</span><span class="s2">(</span>
+            <span class="s0">body</span><span class="s2">: </span><span class="s0">Center</span><span class="s2">(</span><span class="s0">child</span><span class="s2">: </span><span class="s0">CircularProgressIndicator</span><span class="s2">()),</span>
+          <span class="s2">);</span>
+        <span class="s2">} </span><span class="s3">else if </span><span class="s2">(</span><span class="s0">snapshot</span><span class="s2">.</span><span class="s0">hasData</span><span class="s2">) {</span>
+          <span class="s3">return const </span><span class="s0">RecordingScreen</span><span class="s2">();</span>
+        <span class="s2">} </span><span class="s3">else </span><span class="s2">{</span>
+          <span class="s3">return </span><span class="s0">Scaffold</span><span class="s2">(</span>
+            <span class="s0">appBar</span><span class="s2">: </span><span class="s0">AppBar</span><span class="s2">(</span><span class="s0">title</span><span class="s2">: </span><span class="s0">Text</span><span class="s2">(</span><span class="s0">t</span><span class="s2">.</span><span class="s0">appTitle</span><span class="s2">)),</span>
+            <span class="s0">body</span><span class="s2">: </span><span class="s0">Center</span><span class="s2">(</span>
+              <span class="s0">child</span><span class="s2">: </span><span class="s0">ElevatedButton</span><span class="s2">(</span>
+                <span class="s0">onPressed</span><span class="s2">: () </span><span class="s0">async </span><span class="s2">{</span>
+                  <span class="s3">try </span><span class="s2">{</span>
+                    <span class="s3">final </span><span class="s0">GoogleSignIn googleSignIn </span><span class="s2">= </span><span class="s0">GoogleSignIn</span><span class="s2">(</span>
+                      <span class="s0">scopes</span><span class="s2">: [</span>
+                        <span class="s1">'email'</span><span class="s2">,</span>
+                        <span class="s1">'profile'</span><span class="s2">,</span>
+                        <span class="s1">'https://www.googleapis.com/auth/drive.file'</span><span class="s2">,</span>
+                      <span class="s2">],</span>
+                    <span class="s2">);</span>
+
+                    <span class="s0">await googleSignIn</span><span class="s2">.</span><span class="s0">signOut</span><span class="s2">();</span>
+
+                    <span class="s3">final </span><span class="s0">GoogleSignInAccount</span><span class="s2">? </span><span class="s0">googleUser </span><span class="s2">= </span><span class="s0">await googleSignIn</span><span class="s2">.</span><span class="s0">signIn</span><span class="s2">();</span>
+
+                    <span class="s3">if </span><span class="s2">(</span><span class="s0">googleUser </span><span class="s2">!= </span><span class="s3">null</span><span class="s2">) {</span>
+                      <span class="s3">final </span><span class="s0">GoogleSignInAuthentication googleAuth </span><span class="s2">= </span><span class="s0">await googleUser</span><span class="s2">.</span><span class="s0">authentication</span><span class="s2">;</span>
+
+                      <span class="s3">final </span><span class="s0">credential </span><span class="s2">= </span><span class="s0">GoogleAuthProvider</span><span class="s2">.</span><span class="s0">credential</span><span class="s2">(</span>
+                        <span class="s0">accessToken</span><span class="s2">: </span><span class="s0">googleAuth</span><span class="s2">.</span><span class="s0">accessToken</span><span class="s2">,</span>
+                        <span class="s0">idToken</span><span class="s2">: </span><span class="s0">googleAuth</span><span class="s2">.</span><span class="s0">idToken</span><span class="s2">,</span>
+                      <span class="s2">);</span>
+
+                      <span class="s0">await FirebaseAuth</span><span class="s2">.</span><span class="s0">instance</span><span class="s2">.</span><span class="s0">signInWithCredential</span><span class="s2">(</span><span class="s0">credential</span><span class="s2">);</span>
+                    <span class="s2">}</span>
+                  <span class="s2">} </span><span class="s3">catch </span><span class="s2">(</span><span class="s0">e</span><span class="s2">) {</span>
+                    <span class="s0">print</span><span class="s2">(</span><span class="s1">'Sign in error: </span><span class="s2">$</span><span class="s0">e</span><span class="s1">'</span><span class="s2">);</span>
+                    <span class="s0">ScaffoldMessenger</span><span class="s2">.</span><span class="s0">of</span><span class="s2">(</span><span class="s0">context</span><span class="s2">).</span><span class="s0">showSnackBar</span><span class="s2">(</span>
+                      <span class="s0">SnackBar</span><span class="s2">(</span><span class="s0">content</span><span class="s2">: </span><span class="s0">Text</span><span class="s2">(</span><span class="s1">'Sign in failed: </span><span class="s2">${</span><span class="s0">e</span><span class="s2">.</span><span class="s0">toString</span><span class="s2">()}</span><span class="s1">'</span><span class="s2">)),</span>
+                    <span class="s2">);</span>
+                  <span class="s2">}</span>
+                <span class="s2">},</span>
+                <span class="s0">child</span><span class="s2">: </span><span class="s0">Text</span><span class="s2">(</span><span class="s0">t</span><span class="s2">.</span><span class="s0">signInWithGoogle</span><span class="s2">),</span>
+              <span class="s2">),</span>
+            <span class="s2">),</span>
+          <span class="s2">);</span>
+        <span class="s2">}</span>
+      <span class="s2">},</span>
+    <span class="s2">);</span>
+  <span class="s2">}</span>
+<span class="s2">}</span>
+
+<span class="s3">class </span><span class="s0">RecordingScreen </span><span class="s3">extends </span><span class="s0">StatefulWidget </span><span class="s2">{</span>
+  <span class="s3">const </span><span class="s0">RecordingScreen</span><span class="s2">({</span><span class="s3">super</span><span class="s2">.</span><span class="s0">key</span><span class="s2">});</span>
+
+  <span class="s0">@override</span>
+  <span class="s0">State</span><span class="s2">&lt;</span><span class="s0">RecordingScreen</span><span class="s2">&gt; </span><span class="s0">createState</span><span class="s2">() =&gt; </span><span class="s0">_RecordingScreenState</span><span class="s2">();</span>
+<span class="s2">}</span>
+
+<span class="s3">class </span><span class="s0">_RecordingScreenState </span><span class="s3">extends </span><span class="s0">State</span><span class="s2">&lt;</span><span class="s0">RecordingScreen</span><span class="s2">&gt; {</span>
+  <span class="s0">FlutterSoundRecorder</span><span class="s2">? </span><span class="s0">_recorder</span><span class="s2">;</span>
+  <span class="s0">bool _isRecording </span><span class="s2">= </span><span class="s3">false</span><span class="s2">;</span>
+  <span class="s0">bool _isUploading </span><span class="s2">= </span><span class="s3">false</span><span class="s2">;</span>
+  <span class="s0">String</span><span class="s2">? </span><span class="s0">_currentRecordingPath</span><span class="s2">;</span>
+  <span class="s0">String _recordingDuration </span><span class="s2">= </span><span class="s1">&quot;00:00&quot;</span><span class="s2">;</span>
+  <span class="s0">DateTime</span><span class="s2">? </span><span class="s0">_recordingStartTime</span><span class="s2">;</span>
+
+  <span class="s0">@override</span>
+  <span class="s3">void </span><span class="s0">initState</span><span class="s2">() {</span>
+    <span class="s3">super</span><span class="s2">.</span><span class="s0">initState</span><span class="s2">();</span>
+    <span class="s0">_initializeRecorder</span><span class="s2">();</span>
+  <span class="s2">}</span>
+
+  <span class="s0">Future</span><span class="s2">&lt;</span><span class="s3">void</span><span class="s2">&gt; </span><span class="s0">_initializeRecorder</span><span class="s2">() </span><span class="s0">async </span><span class="s2">{</span>
+    <span class="s0">_recorder </span><span class="s2">= </span><span class="s0">FlutterSoundRecorder</span><span class="s2">();</span>
+    <span class="s0">await _recorder</span><span class="s2">!.</span><span class="s0">openRecorder</span><span class="s2">();</span>
+  <span class="s2">}</span>
+
+  <span class="s0">@override</span>
+  <span class="s3">void </span><span class="s0">dispose</span><span class="s2">() {</span>
+    <span class="s0">_recorder</span><span class="s2">?.</span><span class="s0">closeRecorder</span><span class="s2">();</span>
+    <span class="s0">_recorder </span><span class="s2">= </span><span class="s3">null</span><span class="s2">;</span>
+    <span class="s3">super</span><span class="s2">.</span><span class="s0">dispose</span><span class="s2">();</span>
+  <span class="s2">}</span>
+
+  <span class="s0">Future</span><span class="s2">&lt;</span><span class="s3">void</span><span class="s2">&gt; </span><span class="s0">_toggleRecording</span><span class="s2">() </span><span class="s0">async </span><span class="s2">{</span>
+    <span class="s3">if </span><span class="s2">(</span><span class="s0">_isRecording</span><span class="s2">) {</span>
+      <span class="s0">await _stopRecording</span><span class="s2">();</span>
+    <span class="s2">} </span><span class="s3">else </span><span class="s2">{</span>
+      <span class="s0">await _startRecording</span><span class="s2">();</span>
+    <span class="s2">}</span>
+  <span class="s2">}</span>
+
+  <span class="s0">Future</span><span class="s2">&lt;</span><span class="s3">void</span><span class="s2">&gt; </span><span class="s0">_startRecording</span><span class="s2">() </span><span class="s0">async </span><span class="s2">{</span>
+    <span class="s3">try </span><span class="s2">{</span>
+      <span class="s3">var </span><span class="s0">status </span><span class="s2">= </span><span class="s0">await Permission</span><span class="s2">.</span><span class="s0">microphone</span><span class="s2">.</span><span class="s0">request</span><span class="s2">();</span>
+      <span class="s3">if </span><span class="s2">(!</span><span class="s0">status</span><span class="s2">.</span><span class="s0">isGranted</span><span class="s2">) {</span>
+        <span class="s0">ScaffoldMessenger</span><span class="s2">.</span><span class="s0">of</span><span class="s2">(</span><span class="s0">context</span><span class="s2">).</span><span class="s0">showSnackBar</span><span class="s2">(</span>
+          <span class="s3">const </span><span class="s0">SnackBar</span><span class="s2">(</span><span class="s0">content</span><span class="s2">: </span><span class="s0">Text</span><span class="s2">(</span><span class="s1">'Microphone permission denied'</span><span class="s2">)),</span>
+        <span class="s2">);</span>
+        <span class="s3">return</span><span class="s2">;</span>
+      <span class="s2">}</span>
+
+      <span class="s3">final </span><span class="s0">directory </span><span class="s2">= </span><span class="s0">await getApplicationDocumentsDirectory</span><span class="s2">();</span>
+      <span class="s3">final </span><span class="s0">timestamp </span><span class="s2">= </span><span class="s0">DateTime</span><span class="s2">.</span><span class="s0">now</span><span class="s2">().</span><span class="s0">millisecondsSinceEpoch</span><span class="s2">;</span>
+      <span class="s3">final </span><span class="s0">filePath </span><span class="s2">= </span><span class="s1">'</span><span class="s2">${</span><span class="s0">directory</span><span class="s2">.</span><span class="s0">path</span><span class="s2">}</span><span class="s1">/recording_</span><span class="s2">$</span><span class="s0">timestamp</span><span class="s1">.m4a'</span><span class="s2">;</span>
+
+      <span class="s0">await _recorder</span><span class="s2">!.</span><span class="s0">startRecorder</span><span class="s2">(</span>
+        <span class="s0">toFile</span><span class="s2">: </span><span class="s0">filePath</span><span class="s2">,</span>
+        <span class="s0">codec</span><span class="s2">: </span><span class="s0">Codec</span><span class="s2">.</span><span class="s0">aacMP4</span><span class="s2">,</span>
+        <span class="s0">bitRate</span><span class="s2">: </span><span class="s4">64000</span><span class="s2">,</span>
+        <span class="s0">sampleRate</span><span class="s2">: </span><span class="s4">22050</span><span class="s2">,</span>
+      <span class="s2">);</span>
+
+      <span class="s0">setState</span><span class="s2">(() {</span>
+        <span class="s0">_isRecording </span><span class="s2">= </span><span class="s3">true</span><span class="s2">;</span>
+        <span class="s0">_currentRecordingPath </span><span class="s2">= </span><span class="s0">filePath</span><span class="s2">;</span>
+        <span class="s0">_recordingStartTime </span><span class="s2">= </span><span class="s0">DateTime</span><span class="s2">.</span><span class="s0">now</span><span class="s2">();</span>
+      <span class="s2">});</span>
+
+      <span class="s0">_startTimer</span><span class="s2">();</span>
+    <span class="s2">} </span><span class="s3">catch </span><span class="s2">(</span><span class="s0">e</span><span class="s2">) {</span>
+      <span class="s0">print</span><span class="s2">(</span><span class="s1">'Recording start error: </span><span class="s2">$</span><span class="s0">e</span><span class="s1">'</span><span class="s2">);</span>
+      <span class="s0">ScaffoldMessenger</span><span class="s2">.</span><span class="s0">of</span><span class="s2">(</span><span class="s0">context</span><span class="s2">).</span><span class="s0">showSnackBar</span><span class="s2">(</span>
+        <span class="s0">SnackBar</span><span class="s2">(</span><span class="s0">content</span><span class="s2">: </span><span class="s0">Text</span><span class="s2">(</span><span class="s1">'Failed to start recording: </span><span class="s2">${</span><span class="s0">e</span><span class="s2">.</span><span class="s0">toString</span><span class="s2">()}</span><span class="s1">'</span><span class="s2">)),</span>
+      <span class="s2">);</span>
+    <span class="s2">}</span>
+  <span class="s2">}</span>
+
+  <span class="s3">void </span><span class="s0">_startTimer</span><span class="s2">() {</span>
+    <span class="s3">if </span><span class="s2">(!</span><span class="s0">_isRecording</span><span class="s2">) </span><span class="s3">return</span><span class="s2">;</span>
+
+    <span class="s0">Future</span><span class="s2">.</span><span class="s0">delayed</span><span class="s2">(</span><span class="s3">const </span><span class="s0">Duration</span><span class="s2">(</span><span class="s0">seconds</span><span class="s2">: </span><span class="s4">1</span><span class="s2">), () {</span>
+      <span class="s3">if </span><span class="s2">(</span><span class="s0">_isRecording </span><span class="s2">&amp;&amp; </span><span class="s0">_recordingStartTime </span><span class="s2">!= </span><span class="s3">null</span><span class="s2">) {</span>
+        <span class="s3">final </span><span class="s0">duration </span><span class="s2">= </span><span class="s0">DateTime</span><span class="s2">.</span><span class="s0">now</span><span class="s2">().</span><span class="s0">difference</span><span class="s2">(</span><span class="s0">_recordingStartTime</span><span class="s2">!);</span>
+        <span class="s3">final </span><span class="s0">minutes </span><span class="s2">= </span><span class="s0">duration</span><span class="s2">.</span><span class="s0">inMinutes</span><span class="s2">.</span><span class="s0">toString</span><span class="s2">().</span><span class="s0">padLeft</span><span class="s2">(</span><span class="s4">2</span><span class="s2">, </span><span class="s1">'0'</span><span class="s2">);</span>
+        <span class="s3">final </span><span class="s0">seconds </span><span class="s2">= (</span><span class="s0">duration</span><span class="s2">.</span><span class="s0">inSeconds </span><span class="s2">% </span><span class="s4">60</span><span class="s2">).</span><span class="s0">toString</span><span class="s2">().</span><span class="s0">padLeft</span><span class="s2">(</span><span class="s4">2</span><span class="s2">, </span><span class="s1">'0'</span><span class="s2">);</span>
+
+        <span class="s0">setState</span><span class="s2">(() {</span>
+          <span class="s0">_recordingDuration </span><span class="s2">= </span><span class="s1">&quot;</span><span class="s2">$</span><span class="s0">minutes</span><span class="s1">:</span><span class="s2">$</span><span class="s0">seconds</span><span class="s1">&quot;</span><span class="s2">;</span>
+        <span class="s2">});</span>
+
+        <span class="s0">_startTimer</span><span class="s2">();</span>
+      <span class="s2">}</span>
+    <span class="s2">});</span>
+  <span class="s2">}</span>
+
+  <span class="s0">Future</span><span class="s2">&lt;</span><span class="s3">void</span><span class="s2">&gt; </span><span class="s0">_stopRecording</span><span class="s2">() </span><span class="s0">async </span><span class="s2">{</span>
+    <span class="s3">try </span><span class="s2">{</span>
+      <span class="s3">final </span><span class="s0">path </span><span class="s2">= </span><span class="s0">await _recorder</span><span class="s2">!.</span><span class="s0">stopRecorder</span><span class="s2">();</span>
+      <span class="s0">setState</span><span class="s2">(() {</span>
+        <span class="s0">_isRecording </span><span class="s2">= </span><span class="s3">false</span><span class="s2">;</span>
+        <span class="s0">_currentRecordingPath </span><span class="s2">= </span><span class="s0">path</span><span class="s2">;</span>
+      <span class="s2">});</span>
+
+      <span class="s3">if </span><span class="s2">(</span><span class="s0">path </span><span class="s2">!= </span><span class="s3">null</span><span class="s2">) {</span>
+        <span class="s0">await _uploadRecording</span><span class="s2">(</span><span class="s0">File</span><span class="s2">(</span><span class="s0">path</span><span class="s2">));</span>
+      <span class="s2">}</span>
+    <span class="s2">} </span><span class="s3">catch </span><span class="s2">(</span><span class="s0">e</span><span class="s2">) {</span>
+      <span class="s0">print</span><span class="s2">(</span><span class="s1">'Recording stop error: </span><span class="s2">$</span><span class="s0">e</span><span class="s1">'</span><span class="s2">);</span>
+      <span class="s0">ScaffoldMessenger</span><span class="s2">.</span><span class="s0">of</span><span class="s2">(</span><span class="s0">context</span><span class="s2">).</span><span class="s0">showSnackBar</span><span class="s2">(</span>
+        <span class="s0">SnackBar</span><span class="s2">(</span><span class="s0">content</span><span class="s2">: </span><span class="s0">Text</span><span class="s2">(</span><span class="s1">'Failed to stop recording: </span><span class="s2">${</span><span class="s0">e</span><span class="s2">.</span><span class="s0">toString</span><span class="s2">()}</span><span class="s1">'</span><span class="s2">)),</span>
+      <span class="s2">);</span>
+    <span class="s2">}</span>
+  <span class="s2">}</span>
+
+  <span class="s0">Future</span><span class="s2">&lt;</span><span class="s3">void</span><span class="s2">&gt; </span><span class="s0">_uploadRecording</span><span class="s2">(</span><span class="s0">File audioFile</span><span class="s2">) </span><span class="s0">async </span><span class="s2">{</span>
+    <span class="s0">setState</span><span class="s2">(() {</span>
+      <span class="s0">_isUploading </span><span class="s2">= </span><span class="s3">true</span><span class="s2">;</span>
+    <span class="s2">});</span>
+
+    <span class="s3">try </span><span class="s2">{</span>
+      <span class="s3">final </span><span class="s0">user </span><span class="s2">= </span><span class="s0">FirebaseAuth</span><span class="s2">.</span><span class="s0">instance</span><span class="s2">.</span><span class="s0">currentUser</span><span class="s2">!;</span>
+      <span class="s3">final </span><span class="s0">timestamp </span><span class="s2">= </span><span class="s0">DateTime</span><span class="s2">.</span><span class="s0">now</span><span class="s2">();</span>
+      <span class="s3">final </span><span class="s0">filename </span><span class="s2">= </span><span class="s1">'recording_</span><span class="s2">${</span><span class="s0">timestamp</span><span class="s2">.</span><span class="s0">millisecondsSinceEpoch</span><span class="s2">}</span><span class="s1">.m4a'</span><span class="s2">;</span>
+
+      <span class="s5">// Upload to Firebase Storage</span>
+      <span class="s3">final </span><span class="s0">storageRef </span><span class="s2">= </span><span class="s0">FirebaseStorage</span><span class="s2">.</span><span class="s0">instance</span>
+          <span class="s2">.</span><span class="s0">ref</span><span class="s2">()</span>
+          <span class="s2">.</span><span class="s0">child</span><span class="s2">(</span><span class="s1">'audio'</span><span class="s2">)</span>
+          <span class="s2">.</span><span class="s0">child</span><span class="s2">(</span><span class="s0">user</span><span class="s2">.</span><span class="s0">uid</span><span class="s2">)</span>
+          <span class="s2">.</span><span class="s0">child</span><span class="s2">(</span><span class="s0">filename</span><span class="s2">);</span>
+
+      <span class="s0">await storageRef</span><span class="s2">.</span><span class="s0">putFile</span><span class="s2">(</span><span class="s0">audioFile</span><span class="s2">);</span>
+      <span class="s3">final </span><span class="s0">downloadUrl </span><span class="s2">= </span><span class="s0">await storageRef</span><span class="s2">.</span><span class="s0">getDownloadURL</span><span class="s2">();</span>
+
+      <span class="s5">// Create Firestore document</span>
+      <span class="s0">await FirebaseFirestore</span><span class="s2">.</span><span class="s0">instance</span><span class="s2">.</span><span class="s0">collection</span><span class="s2">(</span><span class="s1">'lectures'</span><span class="s2">).</span><span class="s0">add</span><span class="s2">({</span>
+        <span class="s1">'userId'</span><span class="s2">: </span><span class="s0">user</span><span class="s2">.</span><span class="s0">uid</span><span class="s2">,</span>
+        <span class="s1">'title'</span><span class="s2">: </span><span class="s1">'Lecture </span><span class="s2">${</span><span class="s0">timestamp</span><span class="s2">.</span><span class="s0">day</span><span class="s2">}</span><span class="s1">/</span><span class="s2">${</span><span class="s0">timestamp</span><span class="s2">.</span><span class="s0">month</span><span class="s2">}</span><span class="s1">/</span><span class="s2">${</span><span class="s0">timestamp</span><span class="s2">.</span><span class="s0">year</span><span class="s2">}</span><span class="s1">'</span><span class="s2">,</span>
+        <span class="s1">'recordedAt'</span><span class="s2">: </span><span class="s0">timestamp</span><span class="s2">,</span>
+        <span class="s1">'status'</span><span class="s2">: </span><span class="s1">'uploaded'</span><span class="s2">,</span>
+        <span class="s1">'downloadUrl'</span><span class="s2">: </span><span class="s0">downloadUrl</span><span class="s2">,</span>
+      <span class="s2">});</span>
+
+      <span class="s5">// Upload to Google Drive</span>
+      <span class="s0">await _uploadToGoogleDrive</span><span class="s2">(</span><span class="s0">audioFile</span><span class="s2">, </span><span class="s0">filename</span><span class="s2">);</span>
+
+      <span class="s0">ScaffoldMessenger</span><span class="s2">.</span><span class="s0">of</span><span class="s2">(</span><span class="s0">context</span><span class="s2">).</span><span class="s0">showSnackBar</span><span class="s2">(</span>
+        <span class="s3">const </span><span class="s0">SnackBar</span><span class="s2">(</span><span class="s0">content</span><span class="s2">: </span><span class="s0">Text</span><span class="s2">(</span><span class="s1">'Recording uploaded successfully!'</span><span class="s2">)),</span>
+      <span class="s2">);</span>
+
+      <span class="s5">// Clean up local file</span>
+      <span class="s0">await audioFile</span><span class="s2">.</span><span class="s0">delete</span><span class="s2">();</span>
+
+    <span class="s2">} </span><span class="s3">catch </span><span class="s2">(</span><span class="s0">e</span><span class="s2">) {</span>
+      <span class="s0">print</span><span class="s2">(</span><span class="s1">'Upload error: </span><span class="s2">$</span><span class="s0">e</span><span class="s1">'</span><span class="s2">);</span>
+      <span class="s0">ScaffoldMessenger</span><span class="s2">.</span><span class="s0">of</span><span class="s2">(</span><span class="s0">context</span><span class="s2">).</span><span class="s0">showSnackBar</span><span class="s2">(</span>
+        <span class="s0">SnackBar</span><span class="s2">(</span><span class="s0">content</span><span class="s2">: </span><span class="s0">Text</span><span class="s2">(</span><span class="s1">'Upload failed: </span><span class="s2">${</span><span class="s0">e</span><span class="s2">.</span><span class="s0">toString</span><span class="s2">()}</span><span class="s1">'</span><span class="s2">)),</span>
+      <span class="s2">);</span>
+    <span class="s2">} </span><span class="s3">finally </span><span class="s2">{</span>
+      <span class="s0">setState</span><span class="s2">(() {</span>
+        <span class="s0">_isUploading </span><span class="s2">= </span><span class="s3">false</span><span class="s2">;</span>
+        <span class="s0">_currentRecordingPath </span><span class="s2">= </span><span class="s3">null</span><span class="s2">;</span>
+        <span class="s0">_recordingDuration </span><span class="s2">= </span><span class="s1">&quot;00:00&quot;</span><span class="s2">;</span>
+      <span class="s2">});</span>
+    <span class="s2">}</span>
+  <span class="s2">}</span>
+
+  <span class="s0">Future</span><span class="s2">&lt;</span><span class="s3">void</span><span class="s2">&gt; </span><span class="s0">_uploadToGoogleDrive</span><span class="s2">(</span><span class="s0">File audioFile</span><span class="s2">, </span><span class="s0">String filename</span><span class="s2">) </span><span class="s0">async </span><span class="s2">{</span>
+    <span class="s3">try </span><span class="s2">{</span>
+      <span class="s3">final </span><span class="s0">googleSignIn </span><span class="s2">= </span><span class="s0">GoogleSignIn</span><span class="s2">(</span>
+        <span class="s0">scopes</span><span class="s2">: [</span><span class="s1">'https://www.googleapis.com/auth/drive.file'</span><span class="s2">],</span>
+      <span class="s2">);</span>
+
+      <span class="s3">final </span><span class="s0">account </span><span class="s2">= </span><span class="s0">await googleSignIn</span><span class="s2">.</span><span class="s0">signInSilently</span><span class="s2">();</span>
+      <span class="s3">if </span><span class="s2">(</span><span class="s0">account </span><span class="s2">== </span><span class="s3">null</span><span class="s2">) </span><span class="s3">return</span><span class="s2">;</span>
+
+      <span class="s3">final </span><span class="s0">authClient </span><span class="s2">= </span><span class="s0">await googleSignIn</span><span class="s2">.</span><span class="s0">authenticatedClient</span><span class="s2">();</span>
+      <span class="s3">if </span><span class="s2">(</span><span class="s0">authClient </span><span class="s2">== </span><span class="s3">null</span><span class="s2">) </span><span class="s3">return</span><span class="s2">;</span>
+
+      <span class="s3">final </span><span class="s0">driveApi </span><span class="s2">= </span><span class="s0">drive</span><span class="s2">.</span><span class="s0">DriveApi</span><span class="s2">(</span><span class="s0">authClient</span><span class="s2">);</span>
+
+      <span class="s5">// Create folder structure: Study Buddy/2025_Spring/General/</span>
+      <span class="s3">final </span><span class="s0">now </span><span class="s2">= </span><span class="s0">DateTime</span><span class="s2">.</span><span class="s0">now</span><span class="s2">();</span>
+      <span class="s3">final </span><span class="s0">semester </span><span class="s2">= </span><span class="s1">'</span><span class="s2">${</span><span class="s0">now</span><span class="s2">.</span><span class="s0">year</span><span class="s2">}</span><span class="s1">_Spring'</span><span class="s2">;</span>
+      <span class="s3">final </span><span class="s0">className </span><span class="s2">= </span><span class="s1">'General'</span><span class="s2">;</span>
+
+      <span class="s0">String</span><span class="s2">? </span><span class="s0">studyBuddyFolderId </span><span class="s2">= </span><span class="s0">await _findOrCreateFolder</span><span class="s2">(</span><span class="s0">driveApi</span><span class="s2">, </span><span class="s1">'Study Buddy'</span><span class="s2">, </span><span class="s3">null</span><span class="s2">);</span>
+      <span class="s0">String</span><span class="s2">? </span><span class="s0">semesterFolderId </span><span class="s2">= </span><span class="s0">await _findOrCreateFolder</span><span class="s2">(</span><span class="s0">driveApi</span><span class="s2">, </span><span class="s0">semester</span><span class="s2">, </span><span class="s0">studyBuddyFolderId</span><span class="s2">);</span>
+      <span class="s0">String</span><span class="s2">? </span><span class="s0">classFolderId </span><span class="s2">= </span><span class="s0">await _findOrCreateFolder</span><span class="s2">(</span><span class="s0">driveApi</span><span class="s2">, </span><span class="s0">className</span><span class="s2">, </span><span class="s0">semesterFolderId</span><span class="s2">);</span>
+
+      <span class="s5">// Upload the audio file</span>
+      <span class="s3">final </span><span class="s0">driveFile </span><span class="s2">= </span><span class="s0">drive</span><span class="s2">.</span><span class="s0">File</span><span class="s2">()</span>
+        <span class="s2">..</span><span class="s0">name </span><span class="s2">= </span><span class="s0">filename</span>
+        <span class="s2">..</span><span class="s0">parents </span><span class="s2">= [</span><span class="s0">classFolderId</span><span class="s2">!];</span>
+
+      <span class="s0">await driveApi</span><span class="s2">.</span><span class="s0">files</span><span class="s2">.</span><span class="s0">create</span><span class="s2">(</span>
+        <span class="s0">driveFile</span><span class="s2">,</span>
+        <span class="s0">uploadMedia</span><span class="s2">: </span><span class="s0">drive</span><span class="s2">.</span><span class="s0">Media</span><span class="s2">(</span><span class="s0">audioFile</span><span class="s2">.</span><span class="s0">openRead</span><span class="s2">(), </span><span class="s0">audioFile</span><span class="s2">.</span><span class="s0">lengthSync</span><span class="s2">()),</span>
+      <span class="s2">);</span>
+
+    <span class="s2">} </span><span class="s3">catch </span><span class="s2">(</span><span class="s0">e</span><span class="s2">) {</span>
+      <span class="s0">print</span><span class="s2">(</span><span class="s1">'Google Drive upload error: </span><span class="s2">$</span><span class="s0">e</span><span class="s1">'</span><span class="s2">);</span>
+      <span class="s5">// Don't throw - Firebase upload already succeeded</span>
+    <span class="s2">}</span>
+  <span class="s2">}</span>
+
+  <span class="s0">Future</span><span class="s2">&lt;</span><span class="s0">String</span><span class="s2">?&gt; </span><span class="s0">_findOrCreateFolder</span><span class="s2">(</span><span class="s0">drive</span><span class="s2">.</span><span class="s0">DriveApi driveApi</span><span class="s2">, </span><span class="s0">String folderName</span><span class="s2">, </span><span class="s0">String</span><span class="s2">? </span><span class="s0">parentId</span><span class="s2">) </span><span class="s0">async </span><span class="s2">{</span>
+    <span class="s3">try </span><span class="s2">{</span>
+      <span class="s5">// Search for existing folder</span>
+      <span class="s0">String query </span><span class="s2">= </span><span class="s1">&quot;name='</span><span class="s2">$</span><span class="s0">folderName</span><span class="s1">' and mimeType='application/vnd.google-apps.folder'&quot;</span><span class="s2">;</span>
+      <span class="s3">if </span><span class="s2">(</span><span class="s0">parentId </span><span class="s2">!= </span><span class="s3">null</span><span class="s2">) {</span>
+        <span class="s0">query </span><span class="s2">+= </span><span class="s1">&quot; and '</span><span class="s2">$</span><span class="s0">parentId</span><span class="s1">' in parents&quot;</span><span class="s2">;</span>
+      <span class="s2">}</span>
+
+      <span class="s3">final </span><span class="s0">searchResult </span><span class="s2">= </span><span class="s0">await driveApi</span><span class="s2">.</span><span class="s0">files</span><span class="s2">.</span><span class="s0">list</span><span class="s2">(</span><span class="s0">q</span><span class="s2">: </span><span class="s0">query</span><span class="s2">);</span>
+
+      <span class="s3">if </span><span class="s2">(</span><span class="s0">searchResult</span><span class="s2">.</span><span class="s0">files </span><span class="s2">!= </span><span class="s3">null </span><span class="s2">&amp;&amp; </span><span class="s0">searchResult</span><span class="s2">.</span><span class="s0">files</span><span class="s2">!.</span><span class="s0">isNotEmpty</span><span class="s2">) {</span>
+        <span class="s3">return </span><span class="s0">searchResult</span><span class="s2">.</span><span class="s0">files</span><span class="s2">!.</span><span class="s0">first</span><span class="s2">.</span><span class="s0">id</span><span class="s2">;</span>
+      <span class="s2">}</span>
+
+      <span class="s5">// Create new folder</span>
+      <span class="s3">final </span><span class="s0">folderMetadata </span><span class="s2">= </span><span class="s0">drive</span><span class="s2">.</span><span class="s0">File</span><span class="s2">()</span>
+        <span class="s2">..</span><span class="s0">name </span><span class="s2">= </span><span class="s0">folderName</span>
+        <span class="s2">..</span><span class="s0">mimeType </span><span class="s2">= </span><span class="s1">'application/vnd.google-apps.folder'</span><span class="s2">;</span>
+
+      <span class="s3">if </span><span class="s2">(</span><span class="s0">parentId </span><span class="s2">!= </span><span class="s3">null</span><span class="s2">) {</span>
+        <span class="s0">folderMetadata</span><span class="s2">.</span><span class="s0">parents </span><span class="s2">= [</span><span class="s0">parentId</span><span class="s2">];</span>
+      <span class="s2">}</span>
+
+      <span class="s3">final </span><span class="s0">folder </span><span class="s2">= </span><span class="s0">await driveApi</span><span class="s2">.</span><span class="s0">files</span><span class="s2">.</span><span class="s0">create</span><span class="s2">(</span><span class="s0">folderMetadata</span><span class="s2">);</span>
+      <span class="s3">return </span><span class="s0">folder</span><span class="s2">.</span><span class="s0">id</span><span class="s2">;</span>
+    <span class="s2">} </span><span class="s3">catch </span><span class="s2">(</span><span class="s0">e</span><span class="s2">) {</span>
+      <span class="s0">print</span><span class="s2">(</span><span class="s1">'Folder creation error: </span><span class="s2">$</span><span class="s0">e</span><span class="s1">'</span><span class="s2">);</span>
+      <span class="s3">return null</span><span class="s2">;</span>
+    <span class="s2">}</span>
+  <span class="s2">}</span>
+
+  <span class="s0">@override</span>
+  <span class="s0">Widget build</span><span class="s2">(</span><span class="s0">BuildContext context</span><span class="s2">) {</span>
+    <span class="s3">final </span><span class="s0">user </span><span class="s2">= </span><span class="s0">FirebaseAuth</span><span class="s2">.</span><span class="s0">instance</span><span class="s2">.</span><span class="s0">currentUser</span><span class="s2">!;</span>
+    <span class="s3">final </span><span class="s0">displayName </span><span class="s2">= </span><span class="s0">user</span><span class="s2">.</span><span class="s0">displayName </span><span class="s2">?? </span><span class="s1">'Student'</span><span class="s2">;</span>
+
+    <span class="s3">return </span><span class="s0">Scaffold</span><span class="s2">(</span>
+      <span class="s0">appBar</span><span class="s2">: </span><span class="s0">AppBar</span><span class="s2">(</span>
+        <span class="s0">title</span><span class="s2">: </span><span class="s0">Text</span><span class="s2">(</span><span class="s1">'Study Buddy - </span><span class="s2">$</span><span class="s0">displayName</span><span class="s1">'</span><span class="s2">),</span>
+        <span class="s0">actions</span><span class="s2">: [</span>
+          <span class="s0">IconButton</span><span class="s2">(</span>
+            <span class="s0">icon</span><span class="s2">: </span><span class="s3">const </span><span class="s0">Icon</span><span class="s2">(</span><span class="s0">Icons</span><span class="s2">.</span><span class="s0">logout</span><span class="s2">),</span>
+            <span class="s0">onPressed</span><span class="s2">: () </span><span class="s0">async </span><span class="s2">{</span>
+              <span class="s3">try </span><span class="s2">{</span>
+                <span class="s3">final </span><span class="s0">GoogleSignIn googleSignIn </span><span class="s2">= </span><span class="s0">GoogleSignIn</span><span class="s2">();</span>
+                <span class="s0">await googleSignIn</span><span class="s2">.</span><span class="s0">signOut</span><span class="s2">();</span>
+                <span class="s0">await FirebaseAuth</span><span class="s2">.</span><span class="s0">instance</span><span class="s2">.</span><span class="s0">signOut</span><span class="s2">();</span>
+              <span class="s2">} </span><span class="s3">catch </span><span class="s2">(</span><span class="s0">e</span><span class="s2">) {</span>
+                <span class="s0">print</span><span class="s2">(</span><span class="s1">'Sign out error: </span><span class="s2">$</span><span class="s0">e</span><span class="s1">'</span><span class="s2">);</span>
+              <span class="s2">}</span>
+            <span class="s2">},</span>
+          <span class="s2">)</span>
+        <span class="s2">],</span>
+      <span class="s2">),</span>
+      <span class="s0">body</span><span class="s2">: </span><span class="s0">Center</span><span class="s2">(</span>
+        <span class="s0">child</span><span class="s2">: </span><span class="s0">Column</span><span class="s2">(</span>
+          <span class="s0">mainAxisAlignment</span><span class="s2">: </span><span class="s0">MainAxisAlignment</span><span class="s2">.</span><span class="s0">center</span><span class="s2">,</span>
+          <span class="s0">children</span><span class="s2">: [</span>
+            <span class="s5">// Recording Status</span>
+            <span class="s0">Container</span><span class="s2">(</span>
+              <span class="s0">padding</span><span class="s2">: </span><span class="s3">const </span><span class="s0">EdgeInsets</span><span class="s2">.</span><span class="s0">all</span><span class="s2">(</span><span class="s4">20</span><span class="s2">),</span>
+              <span class="s0">child</span><span class="s2">: </span><span class="s0">Column</span><span class="s2">(</span>
+                <span class="s0">children</span><span class="s2">: [</span>
+                  <span class="s0">Text</span><span class="s2">(</span>
+                    <span class="s0">_isRecording </span><span class="s2">? </span><span class="s1">'Recording...' </span><span class="s2">: </span><span class="s1">'Ready to Record'</span><span class="s2">,</span>
+                    <span class="s0">style</span><span class="s2">: </span><span class="s0">Theme</span><span class="s2">.</span><span class="s0">of</span><span class="s2">(</span><span class="s0">context</span><span class="s2">).</span><span class="s0">textTheme</span><span class="s2">.</span><span class="s0">headlineSmall</span><span class="s2">,</span>
+                  <span class="s2">),</span>
+                  <span class="s3">const </span><span class="s0">SizedBox</span><span class="s2">(</span><span class="s0">height</span><span class="s2">: </span><span class="s4">10</span><span class="s2">),</span>
+                  <span class="s0">Text</span><span class="s2">(</span>
+                    <span class="s0">_recordingDuration</span><span class="s2">,</span>
+                    <span class="s0">style</span><span class="s2">: </span><span class="s0">Theme</span><span class="s2">.</span><span class="s0">of</span><span class="s2">(</span><span class="s0">context</span><span class="s2">).</span><span class="s0">textTheme</span><span class="s2">.</span><span class="s0">headlineMedium</span><span class="s2">?.</span><span class="s0">copyWith</span><span class="s2">(</span>
+                      <span class="s0">fontFamily</span><span class="s2">: </span><span class="s1">'monospace'</span><span class="s2">,</span>
+                      <span class="s0">color</span><span class="s2">: </span><span class="s0">_isRecording </span><span class="s2">? </span><span class="s0">Colors</span><span class="s2">.</span><span class="s0">red </span><span class="s2">: </span><span class="s0">Colors</span><span class="s2">.</span><span class="s0">grey</span><span class="s2">,</span>
+                    <span class="s2">),</span>
+                  <span class="s2">),</span>
+                <span class="s2">],</span>
+              <span class="s2">),</span>
+            <span class="s2">),</span>
+
+            <span class="s3">const </span><span class="s0">SizedBox</span><span class="s2">(</span><span class="s0">height</span><span class="s2">: </span><span class="s4">40</span><span class="s2">),</span>
+
+            <span class="s5">// Record Button</span>
+            <span class="s0">GestureDetector</span><span class="s2">(</span>
+              <span class="s0">onTap</span><span class="s2">: </span><span class="s0">_isUploading </span><span class="s2">? </span><span class="s3">null </span><span class="s2">: </span><span class="s0">_toggleRecording</span><span class="s2">,</span>
+              <span class="s0">child</span><span class="s2">: </span><span class="s0">Container</span><span class="s2">(</span>
+                <span class="s0">width</span><span class="s2">: </span><span class="s4">120</span><span class="s2">,</span>
+                <span class="s0">height</span><span class="s2">: </span><span class="s4">120</span><span class="s2">,</span>
+                <span class="s0">decoration</span><span class="s2">: </span><span class="s0">BoxDecoration</span><span class="s2">(</span>
+                  <span class="s0">shape</span><span class="s2">: </span><span class="s0">BoxShape</span><span class="s2">.</span><span class="s0">circle</span><span class="s2">,</span>
+                  <span class="s0">color</span><span class="s2">: </span><span class="s0">_isRecording </span><span class="s2">? </span><span class="s0">Colors</span><span class="s2">.</span><span class="s0">red </span><span class="s2">: </span><span class="s0">Colors</span><span class="s2">.</span><span class="s0">blue</span><span class="s2">,</span>
+                  <span class="s0">boxShadow</span><span class="s2">: [</span>
+                    <span class="s0">BoxShadow</span><span class="s2">(</span>
+                      <span class="s0">color</span><span class="s2">: (</span><span class="s0">_isRecording </span><span class="s2">? </span><span class="s0">Colors</span><span class="s2">.</span><span class="s0">red </span><span class="s2">: </span><span class="s0">Colors</span><span class="s2">.</span><span class="s0">blue</span><span class="s2">).</span><span class="s0">withOpacity</span><span class="s2">(</span><span class="s4">0.3</span><span class="s2">),</span>
+                      <span class="s0">spreadRadius</span><span class="s2">: </span><span class="s4">5</span><span class="s2">,</span>
+                      <span class="s0">blurRadius</span><span class="s2">: </span><span class="s4">15</span><span class="s2">,</span>
+                    <span class="s2">),</span>
+                  <span class="s2">],</span>
+                <span class="s2">),</span>
+                <span class="s0">child</span><span class="s2">: </span><span class="s0">Icon</span><span class="s2">(</span>
+                  <span class="s0">_isRecording </span><span class="s2">? </span><span class="s0">Icons</span><span class="s2">.</span><span class="s0">stop </span><span class="s2">: </span><span class="s0">Icons</span><span class="s2">.</span><span class="s0">mic</span><span class="s2">,</span>
+                  <span class="s0">color</span><span class="s2">: </span><span class="s0">Colors</span><span class="s2">.</span><span class="s0">white</span><span class="s2">,</span>
+                  <span class="s0">size</span><span class="s2">: </span><span class="s4">60</span><span class="s2">,</span>
+                <span class="s2">),</span>
+              <span class="s2">),</span>
+            <span class="s2">),</span>
+
+            <span class="s3">const </span><span class="s0">SizedBox</span><span class="s2">(</span><span class="s0">height</span><span class="s2">: </span><span class="s4">40</span><span class="s2">),</span>
+
+            <span class="s5">// Status Text</span>
+            <span class="s3">if </span><span class="s2">(</span><span class="s0">_isUploading</span><span class="s2">)</span>
+              <span class="s3">const </span><span class="s0">Column</span><span class="s2">(</span>
+                <span class="s0">children</span><span class="s2">: [</span>
+                  <span class="s0">CircularProgressIndicator</span><span class="s2">(),</span>
+                  <span class="s0">SizedBox</span><span class="s2">(</span><span class="s0">height</span><span class="s2">: </span><span class="s4">10</span><span class="s2">),</span>
+                  <span class="s0">Text</span><span class="s2">(</span><span class="s1">'Uploading recording...'</span><span class="s2">),</span>
+                <span class="s2">],</span>
+              <span class="s2">),</span>
+
+            <span class="s3">const </span><span class="s0">SizedBox</span><span class="s2">(</span><span class="s0">height</span><span class="s2">: </span><span class="s4">20</span><span class="s2">),</span>
+
+            <span class="s5">// Instructions</span>
+            <span class="s0">Padding</span><span class="s2">(</span>
+              <span class="s0">padding</span><span class="s2">: </span><span class="s3">const </span><span class="s0">EdgeInsets</span><span class="s2">.</span><span class="s0">symmetric</span><span class="s2">(</span><span class="s0">horizontal</span><span class="s2">: </span><span class="s4">40</span><span class="s2">),</span>
+              <span class="s0">child</span><span class="s2">: </span><span class="s0">Text</span><span class="s2">(</span>
+                <span class="s0">_isRecording</span>
+                    <span class="s2">? </span><span class="s1">'Tap the red button to stop recording'</span>
+                    <span class="s2">: </span><span class="s1">'Tap the blue button to start recording your lecture'</span><span class="s2">,</span>
+                <span class="s0">textAlign</span><span class="s2">: </span><span class="s0">TextAlign</span><span class="s2">.</span><span class="s0">center</span><span class="s2">,</span>
+                <span class="s0">style</span><span class="s2">: </span><span class="s0">Theme</span><span class="s2">.</span><span class="s0">of</span><span class="s2">(</span><span class="s0">context</span><span class="s2">).</span><span class="s0">textTheme</span><span class="s2">.</span><span class="s0">bodyLarge</span><span class="s2">?.</span><span class="s0">copyWith</span><span class="s2">(</span>
+                  <span class="s0">color</span><span class="s2">: </span><span class="s0">Colors</span><span class="s2">.</span><span class="s0">grey</span><span class="s2">[</span><span class="s4">600</span><span class="s2">],</span>
+                <span class="s2">),</span>
+              <span class="s2">),</span>
+            <span class="s2">),</span>
+          <span class="s2">],</span>
+        <span class="s2">),</span>
+      <span class="s2">),</span>
+    <span class="s2">);</span>
+  <span class="s2">}</span>
+<span class="s2">}</span></pre>
+</body>
+</html>
