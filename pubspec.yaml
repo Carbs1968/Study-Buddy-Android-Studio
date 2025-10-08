@@ -1,9 +1,7 @@
 name: study_buddy
 description: A new Flutter project.
-
-publish_to: 'none'
-
-version: 1.0.0+1
+publish_to: "none"
+version: 1.0.6+8
 
 environment:
   sdk: ">=3.5.0 <4.0.0"
@@ -12,19 +10,22 @@ dependencies:
   flutter:
     sdk: flutter
 
-  # Firebase (your working versions)
+  # Firebase
   firebase_core: ^3.4.0
   firebase_auth: ^5.1.4
   cloud_firestore: ^5.4.4
   firebase_storage: ^12.1.3
+  cloud_functions: ^5.0.5
+  firebase_app_check: ^0.3.0+1
 
+  # Localization
   flutter_localizations:
     sdk: flutter
   flutter_gen: any
+
+  # State & utils
   provider: ^6.1.2
   intl: ^0.19.0
-
-  # Keep screen awake while recording
   wakelock_plus: ^1.2.5
 
   # Google Sign-in + Drive
@@ -33,6 +34,7 @@ dependencies:
   googleapis_auth: ^1.6.0
   extension_google_sign_in_as_googleapis_auth: ^2.0.12
   http: ^1.2.2
+  url_launcher: ^6.3.0
 
   # Files / permissions
   path_provider: ^2.1.3
@@ -46,10 +48,28 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^5.0.0
+  flutter_launcher_icons: ^0.14.1
 
-# --- Overrides (build stability only; do not affect Android runtime) ---
 dependency_overrides:
-  # Prevent pub from selecting an old Linux implementation that
-  # doesn't match the current platform interface.
   record_linux: ^1.2.1
   record_platform_interface: ^1.4.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/icons/app_icon.png
+
+# flutter_launcher_icons configuration
+flutter_icons:
+  android: true
+  ios: true
+  image_path: "assets/icons/app_icon.png"
+  adaptive_icon_background: "#FFFFFF"
+  adaptive_icon_foreground: "assets/icons/app_icon.png"
+
+flutter_intl:
+  enabled: true
+  arb_dir: lib/l10n
+  template_arbs:
+    - app_en.arb
+  output_dir: lib/l10n

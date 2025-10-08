@@ -98,7 +98,7 @@ abstract class AppLocalizations {
   /// No description provided for @appTitle.
   ///
   /// In en, this message translates to:
-  /// **'Study Buddy'**
+  /// **'Study Buddy Note'**
   String get appTitle;
 
   /// No description provided for @signInWithGoogle.

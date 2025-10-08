@@ -4,20 +4,20 @@
     <!-- Permissions required by your features -->
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
-    <!-- Foreground service (general + microphone type for newer Android) -->
+    <!-- Foreground service (general + microphone type for Android 10+/14+) -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MICROPHONE" />
-    <!-- Optional: notifications if your service posts them (safe to keep) -->
+    <!-- Optional (Android 13+): only shown if you post notifications -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <application
-        android:label="Study Buddy"
         android:name="${applicationName}"
+        android:label="Study Buddy Note"
         android:icon="@mipmap/ic_launcher">
 
-        <!-- Standard Flutter entry activity (no custom MainActivity needed) -->
+        <!-- Use your app's MainActivity so the MethodChannel is available -->
         <activity
-            android:name="io.flutter.embedding.android.FlutterActivity"
+            android:name=".MainActivity"
             android:exported="true"
             android:launchMode="singleTop"
             android:theme="@style/LaunchTheme"
@@ -30,18 +30,16 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
 
-            <!-- Tells Android we're using Flutter embedding v2 -->
+            <!-- Flutter embedding v2 marker -->
             <meta-data
                 android:name="flutterEmbedding"
                 android:value="2" />
         </activity>
 
-        <!-- Your foreground recorder service (fully-qualified name) -->
+        <!-- Foreground recorder service -->
         <service
-            android:name="com.carbs.studybuddy.study_buddy.RecorderService"
+            android:name=".RecorderService"
             android:exported="false"
-            android:foregroundServiceType="microphone|mediaProjection|dataSync" />
-        <!-- Note: keep 'microphone' for recording; the others are harmless if unused -->
-
+            android:foregroundServiceType="microphone" />
     </application>
 </manifest>

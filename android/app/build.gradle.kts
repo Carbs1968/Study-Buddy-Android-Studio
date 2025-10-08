@@ -1,3 +1,13 @@
+import java.util.Properties
+import java.io.FileInputStream
+
+// Load key.properties
+val keystorePropertiesFile = rootProject.file("key.properties")
+val keystoreProperties = Properties()
+if (keystorePropertiesFile.exists()) {
+    keystoreProperties.load(FileInputStream(keystorePropertiesFile))
+}
+
 plugins {
     id("com.android.application")
     id("kotlin-android")
@@ -5,23 +15,67 @@ plugins {
     id("com.google.gms.google-services")
 }
 
+// ---- Resolve version from Flutter/ pubspec.yaml ----
+var resolvedVersionName: String = "1.0.0"
+var resolvedVersionCode: Int = 1
+
+run {
+    val fromPropsName = (project.properties["flutterVersionName"] as String?)
+        ?: (project.properties["FLUTTER_BUILD_NAME"] as String?)
+    val fromPropsCodeStr = (project.properties["flutterVersionCode"] as String?)
+        ?: (project.properties["FLUTTER_BUILD_NUMBER"] as String?)
+    if (fromPropsName != null && fromPropsCodeStr != null) {
+        resolvedVersionName = fromPropsName
+        resolvedVersionCode = fromPropsCodeStr.toInt()
+    } else {
+        val pubspec = rootProject.file("../pubspec.yaml")
+        if (pubspec.exists()) {
+            val line = pubspec.readLines().firstOrNull { it.trim().startsWith("version:") }
+            val versionLine = line?.substringAfter("version:")?.trim()
+            val parts = versionLine?.split("+")
+            resolvedVersionName = parts?.getOrNull(0) ?: "1.0.0"
+            resolvedVersionCode = parts?.getOrNull(1)?.toIntOrNull() ?: 1
+        }
+    }
+}
+println("📦 Using versionName=$resolvedVersionName  versionCode=$resolvedVersionCode")
+// ---- End version resolution ----
+
 android {
-    // Must match your app id
     namespace = "com.carbs.studybuddy.study_buddy"
 
     compileSdk = 35
 
     defaultConfig {
         applicationId = "com.carbs.studybuddy.study_buddy"
-        minSdk = 23
+        minSdk = 24
         targetSdk = 35
 
-        versionCode = (project.findProperty("flutterVersionCode") as String?)?.toInt() ?: 1
-        versionName = project.findProperty("flutterVersionName") as String? ?: "1.0.0"
+        versionCode = resolvedVersionCode
+        versionName = resolvedVersionName
+    }
+
+    signingConfigs {
+        create("release") {
+            val alias = keystoreProperties["keyAlias"]?.toString()
+                ?: throw GradleException("Missing keyAlias in key.properties")
+            val keyPass = keystoreProperties["keyPassword"]?.toString()
+                ?: throw GradleException("Missing keyPassword in key.properties")
+            val storePath = keystoreProperties["storeFile"]?.toString()
+                ?: throw GradleException("Missing storeFile in key.properties")
+            val storePass = keystoreProperties["storePassword"]?.toString()
+                ?: throw GradleException("Missing storePassword in key.properties")
+
+            keyAlias = alias
+            keyPassword = keyPass
+            storeFile = file(storePath)
+            storePassword = storePass
+        }
     }
 
     buildTypes {
         release {
+            signingConfig = signingConfigs.getByName("release")
             isMinifyEnabled = false
             isShrinkResources = false
             proguardFiles(
@@ -32,7 +86,7 @@ android {
         debug { /* defaults */ }
     }
 
-    // Align Java/Kotlin toolchains
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
@@ -54,4 +108,31 @@ flutter {
 
 dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
+}
+
+gradle.projectsEvaluated {
+    tasks.named("assembleDebug") {
+        doLast {
+            val apkFile = file("$buildDir/outputs/apk/debug/app-debug.apk")
+            val flutterApkDir = file("$rootDir/../build/app/outputs/flutter-apk")
+            if (apkFile.exists()) {
+                flutterApkDir.mkdirs()
+                apkFile.copyTo(file("$flutterApkDir/app-debug.apk"), overwrite = true)
+            }
+        }
+    }
+}
+
+// Copy the release AAB to Flutter's expected location as well
+gradle.projectsEvaluated {
+    tasks.named("bundleRelease") {
+        doLast {
+            val aabFile = file("$buildDir/outputs/bundle/release/app-release.aab")
+            val flutterAabDir = file("$rootDir/../build/app/outputs/bundle/release")
+            if (aabFile.exists()) {
+                flutterAabDir.mkdirs()
+                aabFile.copyTo(file("$flutterAabDir/app-release.aab"), overwrite = true)
+            }
+        }
+    }
 }
