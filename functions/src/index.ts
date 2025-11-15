@@ -40,15 +40,16 @@ function parseStoragePath(url: string): string | null {
 
 /**
  * Save transcript text to
- *   gs://<default-bucket>/transcripts/<id>.txt
+ *   gs://<default-bucket>/transcripts/<uid>/<id>.txt
  *
+ * @param {string} uid User ID (used as subdirectory).
  * @param {string} id Recording document ID (used as filename).
  * @param {string} text Transcript text to write.
  * @return {Promise<string>} Resolves to the object path that was written.
  */
-async function saveTranscriptText(id: string, text: string): Promise<string> {
+async function saveTranscriptText(uid: string, id: string, text: string): Promise<string> {
   const bucket = getStorage().bucket();
-  const objectPath = `${TRANSCRIPTS_DIR}/${id}.txt`;
+  const objectPath = `${TRANSCRIPTS_DIR}/${uid}/${id}.txt`;
   const file = bucket.file(objectPath);
   await file.save(text, {
     resumable: false,
@@ -213,7 +214,12 @@ export const getTranscriptText = onCall(
 
     // Verify ownership in Firestore
     const db = getFirestore();
-    const recSnap = await db.collection("recordings").doc(recordingId).get();
+    const recSnap = await db
+      .collection("users")
+      .doc(uid)
+      .collection("recordings")
+      .doc(recordingId)
+      .get();
     if (!recSnap.exists) {
       throw new HttpsError("not-found", "Recording not found.");
     }
@@ -223,7 +229,7 @@ export const getTranscriptText = onCall(
     }
 
     // Read private transcript object
-    const objectPath = `${TRANSCRIPTS_DIR}/${recordingId}.txt`;
+    const objectPath = `${TRANSCRIPTS_DIR}/${uid}/${recordingId}.txt`;
     const bucket = getStorage().bucket();
     const file = bucket.file(objectPath);
     const [exists] = await file.exists();
@@ -259,9 +265,9 @@ export const getAiJobOutput = onCall(
       throw new HttpsError("invalid-argument", "type must be summary|notes|quiz");
     }
 
-    // Verify ownership in Firestore
+    // Verify ownership in Firestore (user's subcollection)
     const db = getFirestore();
-    const recRef = db.collection("recordings").doc(recordingId);
+    const recRef = db.collection("users").doc(uid).collection("recordings").doc(recordingId);
     const recSnap = await recRef.get();
     if (!recSnap.exists) {
       throw new HttpsError("not-found", "Recording not found.");
@@ -315,7 +321,7 @@ export const getAiJobOutput = onCall(
  */
 export const onTranscriptRequested = onDocumentUpdated(
   {
-    document: "recordings/{id}",
+    document: "users/{uid}/recordings/{id}",
     region: "us-central1",
     timeoutSeconds: 540,
     memory: "1GiB",
@@ -477,7 +483,7 @@ export const onTranscriptRequested = onDocumentUpdated(
     }
 
     // Save full transcript and update Firestore (single canonical path)
-    const objectPathTxt = await saveTranscriptText(docId, transcriptText);
+    const objectPathTxt = await saveTranscriptText(after.uid as string, docId, transcriptText);
     const preview = transcriptText.substring(0, 500);
 
     await snap.after.ref.update({
@@ -502,12 +508,13 @@ export const onTranscriptRequested = onDocumentUpdated(
 
 /**
  * Read transcript text from Storage for a recording.
+ * @param {string} uid user id
  * @param {string} recordingId recording document id
  * @return {Promise<string>} transcript text
  */
-async function readTranscriptText(recordingId: string): Promise<string> {
+async function readTranscriptText(uid: string, recordingId: string): Promise<string> {
   const bucket = getStorage().bucket();
-  const file = bucket.file(`${TRANSCRIPTS_DIR}/${recordingId}.txt`);
+  const file = bucket.file(`${TRANSCRIPTS_DIR}/${uid}/${recordingId}.txt`);
   const [exists] = await file.exists();
   if (!exists) {
     throw new Error("Transcript file not found.");
@@ -646,8 +653,9 @@ function makePreview(jobType: "summary" | "notes" | "quiz", data: unknown): stri
 
 /**
  * Write JSON payload to Cloud Storage at
- * ai/{recordingId}/{type}/{jobId}.json
+ * ai/{uid}/{recordingId}/{type}/{jobId}.json
  *
+ * @param {string} uid user id
  * @param {string} recordingId recording id
  * @param {"summary"|"notes"|"quiz"} jobType job type
  * @param {string} jobId aiJobs doc id
@@ -655,13 +663,14 @@ function makePreview(jobType: "summary" | "notes" | "quiz", data: unknown): stri
  * @return {Promise<string>} object path written
  */
 async function saveAiJson(
+  uid: string,
   recordingId: string,
   jobType: "summary" | "notes" | "quiz",
   jobId: string,
   jsonObj: unknown,
 ): Promise<string> {
   const bucket = getStorage().bucket();
-  const objectPath = `ai/${recordingId}/${jobType}/${jobId}.json`;
+  const objectPath = `ai/${uid}/${recordingId}/${jobType}/${jobId}.json`;
   const file = bucket.file(objectPath);
   await file.save(JSON.stringify(jsonObj, null, 2), {
     resumable: false,
@@ -719,7 +728,8 @@ export const onAiJobCreated = onDocumentCreated(
     });
 
     const db = getFirestore();
-    const recRef = db.collection("recordings").doc(recordingId);
+    // Use user's subcollection for recordings
+    const recRef = db.collection("users").doc(job.uid!).collection("recordings").doc(recordingId);
     const recSnap = await recRef.get();
     if (!recSnap.exists) {
       const msg = "Recording not found.";
@@ -754,7 +764,7 @@ export const onAiJobCreated = onDocumentCreated(
     // Load transcript
     let transcript = "";
     try {
-      transcript = await readTranscriptText(recordingId);
+      transcript = await readTranscriptText(job.uid!, recordingId);
     } catch (e) {
       const msg = (e as { message?: string })?.message || "Transcript missing.";
       await snap.ref.update({
@@ -821,7 +831,7 @@ export const onAiJobCreated = onDocumentCreated(
     // Save JSON to Storage
     let outPath = "";
     try {
-      outPath = await saveAiJson(recordingId, jobType, jobId, modelJson);
+      outPath = await saveAiJson(job.uid!, recordingId, jobType, jobId, modelJson);
     } catch (e) {
       const msg =
         (e as { message?: string })?.message || "Failed to write AI output.";

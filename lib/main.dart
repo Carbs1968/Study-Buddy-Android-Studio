@@ -1,22 +1,29 @@
+
 // lib/main.dart
 
-// Dart
+// --------------------
+// Dart imports
+// --------------------
 import 'dart:convert';
 import 'dart:async';
 import 'dart:io';
 import 'dart:math';
+import 'dart:io' show Platform;
 
-// Flutter
+// --------------------
+// Flutter imports
+// --------------------
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
-// Plugins
+// --------------------
+// Third-party and Firebase imports
+// --------------------
 import 'package:path_provider/path_provider.dart';
 import 'package:record/record.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
-
-// Firebase
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart' as fb;
 import 'package:firebase_storage/firebase_storage.dart';
@@ -24,16 +31,39 @@ import 'package:path/path.dart' as path;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_functions/cloud_functions.dart'; // ✅ NEW
 import 'package:firebase_app_check/firebase_app_check.dart';
-import 'firebase_options.dart';
-
-// Google Sign-In / Drive
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
 import 'package:googleapis/drive/v3.dart' as drive;
 import 'package:url_launcher/url_launcher.dart';
 
-// Platform
-import 'dart:io' show Platform;
+// --------------------
+// Local project imports
+// --------------------
+import 'firebase_options.dart';
+import 'l10n/strings.dart';
+// Added import for AcademicSettingsScreen at top-level to avoid misplaced directives.
+import 'screens/academic_settings_screen.dart';
+
+final ValueNotifier<Locale> appLocale = ValueNotifier(const Locale('en'));
+
+// -----------------------------------------------------------------------------
+// SBLocale
+//
+// A simple InheritedWidget that holds the current Locale and SBStrings. This
+// replicates the previous localization wrapper used in MyApp without relying
+// on misplaced import directives. Widgets can depend on this to rebuild when
+// the locale or strings change. Placing this definition near the top keeps it
+// visible for MyApp while maintaining Dart import order.
+// Make SBLocale public so it can be looked up by SBStrings.of() in other files.
+// Removed SBLocale wrapper: localization is now handled via SBStrings.delegate
+
+
+// --------------------
+// 🎨 Brand Colors
+// --------------------
+const kBrandPrimary = Color(0xFF6741D9); // Purple
+const kBrandSurface = Color(0xFFF7F2FA); // Soft lilac background
+const kBrandAccent = Color(0xFF9B6AF3); // Lighter accent if needed
 
 // Android service channel for foreground recording
 const _recSvc = MethodChannel('study_buddy/recorder_service');
@@ -41,26 +71,24 @@ const _recSvc = MethodChannel('study_buddy/recorder_service');
 // Small logger to keep output consistent
 void _log(String msg) => debugPrint('[StudyBuddy] $msg');
 
+// Utility: Ensure Firebase is initialized and log if not ready
+Future<void> _ensureFirebaseReady() async {
+  if (Firebase.apps.isEmpty) {
+    await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+    _log('Firebase re-initialized by guard.');
+  }
+  if (fb.FirebaseAuth.instance.currentUser == null) {
+    _log('FirebaseAuth user missing.');
+  }
+}
+
 // ✅ Single Functions handle (same app-wide region as your backend)
 late FirebaseFunctions functions;
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // App Check activation must be before Firebase.initializeApp.
-  _log('Preparing to activate App Check...');
-  try {
-    await FirebaseAppCheck.instance.activate(
-      androidProvider: AndroidProvider.playIntegrity,
-      appleProvider: AppleProvider.appAttest,
-    );
-    _log('AppCheck activated with production providers');
-  } catch (e) {
-    _log('AppCheck activation skipped/failed: $e');
-  }
-  _log('App Check activation complete.');
-
-  // ✅ Initialize Firebase directly (single call, no conditional)
+// Initialize Firebase first.
   try {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
@@ -69,6 +97,20 @@ Future<void> main() async {
   } catch (e) {
     _log('Firebase init failed: $e');
   }
+
+// Activate App Check.  Use the debug provider in non‑release builds so App Check doesn’t block your backend calls.
+  _log('Preparing to activate App Check...');
+  try {
+    await FirebaseAppCheck.instance.activate(
+      androidProvider: kReleaseMode ? AndroidProvider.playIntegrity : AndroidProvider.debug,
+      appleProvider: kReleaseMode ? AppleProvider.appAttest : AppleProvider.debug,
+    );
+    _log('AppCheck activated with ${kReleaseMode ? 'production' : 'debug'} providers');
+  } catch (e) {
+    _log('AppCheck activation skipped/failed: $e');
+  }
+  _log('App Check activation complete.');
+
 
   _log('Using Storage bucket: ${FirebaseStorage.instance.bucket}');
 
@@ -82,14 +124,96 @@ class MyApp extends StatelessWidget {
   const MyApp({super.key});
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Study Buddy Note',
-      theme: ThemeData(
-        colorSchemeSeed: Colors.deepPurple,
-        useMaterial3: true,
-      ),
-      home: const AuthGate(),
-      debugShowCheckedModeBanner: false,
+    return ValueListenableBuilder<Locale>(
+      valueListenable: appLocale,
+      builder: (context, locale, _) {
+        return MaterialApp(
+          title: SBStrings(locale).appTitle,
+          theme: ThemeData(
+            useMaterial3: true,
+            colorScheme: ColorScheme.fromSeed(
+              seedColor: kBrandPrimary,
+              brightness: Brightness.light,
+            ),
+            scaffoldBackgroundColor: kBrandSurface,
+            appBarTheme: const AppBarTheme(
+              backgroundColor: Colors.transparent,
+              foregroundColor: Colors.black87,
+              elevation: 0,
+              titleTextStyle: TextStyle(
+                fontWeight: FontWeight.w600,
+                fontSize: 22,
+                color: Colors.black87,
+              ),
+            ),
+            bottomNavigationBarTheme: BottomNavigationBarThemeData(
+              selectedItemColor: kBrandPrimary,
+              unselectedItemColor: Colors.black54,
+              backgroundColor: kBrandSurface,
+              type: BottomNavigationBarType.fixed,
+            ),
+            inputDecorationTheme: const InputDecorationTheme(
+              border: OutlineInputBorder(),
+              focusedBorder: OutlineInputBorder(
+                borderSide: BorderSide(width: 2),
+              ),
+            ),
+            elevatedButtonTheme: ElevatedButtonThemeData(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: kBrandPrimary,
+                foregroundColor: Colors.white,
+                shape: const StadiumBorder(),
+                padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 20),
+                textStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+              ),
+            ),
+            textButtonTheme: TextButtonThemeData(
+              style: TextButton.styleFrom(
+                foregroundColor: kBrandPrimary,
+                textStyle: const TextStyle(fontWeight: FontWeight.w500),
+              ),
+            ),
+            textTheme: const TextTheme(
+              headlineLarge: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.black87),
+              headlineMedium: TextStyle(fontSize: 24, fontWeight: FontWeight.w700, color: Colors.black87),
+              headlineSmall: TextStyle(fontSize: 20, fontWeight: FontWeight.w600, color: Colors.black87),
+              titleLarge: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Colors.black87),
+              bodyLarge: TextStyle(fontSize: 16, color: Colors.black87, height: 1.4),
+              bodyMedium: TextStyle(fontSize: 14, color: Colors.black87, height: 1.4),
+              labelLarge: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.white),
+              labelMedium: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: Colors.black87),
+            ),
+          ),
+          darkTheme: ThemeData(
+            useMaterial3: true,
+            colorScheme: ColorScheme.fromSeed(
+              seedColor: kBrandPrimary,
+              brightness: Brightness.dark,
+            ),
+            textTheme: const TextTheme(
+              headlineLarge: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.white),
+              headlineMedium: TextStyle(fontSize: 24, fontWeight: FontWeight.w700, color: Colors.white),
+              headlineSmall: TextStyle(fontSize: 20, fontWeight: FontWeight.w600, color: Colors.white),
+              titleLarge: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Colors.white),
+              bodyLarge: TextStyle(fontSize: 16, color: Colors.white70, height: 1.4),
+              bodyMedium: TextStyle(fontSize: 14, color: Colors.white70, height: 1.4),
+              labelLarge: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.black87),
+              labelMedium: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: Colors.white),
+            ),
+          ),
+          themeMode: ThemeMode.system,
+          home: const AuthGate(),
+          debugShowCheckedModeBanner: false,
+          locale: locale,
+          supportedLocales: SBStrings.supportedLocales,
+          localizationsDelegates: const [
+            SBStrings.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+        );
+      },
     );
   }
 }
@@ -135,7 +259,10 @@ class _LoginPageState extends State<LoginPage> {
         drive.DriveApi.driveFileScope,
         'email',
       ]);
-      GoogleSignInAccount? acc = await gsi.signIn();
+
+      // Prefer silent sign-in first (handles "already signed in" after logout)
+      GoogleSignInAccount? acc = await gsi.signInSilently();
+      acc ??= await gsi.signIn();
       if (acc == null) throw 'Sign-in canceled';
 
       final auth = await acc.authentication;
@@ -147,7 +274,7 @@ class _LoginPageState extends State<LoginPage> {
       final user = fb.FirebaseAuth.instance.currentUser;
       await _createUserIfNeeded(user);
     } catch (e) {
-      setState(() => _error = e.toString());
+      if (mounted) setState(() => _error = e.toString());
     } finally {
       if (mounted) setState(() => _loading = false);
     }
@@ -155,7 +282,7 @@ class _LoginPageState extends State<LoginPage> {
 
   Future<void> _createUserIfNeeded(fb.User? u) async {
     if (u == null) return;
-    final ref = FirebaseFirestore.instance.collection('Users').doc(u.uid);
+    final ref = FirebaseFirestore.instance.collection('users').doc(u.uid);
     final snap = await ref.get();
     if (!snap.exists) {
       await ref.set({
@@ -165,53 +292,52 @@ class _LoginPageState extends State<LoginPage> {
         'photoURL': u.photoURL,
         'createdAt': FieldValue.serverTimestamp(),
         'provider': 'google',
+        'locale': appLocale.value.languageCode, // Save user's language
       });
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final w = MediaQuery.of(context).size.width;
-    final btnW = min(w * 0.8, 340.0);
-
+    final strings = SBStrings.of(context);
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Study Buddy Note'),
-        centerTitle: false,
-      ),
       body: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 380),
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                if (_error != null) ...[
-                  Text(_error!, style: const TextStyle(color: Colors.red)),
-                  const SizedBox(height: 12),
-                ],
-                SizedBox(
-                  width: btnW,
-                  child: ElevatedButton(
-                    onPressed: _loading ? null : _signInWithGoogle,
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(
-                        vertical: 14,
-                        horizontal: 16,
-                      ),
-                    ),
-                    child: _loading
-                        ? const SizedBox(
-                      height: 20,
-                      width: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                        : const Text('Sign in with Google'),
-                  ),
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                strings.appTitle,
+                style: const TextStyle(
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold,
+                  color: kBrandPrimary,
                 ),
-              ],
-            ),
+              ),
+              const SizedBox(height: 40),
+              if (_error != null)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: Text(_error!, style: const TextStyle(color: Colors.red)),
+                ),
+              SizedBox(
+                width: 300,
+                child: ElevatedButton(
+                  onPressed: _loading ? null : _signInWithGoogle,
+                  child: _loading
+                      ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(
+                      color: Colors.white,
+                      strokeWidth: 2,
+                    ),
+                  )
+                      : Text(strings.signInWithGoogle),
+                ),
+              ),
+            ],
           ),
         ),
       ),
@@ -231,23 +357,44 @@ class HomeShell extends StatefulWidget {
 class _HomeShellState extends State<HomeShell> {
   int _tab = 0;
   final _tabs = const [
-    RecorderPage(), // existing feature: record/upload flow
-    LibraryScreen(), // new: browse your recordings
-    SettingsScreen(), // new: placeholder for global toggles
+    RecorderPage(),
+    LibraryScreen(),
+    SettingsScreen(),
   ];
 
   @override
+  void initState() {
+    super.initState();
+    _loadSavedLocale();
+  }
+
+  Future<void> _loadSavedLocale() async {
+    final user = fb.FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+    try {
+      final doc = await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
+      final data = doc.data();
+      if (data != null && data['locale'] != null) {
+        final code = data['locale'] as String;
+        if (SBStrings.supportedLocales.any((l) => l.languageCode == code)) {
+          appLocale.value = Locale(code);
+        }
+      }
+    } catch (_) {}
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final strings = SBStrings.of(context);
     return Scaffold(
       body: _tabs[_tab],
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _tab,
         onTap: (i) => setState(() => _tab = i),
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.mic), label: 'Record'),
-          BottomNavigationBarItem(
-              icon: Icon(Icons.library_music), label: 'Library'),
-          BottomNavigationBarItem(icon: Icon(Icons.settings), label: 'Settings'),
+        items: [
+          BottomNavigationBarItem(icon: const Icon(Icons.mic), label: strings.record),
+          BottomNavigationBarItem(icon: const Icon(Icons.library_music), label: strings.library),
+          BottomNavigationBarItem(icon: const Icon(Icons.settings), label: strings.settings),
         ],
       ),
     );
@@ -261,6 +408,28 @@ class RecorderPage extends StatefulWidget {
 }
 
 class _RecorderPageState extends State<RecorderPage> {
+  // Focus node for topic field
+  final FocusNode _topicFocus = FocusNode();
+
+  // Tracks if user selected from dropdown (existing class)
+  bool _selectedExistingClass = false;
+  // Fetch distinct class names from Firestore for this user
+  Future<List<String>> _fetchClassNames() async {
+    final uid = fb.FirebaseAuth.instance.currentUser?.uid;
+    if (uid == null) return [];
+    final snap = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(uid)
+        .collection('recordings')
+        .get();
+    final classes = snap.docs
+        .map((d) => (d['className'] ?? '').toString().trim())
+        .where((s) => s.isNotEmpty)
+        .toSet()
+        .toList()
+      ..sort();
+    return classes;
+  }
   // Controllers
   final TextEditingController _classCtl = TextEditingController();
   final TextEditingController _topicCtl = TextEditingController();
@@ -287,18 +456,23 @@ class _RecorderPageState extends State<RecorderPage> {
     scopes: [drive.DriveApi.driveFileScope, 'email'],
   );
 
-  // UI strings
-  String get _titleText =>
-      _recordingComplete ? 'Recording complete' : _isRecording ? 'Recording' : 'Ready to Record';
+  // UI strings (now localized)
+  String get _titleText {
+    final strings = SBStrings.of(context);
+    if (_recordingComplete) return strings.recordingComplete;
+    if (_isRecording) return strings.recording;
+    return strings.readyToRecord;
+  }
 
   String get _clockText => _formatDuration(Duration(seconds: _elapsedSeconds));
 
   String get _helperText {
-    if (_isUploading) return 'Uploading...';
-    if (_recordingComplete) return 'Choose Upload or Discard';
-    if (_isRecording && _isPaused) return 'Recording paused';
-    if (_isRecording) return 'Tap red to stop';
-    return 'Enter class & topic, then tap the blue button to start';
+    final strings = SBStrings.of(context);
+    if (_isUploading) return strings.uploading;
+    if (_recordingComplete) return strings.chooseUploadOrDiscard;
+    if (_isRecording && _isPaused) return strings.recordingPaused;
+    if (_isRecording) return strings.tapRedToStop;
+    return strings.enterClassAndTopic;
   }
 
   bool get _isReadyToRecord =>
@@ -605,6 +779,17 @@ class _RecorderPageState extends State<RecorderPage> {
       _uploadPhase = 'Firebase';
     });
 
+    // Ensure Firebase is initialized and user is authenticated
+    if (Firebase.apps.isEmpty) {
+      await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+    }
+    final user = fb.FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      _log('No authenticated user. Aborting upload.');
+      return;
+    }
+    final uid = user.uid;
+
     final createdAt = DateTime.now();
     final filename = path.basename(_filePath!);
 
@@ -627,7 +812,6 @@ class _RecorderPageState extends State<RecorderPage> {
     }
 
     // Upload to Firebase Storage using the new helper
-    final uid = fb.FirebaseAuth.instance.currentUser!.uid;
     try {
       await uploadRecording(fileOnDisk, uid);
     } catch (e) {
@@ -680,19 +864,28 @@ class _RecorderPageState extends State<RecorderPage> {
     // Firestore metadata (kept as before, with additive fields)
     final durationSeconds = _elapsedSeconds;
     final fileLen = await fileOnDisk.length();
-    await _writeFirestoreMetadata(
-      filename: filename,
-      className: _classCtl.text,
-      topic: _topicCtl.text,
-      createdAt: createdAt,
-      durationSeconds: durationSeconds,
-      storageUrl: "", // Storage URL retrieval omitted in new helper; add if needed
-      storagePath: "recordings/$uid/$filename",
-      driveFileId: driveId,
-      sizeBytes: fileLen,
-      mimeType: 'audio/mp4',
-    );
-    _log('Firestore metadata written');
+    try {
+      await _writeFirestoreMetadata(
+        filename: filename,
+        className: _classCtl.text,
+        topic: _topicCtl.text,
+        createdAt: createdAt,
+        durationSeconds: durationSeconds,
+        storageUrl: "", // Storage URL retrieval omitted in new helper; add if needed
+        storagePath: "recordings/$uid/$filename",
+        driveFileId: driveId,
+        sizeBytes: fileLen,
+        mimeType: 'audio/mp4',
+      );
+      _log('Firestore metadata written');
+    } on FirebaseException catch (e) {
+      _log('Firestore write failed (${e.code}): ${e.message}');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Firestore write failed: ${e.message}')),
+        );
+      }
+    }
 
     if (mounted) {
       setState(() {
@@ -700,8 +893,12 @@ class _RecorderPageState extends State<RecorderPage> {
         _uploadProgress = null;
         _uploadPhase = null;
       });
+      // Clear class/topic inputs and reset selected class state
+      _classCtl.clear();
+      _topicCtl.clear();
+      _selectedExistingClass = false;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Upload complete')),
+        const SnackBar(content: Text('Upload complete. Ready for your next lecture!')),
       );
     }
 
@@ -719,22 +916,43 @@ class _RecorderPageState extends State<RecorderPage> {
     }
   }
 
-// Use the default Firebase Storage bucket from google-services.json
-Future<void> uploadRecording(File file, String uid) async {
-  final fileName = path.basename(file.path);
-  final storagePath = "recordings/$uid/$fileName";
+  Future<void> uploadRecording(File file, String uid) async {
+    // Ensure Firebase initialized and user authenticated
+    if (Firebase.apps.isEmpty) {
+      await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+    }
+    final user = fb.FirebaseAuth.instance.currentUser;
+    if (user == null) throw Exception('No authenticated user for upload');
 
-  _log("Uploading to Firebase Storage (default bucket) path=$storagePath");
-  final storageRef = FirebaseStorage.instance
-      .ref()
-      .child(storagePath);
+    // We no longer read or use academic level/term for building the storage path.
+    // This restores the original upload structure where files are stored directly
+    // under recordings/{uid}/{filename}. Reading academic settings can be added
+    // separately without influencing the storage path.
 
+    final fileName = path.basename(file.path);
+    // Upload under recordings/{uid}/{fileName} with no intermediate level/term.
+    final storagePath = "recordings/$uid/$fileName";
+    _log("Uploading to Firebase Storage path=$storagePath");
 
-  await storageRef.putFile(
-    file,
-    SettableMetadata(contentType: 'audio/mp4'),
-  );
-}
+    final storageRef = FirebaseStorage.instance.ref().child(storagePath);
+    await storageRef.putFile(
+      file,
+      SettableMetadata(contentType: 'audio/mp4'),
+    );
+
+    // Save metadata to Firestore. Use className and topic if available via
+    // outer context (e.g. passed in from the recording page) instead of level/term.
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(uid)
+        .collection('recordings')
+        .add({
+      'filename': fileName,
+      'storagePath': storagePath,
+      'createdAt': FieldValue.serverTimestamp(),
+      'uid': uid,
+    });
+  }
 
   Future<void> _discardRecording() async {
     if (_filePath != null) {
@@ -940,185 +1158,255 @@ Future<void> uploadRecording(File file, String uid) async {
     final w = MediaQuery.of(context).size.width;
     final big = min(w * 0.6, 300.0);
 
+    final strings = SBStrings.of(context);
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Study Buddy Note'),
-        actions: [
-          TextButton(
-            onPressed: _logout,
-            child: const Text('Logout', style: TextStyle(color: Colors.black)),
-          ),
-        ],
-      ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: EdgeInsets.only(
-            left: 20,
-            right: 20,
-            top: 16,
-            bottom: 16 + MediaQuery.of(context).padding.bottom,
-          ),
-          child: Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 680),
-              child: Column(
-                children: [
-                  const SizedBox(height: 8),
-                  Text(
-                    _titleText,
-                    style: const TextStyle(
-                        fontSize: 36, fontWeight: FontWeight.w700),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 10),
-                  Text(
-                    _clockText,
-                    style: const TextStyle(
-                        fontSize: 48,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.black54),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 10),
-                  Text(
-                    _helperText,
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(color: Colors.black54),
-                  ),
-                  const SizedBox(height: 18),
-
-                  // Inputs
-                  TextField(
-                    controller: _classCtl,
-                    enabled:
-                    !_isRecording && !_isUploading && !_recordingComplete,
-                    decoration: const InputDecoration(
-                      labelText: 'Class name',
-                      border: OutlineInputBorder(),
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  TextField(
-                    controller: _topicCtl,
-                    enabled:
-                    !_isRecording && !_isUploading && !_recordingComplete,
-                    decoration: const InputDecoration(
-                      labelText: 'Lecture topic',
-                      border: OutlineInputBorder(),
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-
-                  // Record / Stop
-                  SizedBox(
-                    width: big,
-                    height: big,
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        shape: const CircleBorder(),
-                        backgroundColor: (_isRecording || _isReadyToRecord)
-                            ? (_isRecording ? Colors.red : Colors.deepPurple)
-                            : Colors.grey[400],
-                      ),
-                      onPressed: _isRecording
-                          ? _stopRecording
-                          : (_isReadyToRecord ? _startRecording : null),
-                      child: Text(
-                        _isRecording ? 'Stop' : 'Record',
-                        style:
-                        const TextStyle(color: Colors.white, fontSize: 22),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-
-                  // Pause / Resume
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: _isRecording ? _pauseOrResume : null,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: _isRecording
-                            ? Colors.grey.shade800
-                            : Colors.grey.shade300,
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                      ),
-                      child: Text(
-                        _isRecording ? (_isPaused ? 'Resume' : 'Pause') : 'Pause',
-                        style: TextStyle(
-                          color: _isRecording
-                              ? Colors.white
-                              : Colors.grey.shade600,
-                          fontSize: 18,
-                        ),
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(height: 20),
-
-                  // Upload progress
-                  if (_isUploading) ...[
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        if (_uploadProgress == null)
-                          const SizedBox(
-                            width: 18,
-                            height: 18,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          ),
-                        const SizedBox(width: 8),
-                        Text(
-                          _uploadPhase == null
-                              ? 'Uploading...'
-                              : 'Uploading to $_uploadPhase...',
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    if (_uploadProgress != null)
-                      LinearProgressIndicator(
-                          value: _uploadProgress, minHeight: 6),
-                  ],
-
-                  // Upload / Discard
-                  if (_recordingComplete) ...[
-                    const SizedBox(height: 8),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: ElevatedButton(
-                            onPressed: _isUploading ? null : _uploadRecording,
-                            style: ElevatedButton.styleFrom(
-                              padding:
-                              const EdgeInsets.symmetric(vertical: 14),
-                            ),
-                            child: const Text('Upload'),
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: ElevatedButton(
-                            onPressed: _isUploading ? null : _discardRecording,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.red,
-                              padding:
-                              const EdgeInsets.symmetric(vertical: 14),
-                            ),
-                            child: const Text('Discard'),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-
-                  const SizedBox(height: 12),
-                ],
-              ),
-            ),
+        title: Text(
+          strings.appTitle,
+          style: const TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
           ),
         ),
+        centerTitle: true,
+      ),
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          return SingleChildScrollView(
+            padding: EdgeInsets.only(
+              left: 20,
+              right: 20,
+              top: 16,
+              bottom: 16 + MediaQuery.of(context).padding.bottom,
+            ),
+            physics: constraints.maxHeight < 700
+                ? const AlwaysScrollableScrollPhysics()
+                : const NeverScrollableScrollPhysics(),
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                minHeight: constraints.maxHeight,
+              ),
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 680),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      const SizedBox(height: 8),
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Text(
+                            _titleText,
+                            style: const TextStyle(
+                              fontSize: 30,
+                              fontWeight: FontWeight.w800,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            _clockText,
+                            style: const TextStyle(
+                              fontSize: 22,
+                              color: Colors.black54,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        _helperText,
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          color: Colors.black54,
+                          fontSize: 14,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+
+                      // Inputs
+                      FutureBuilder<List<String>>(
+                        future: _fetchClassNames(),
+                        builder: (context, snapshot) {
+                          final classList = snapshot.data ?? [];
+                          // Determine dropdown value
+                          String? dropdownValue = classList.contains(_classCtl.text) ? _classCtl.text : null;
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              if (snapshot.connectionState == ConnectionState.waiting)
+                                const LinearProgressIndicator(minHeight: 2),
+                              DropdownButtonFormField<String>(
+                                value: dropdownValue,
+                                decoration: InputDecoration(
+                                  labelText: strings.selectClass,
+                                  border: const OutlineInputBorder(),
+                                ),
+                                items: classList
+                                    .map((name) => DropdownMenuItem(
+                                  value: name,
+                                  child: Text(name),
+                                ))
+                                    .toList(),
+                                onChanged: (val) {
+                                  setState(() {
+                                    if (val != null) {
+                                      _selectedExistingClass = true;
+                                      _classCtl.text = val;
+                                      // Focus the topic field
+                                      FocusScope.of(context).requestFocus(_topicFocus);
+                                    } else {
+                                      // Cleared dropdown selection
+                                      _selectedExistingClass = false;
+                                      _classCtl.clear();
+                                    }
+                                  });
+                                },
+                                isExpanded: true,
+                              ),
+                              const SizedBox(height: 6),
+                              if (!_selectedExistingClass)
+                                TextField(
+                                  controller: _classCtl,
+                                  enabled: !_isRecording && !_isUploading && !_recordingComplete,
+                                  decoration: InputDecoration(
+                                    labelText: strings.enterNewClass,
+                                    border: const OutlineInputBorder(),
+                                  ),
+                                ),
+                            ],
+                          );
+                        },
+                      ),
+                      const SizedBox(height: 12),
+                      TextField(
+                        controller: _topicCtl,
+                        focusNode: _topicFocus,
+                        enabled: !_isRecording && !_isUploading && !_recordingComplete,
+                        decoration: InputDecoration(
+                          labelText: strings.lectureTopic,
+                          border: const OutlineInputBorder(),
+                        ),
+                      ),
+                      const SizedBox(height: 14),
+
+                      // Record / Stop
+                      SizedBox(
+                        width: big,
+                        height: big,
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            shape: const CircleBorder(),
+                            backgroundColor: (_isRecording || _isReadyToRecord)
+                                ? (_isRecording ? Colors.red : Colors.deepPurple.shade600)
+                                : Colors.grey[400],
+                          ),
+                          onPressed: _isRecording
+                              ? _stopRecording
+                              : (_isReadyToRecord ? _startRecording : null),
+                          child: Text(
+                            _isRecording ? strings.stop : strings.record,
+                            style: const TextStyle(color: Colors.white, fontSize: 22),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+
+                      // Pause / Resume
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          onPressed: _isRecording ? _pauseOrResume : null,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: _isRecording
+                                ? Colors.grey.shade800
+                                : Colors.grey.shade300,
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                          ),
+                          child: Text(
+                            _isRecording
+                                ? (_isPaused ? strings.resume : strings.pause)
+                                : strings.pause,
+                            style: TextStyle(
+                              color: _isRecording
+                                  ? Colors.white
+                                  : Colors.grey.shade600,
+                              fontSize: 18,
+                            ),
+                          ),
+                        ),
+                      ),
+
+                      const SizedBox(height: 14),
+
+                      // Upload progress
+                      if (_isUploading) ...[
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            if (_uploadProgress == null)
+                              const SizedBox(
+                                width: 18,
+                                height: 18,
+                                child: CircularProgressIndicator(strokeWidth: 2),
+                              ),
+                            const SizedBox(width: 8),
+                            Text(
+                              _uploadPhase == null
+                                  ? strings.uploading
+                                  : strings.uploadingTo(_uploadPhase!),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        if (_uploadProgress != null)
+                          LinearProgressIndicator(
+                              value: _uploadProgress, minHeight: 6),
+                      ],
+
+                      // Upload / Discard
+                      if (_recordingComplete) ...[
+                        const SizedBox(height: 8),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: ElevatedButton(
+                                onPressed: _isUploading ? null : _uploadRecording,
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.deepPurple.shade600,
+                                  padding:
+                                  const EdgeInsets.symmetric(vertical: 14),
+                                ),
+                                child: Text(strings.upload),
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: ElevatedButton(
+                                onPressed: _isUploading ? null : _discardRecording,
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.red,
+                                  padding:
+                                  const EdgeInsets.symmetric(vertical: 14),
+                                ),
+                                child: Text(strings.discard),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+
+                      const SizedBox(height: 12),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          );
+        },
       ),
     );
   }
@@ -1147,7 +1435,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
   Widget build(BuildContext context) {
     final uid = fb.FirebaseAuth.instance.currentUser?.uid;
     if (uid == null) {
-      return const Scaffold(body: Center(child: Text('Not signed in')));
+      return Scaffold(body: Center(child: Text(SBStrings.of(context).notSignedIn)));
     }
 
     final q = FirebaseFirestore.instance
@@ -1155,17 +1443,18 @@ class _LibraryScreenState extends State<LibraryScreen> {
         .doc(uid)
         .collection('recordings');
 
+    final strings = SBStrings.of(context);
     return Scaffold(
-      appBar: AppBar(title: const Text('Library')),
+      appBar: AppBar(title: Text(strings.library)),
       body: Column(
         children: [
           Padding(
             padding: const EdgeInsets.all(12),
             child: TextField(
-              decoration: const InputDecoration(
-                prefixIcon: Icon(Icons.search),
-                hintText: 'Search classes...',
-                border: OutlineInputBorder(),
+              decoration: InputDecoration(
+                prefixIcon: const Icon(Icons.search),
+                hintText: strings.selectClass,
+                border: const OutlineInputBorder(),
               ),
               onChanged: (v) => setState(() => _search = v.trim().toLowerCase()),
             ),
@@ -1182,7 +1471,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
                     child: Padding(
                       padding: const EdgeInsets.all(16),
                       child: Text(
-                        'Error loading: ${snap.error}',
+                        '${strings.errorLoading}: ${snap.error}',
                         textAlign: TextAlign.center,
                       ),
                     ),
@@ -1191,7 +1480,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
 
                 final docs = (snap.data?.docs ?? []);
                 if (docs.isEmpty) {
-                  return const Center(child: Text('No recordings yet.'));
+                  return Center(child: Text(strings.noRecordingsYet));
                 }
 
                 // Aggregate by className
@@ -1233,8 +1522,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
                 });
 
                 if (items.isEmpty) {
-                  return const Center(
-                      child: Text('No classes match your search.'));
+                  return Center(child: Text(strings.noClassesMatch));
                 }
 
                 return ListView.separated(
@@ -1244,7 +1532,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
                     final r = items[i];
                     final subtitle = [
                       if (r.latest != null) r.latest!.toLocal().toString(),
-                      '${r.count} lecture${r.count == 1 ? '' : 's'}',
+                      strings.lectureCount(r.count),
                     ].join(' • ');
                     return ListTile(
                       leading: const Icon(Icons.folder),
@@ -1301,7 +1589,7 @@ class _ClassLecturesScreenState extends State<ClassLecturesScreen> {
   Widget build(BuildContext context) {
     final uid = fb.FirebaseAuth.instance.currentUser?.uid;
     if (uid == null) {
-      return const Scaffold(body: Center(child: Text('Not signed in')));
+      return Scaffold(body: Center(child: Text(SBStrings.of(context).notSignedIn)));
     }
 
     // Filter at source: only this class + this user
@@ -1311,6 +1599,7 @@ class _ClassLecturesScreenState extends State<ClassLecturesScreen> {
         .collection('recordings')
         .where('className', isEqualTo: widget.className);
 
+    final strings = SBStrings.of(context);
     return Scaffold(
       appBar: AppBar(title: Text(widget.className)),
       body: Column(
@@ -1318,10 +1607,10 @@ class _ClassLecturesScreenState extends State<ClassLecturesScreen> {
           Padding(
             padding: const EdgeInsets.all(12),
             child: TextField(
-              decoration: const InputDecoration(
-                prefixIcon: Icon(Icons.search),
-                hintText: 'Search topics in this class...',
-                border: OutlineInputBorder(),
+              decoration: InputDecoration(
+                prefixIcon: const Icon(Icons.search),
+                hintText: '${strings.lectureTopic}...',
+                border: const OutlineInputBorder(),
               ),
               onChanged: (v) => setState(() => _search = v.trim().toLowerCase()),
             ),
@@ -1338,7 +1627,7 @@ class _ClassLecturesScreenState extends State<ClassLecturesScreen> {
                     child: Padding(
                       padding: const EdgeInsets.all(16),
                       child: Text(
-                        'Error loading: ${snap.error}',
+                        '${strings.errorLoading}: ${snap.error}',
                         textAlign: TextAlign.center,
                       ),
                     ),
@@ -1368,7 +1657,7 @@ class _ClassLecturesScreenState extends State<ClassLecturesScreen> {
                 });
 
                 if (docs.isEmpty) {
-                  return const Center(child: Text('No lectures yet.'));
+                  return Center(child: Text(strings.noLecturesYet));
                 }
 
                 return ListView.separated(
@@ -1392,7 +1681,7 @@ class _ClassLecturesScreenState extends State<ClassLecturesScreen> {
                       title: Text(title,
                           maxLines: 1, overflow: TextOverflow.ellipsis),
                       subtitle: Text(
-                        '${dt != null ? dt.toLocal().toString() : ''} • transcript: $status',
+                        '${dt != null ? dt.toLocal().toString() : ''} • ${strings.transcript}: $status',
                       ),
                       trailing: const Icon(Icons.chevron_right),
                       onTap: () {
@@ -1572,9 +1861,9 @@ class LectureDetailScreen extends StatelessWidget {
               const Text('Key Points', style: TextStyle(fontWeight: FontWeight.bold)),
               const SizedBox(height: 4),
               ...keyPoints.map((p) => Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 2),
-                    child: Text('• $p'),
-                  )),
+                padding: const EdgeInsets.symmetric(vertical: 2),
+                child: Text('• $p'),
+              )),
             ],
             if (terms.isNotEmpty) ...[
               const SizedBox(height: 12),
@@ -1599,9 +1888,9 @@ class LectureDetailScreen extends StatelessWidget {
               const SizedBox(height: 4),
               ...List<String>.from(sec['bullets'] ?? const [])
                   .map((b) => Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 2),
-                        child: Text('• $b'),
-                      )),
+                padding: const EdgeInsets.symmetric(vertical: 2),
+                child: Text('• $b'),
+              )),
               const SizedBox(height: 10),
             ],
             if (equations.isNotEmpty) ...[
@@ -1652,7 +1941,7 @@ class LectureDetailScreen extends StatelessWidget {
         );
 
       default:
-        // Fallback: show raw map
+      // Fallback: show raw map
         return Text(data.toString());
     }
   }
@@ -1697,14 +1986,14 @@ class LectureDetailScreen extends StatelessWidget {
             ? 'Open in Drive:\n$driveViewUrl'
             : (storageUrl.isNotEmpty ? storageUrl : 'No playback URL available');
 
+        final strings = SBStrings.of(context);
         return Scaffold(
           appBar: AppBar(title: Text('$className — $topic')),
           body: ListView(
             padding: const EdgeInsets.all(16),
             children: [
               // Playback (Drive preferred, Storage fallback) — button only
-              const Text('Playback',
-                  style: TextStyle(fontWeight: FontWeight.bold)),
+              Text(strings.playback, style: const TextStyle(fontWeight: FontWeight.bold)),
               const SizedBox(height: 8),
               Builder(
                 builder: (context) {
@@ -1713,30 +2002,28 @@ class LectureDetailScreen extends StatelessWidget {
                     if (!await launchUrl(uri,
                         mode: LaunchMode.externalApplication)) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Could not open link')),
+                        SnackBar(content: Text(strings.couldNotOpenLink)),
                       );
                     }
                   }
 
                   if (driveViewUrl.isNotEmpty) {
-                    return ElevatedButton.icon(
-                      icon: const Icon(Icons.open_in_new),
-                      label: const Text('Open in Google Drive'),
+                    return ElevatedButton(
                       onPressed: () => _open(driveViewUrl),
+                      child: Text(strings.openInGoogleDrive),
                     );
                   }
 
                   if (storageUrl.isNotEmpty) {
-                    return ElevatedButton.icon(
-                      icon: const Icon(Icons.link),
-                      label: const Text('Open from Firebase Storage'),
+                    return ElevatedButton(
                       onPressed: () => _open(storageUrl),
+                      child: Text(strings.openFromFirebaseStorage),
                     );
                   }
 
-                  return const Text(
-                    'No playback link available',
-                    style: TextStyle(color: Colors.black54),
+                  return Text(
+                    strings.noPlaybackLinkAvailable,
+                    style: const TextStyle(color: Colors.black54),
                   );
                 },
               ),
@@ -1745,16 +2032,14 @@ class LectureDetailScreen extends StatelessWidget {
 
               ListTile(
                 leading: const Icon(Icons.description),
-                title: const Text('Transcript status'),
+                title: Text(strings.transcriptStatus),
                 subtitle: Text(status),
               ),
 
               // Show “View transcript” when done (private fetch via callable)
               if (status == 'done') ...[
                 const SizedBox(height: 8),
-                ElevatedButton.icon(
-                  icon: const Icon(Icons.text_snippet),
-                  label: const Text('View transcript'),
+                ElevatedButton(
                   onPressed: () async {
                     try {
                       showDialog(
@@ -1771,14 +2056,14 @@ class LectureDetailScreen extends StatelessWidget {
                       Navigator.of(context).pop(); // close progress
                       if (full.isEmpty) {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Transcript is empty')),
+                          SnackBar(content: Text(strings.transcriptIsEmpty)),
                         );
                         return;
                       }
                       showDialog(
                         context: context,
                         builder: (_) => AlertDialog(
-                          title: const Text('Transcript'),
+                          title: Text(strings.transcript),
                           content: SizedBox(
                             width: double.maxFinite,
                             child: SingleChildScrollView(child: Text(full)),
@@ -1786,7 +2071,7 @@ class LectureDetailScreen extends StatelessWidget {
                           actions: [
                             TextButton(
                               onPressed: () => Navigator.pop(context),
-                              child: const Text('Close'),
+                              child: Text(strings.close),
                             ),
                           ],
                         ),
@@ -1800,18 +2085,19 @@ class LectureDetailScreen extends StatelessWidget {
                       showDialog(
                         context: context,
                         builder: (_) => AlertDialog(
-                          title: const Text('Transcript error'),
+                          title: Text(strings.transcriptError),
                           content: Text(msg),
                           actions: [
                             TextButton(
                               onPressed: () => Navigator.pop(context),
-                              child: const Text('OK'),
+                              child: Text(strings.ok),
                             ),
                           ],
                         ),
                       );
                     }
                   },
+                  child: Text(strings.viewTranscript),
                 ),
               ],
 
@@ -1819,7 +2105,7 @@ class LectureDetailScreen extends StatelessWidget {
               if (status == 'none' || status == 'error')
                 ElevatedButton.icon(
                   icon: const Icon(Icons.text_snippet_outlined),
-                  label: const Text('Request transcription'),
+                  label: Text(strings.requestTranscription),
                   onPressed: () async {
                     try {
                       await docRef.update({
@@ -1827,12 +2113,12 @@ class LectureDetailScreen extends StatelessWidget {
                         'transcriptStatus': 'pending',
                       });
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                            content: Text('Transcription requested.')),
+                        SnackBar(
+                            content: Text(strings.transcriptionRequested)),
                       );
                     } catch (e) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Failed: $e')),
+                        SnackBar(content: Text('${strings.failed}: $e')),
                       );
                     }
                   },
@@ -1841,81 +2127,71 @@ class LectureDetailScreen extends StatelessWidget {
               if (transcriptId != null)
                 ListTile(
                   leading: const Icon(Icons.article),
-                  title: const Text('Transcript (Google Drive)'),
-                  subtitle: Text('File ID: $transcriptId'),
+                  title: Text(strings.transcriptGoogleDrive),
+                  subtitle: Text('${strings.fileId}: $transcriptId'),
                 ),
 
               for (final id in subs)
                 ListTile(
                   leading: const Icon(Icons.subtitles),
-                  title: const Text('Subtitles (Google Drive)'),
-                  subtitle: Text('File ID: $id'),
+                  title: Text(strings.subtitlesGoogleDrive),
+                  subtitle: Text('${strings.fileId}: $id'),
                 ),
 
               const SizedBox(height: 24),
               const Divider(),
-              const Text('AI outputs',
-                  style: TextStyle(fontWeight: FontWeight.bold)),
+              Text(strings.aiOutputs, style: const TextStyle(fontWeight: FontWeight.bold)),
               const SizedBox(height: 8),
 
               _AiActionRow(
-                title: 'Generate Summary',
+                title: strings.generateSummary,
                 status: (m['summaryStatus'] ?? 'none').toString(),
                 onRequest: () async {
+                  final uid = fb.FirebaseAuth.instance.currentUser?.uid;
                   await FirebaseFirestore.instance.collection('aiJobs').add({
+                    'uid': uid,
                     'type': 'summary',
                     'recordingId': recordingId,
-                    'uid': fb.FirebaseAuth.instance.currentUser?.uid,
                     'status': 'pending',
                     'createdAt': DateTime.now().toIso8601String(),
                   });
                 },
+                recordingId: recordingId,
+                viewAiOutput: _viewAiOutput,
               ),
               _AiActionRow(
-                title: 'Generate Notes',
+                title: strings.generateNotes,
                 status: (m['notesStatus'] ?? 'none').toString(),
                 onRequest: () async {
+                  final uid = fb.FirebaseAuth.instance.currentUser?.uid;
                   await FirebaseFirestore.instance.collection('aiJobs').add({
+                    'uid': uid,
                     'type': 'notes',
                     'recordingId': recordingId,
-                    'uid': fb.FirebaseAuth.instance.currentUser?.uid,
                     'status': 'pending',
                     'createdAt': DateTime.now().toIso8601String(),
                   });
                 },
+                recordingId: recordingId,
+                viewAiOutput: _viewAiOutput,
               ),
               _AiActionRow(
-                title: 'Generate Practice Test',
+                title: strings.generatePracticeTest,
                 status: (m['quizStatus'] ?? 'none').toString(),
                 onRequest: () async {
+                  final uid = fb.FirebaseAuth.instance.currentUser?.uid;
                   await FirebaseFirestore.instance.collection('aiJobs').add({
+                    'uid': uid,
                     'type': 'quiz',
                     'recordingId': recordingId,
-                    'uid': fb.FirebaseAuth.instance.currentUser?.uid,
                     'status': 'pending',
                     'createdAt': DateTime.now().toIso8601String(),
                   });
                 },
+                recordingId: recordingId,
+                viewAiOutput: _viewAiOutput,
               ),
               const SizedBox(height: 8),
-              if ((m['summaryStatus'] ?? 'none').toString() == 'done')
-                ElevatedButton.icon(
-                  icon: const Icon(Icons.auto_awesome),
-                  label: const Text('View Summary'),
-                  onPressed: () => _viewAiOutput(context, recordingId, 'summary'),
-                ),
-              if ((m['notesStatus'] ?? 'none').toString() == 'done')
-                ElevatedButton.icon(
-                  icon: const Icon(Icons.notes),
-                  label: const Text('View Notes'),
-                  onPressed: () => _viewAiOutput(context, recordingId, 'notes'),
-                ),
-              if ((m['quizStatus'] ?? 'none').toString() == 'done')
-                ElevatedButton.icon(
-                  icon: const Icon(Icons.quiz),
-                  label: const Text('View Practice Test'),
-                  onPressed: () => _viewAiOutput(context, recordingId, 'quiz'),
-                ),
             ],
           ),
         );
@@ -1928,22 +2204,42 @@ class _AiActionRow extends StatelessWidget {
   final String title;
   final String status;
   final Future<void> Function() onRequest;
+  final String recordingId;
+  final Future<void> Function(BuildContext, String, String)? viewAiOutput;
 
   const _AiActionRow({
     required this.title,
     required this.status,
     required this.onRequest,
+    required this.recordingId,
+    this.viewAiOutput,
   });
+
+  String _typeFromTitle(String t) {
+    final lower = t.toLowerCase();
+    if (lower.contains('summary')) return 'summary';
+    if (lower.contains('notes')) return 'notes';
+    if (lower.contains('practice') || lower.contains('quiz')) return 'quiz';
+    return '';
+  }
 
   @override
   Widget build(BuildContext context) {
+    final type = _typeFromTitle(title);
+    final strings = SBStrings.of(context);
     return ListTile(
       leading: const Icon(Icons.auto_awesome),
       title: Text(title),
-      subtitle: Text('Status: $status'),
+      subtitle: Text('${strings.status}: $status'),
       trailing: ElevatedButton(
-        onPressed: (status == 'none' || status == 'error') ? onRequest : null,
-        child: const Text('Request'),
+        onPressed: (status == 'none' || status == 'error')
+            ? onRequest
+            : (status == 'done' && viewAiOutput != null && type.isNotEmpty
+            ? () => viewAiOutput!(context, recordingId, type)
+            : null),
+        child: Text(
+          (status == 'done') ? strings.view : strings.request,
+        ),
       ),
     );
   }
@@ -1952,15 +2248,135 @@ class _AiActionRow extends StatelessWidget {
 // --------------------
 // Settings (Additive)
 // --------------------
+
+// (imports moved to top-level; removed duplicate local imports)
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
+
   @override
   Widget build(BuildContext context) {
+    final user = fb.FirebaseAuth.instance.currentUser;
+
+    final strings = SBStrings.of(context);
     return Scaffold(
-      appBar: AppBar(title: const Text('Settings')),
-      body: const Center(
-        child: Text(
-            'Global toggles coming next (auto-transcribe, auto-generate, etc.)'),
+      appBar: AppBar(title: Text(strings.settings)),
+      body: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            if (user != null) ...[
+              CircleAvatar(
+                radius: 50,
+                backgroundImage:
+                user.photoURL != null ? NetworkImage(user.photoURL!) : null,
+                child: user.photoURL == null
+                    ? const Icon(Icons.person, size: 50)
+                    : null,
+              ),
+              const SizedBox(height: 12),
+              Text(
+                user.displayName ?? strings.unknownUser,
+                style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+              Text(
+                user.email ?? '',
+                style: const TextStyle(color: Colors.black54),
+              ),
+              const Divider(height: 40),
+            ],
+            // Language picker
+            Row(
+              children: [
+                Text('${strings.language}:', style: const TextStyle(fontWeight: FontWeight.bold)),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: DropdownButton<Locale>(
+                    value: appLocale.value,
+                    isExpanded: true,
+                    items: SBStrings.supportedLocales
+                        .map((l) => DropdownMenuItem(
+                      value: l,
+                      child: Text(SBStrings.localeNames[l.languageCode] ?? l.languageCode),
+                    ))
+                        .toList(),
+                    onChanged: (val) async {
+                      if (val == null) return;
+                      appLocale.value = val;
+                      final u = fb.FirebaseAuth.instance.currentUser;
+                      if (u != null) {
+                        await FirebaseFirestore.instance.collection('users').doc(u.uid).set(
+                          {'locale': val.languageCode},
+                          SetOptions(merge: true),
+                        );
+                      }
+                    },
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            SwitchListTile(
+              title: Text(strings.autoTranscribeAfterUpload),
+              value: false,
+              onChanged: (v) {},
+            ),
+            SwitchListTile(
+              title: Text(strings.autoGenerateNotes),
+              value: false,
+              onChanged: (v) {},
+            ),
+            // Insert Academic Settings button here
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const AcademicSettingsScreen()),
+                );
+              },
+              child: Text(SBStrings.of(context).academicSettingsTitle),
+            ),
+            const Spacer(),
+            ElevatedButton.icon(
+              onPressed: () async {
+                try {
+                  // Sign out from Firebase Auth
+                  await fb.FirebaseAuth.instance.signOut();
+
+                  // Also clear cached GoogleSignIn session
+                  final gsi = GoogleSignIn(scopes: [drive.DriveApi.driveFileScope, 'email']);
+                  GoogleSignInAccount? acc = await gsi.signInSilently();
+                  if (acc != null) {
+                    try { await gsi.signOut(); } catch (_) {}
+                    try { await gsi.disconnect(); } catch (_) {}
+                  }
+
+                  if (context.mounted) {
+                    Navigator.of(context).pushAndRemoveUntil(
+                      MaterialPageRoute(builder: (_) => const LoginPage()),
+                          (_) => false,
+                    );
+                  }
+                } catch (_) {
+                  if (context.mounted) {
+                    Navigator.of(context).pushAndRemoveUntil(
+                      MaterialPageRoute(builder: (_) => const LoginPage()),
+                          (_) => false,
+                    );
+                  }
+                }
+              },
+              icon: const Icon(Icons.logout),
+              label: Text(strings.logout),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red,
+                foregroundColor: Colors.white,
+                minimumSize: const Size.fromHeight(48),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -1981,11 +2397,19 @@ class _GoogleAuthClient extends http.BaseClient {
 
   void close() => _client.close();
 }
+
+// -----------------------------
+// MULTILINGUAL TRANSLATION FIX
+// -----------------------------
+
+
 // --------- FIREBASE STORAGE: Transcripts and Profile Images ---------
 
 // Example: Upload transcript file to Storage under /transcripts/{uid}/
 Future<String> uploadTranscriptFile(File transcriptFile, String filename) async {
   final uid = fb.FirebaseAuth.instance.currentUser!.uid;
+  final storagePath = 'transcripts/$uid/$filename';
+  _log('Uploading transcript to path=$storagePath');
   final ref = FirebaseStorage.instance
       .ref()
       .child('transcripts')
@@ -2002,6 +2426,8 @@ Future<String> uploadTranscriptFile(File transcriptFile, String filename) async 
 // Example: Upload profile image to Storage under /profile_pics/{uid}/
 Future<String> uploadProfileImage(File imageFile, String filename) async {
   final uid = fb.FirebaseAuth.instance.currentUser!.uid;
+  final storagePath = 'profile_pics/$uid/$filename';
+  _log('Uploading profile image to path=$storagePath');
   final ref = FirebaseStorage.instance
       .ref()
       .child('profile_pics')
@@ -2018,6 +2444,8 @@ Future<String> uploadProfileImage(File imageFile, String filename) async {
 // Upload profile image to /profile_images/{uid}/{filename} with contentType image/jpeg
 Future<String> uploadProfileImageV2(File imageFile, String filename) async {
   final uid = fb.FirebaseAuth.instance.currentUser!.uid;
+  final storagePath = 'profile_images/$uid/$filename';
+  _log('Uploading profile image V2 to path=$storagePath');
   final ref = FirebaseStorage.instance
       .ref()
       .child('profile_images')
@@ -2034,6 +2462,8 @@ Future<String> uploadProfileImageV2(File imageFile, String filename) async {
 // Upload user photo to /user_photos/{uid}/{filename} with contentType image/jpeg
 Future<String> uploadUserPhoto(File imageFile, String filename) async {
   final uid = fb.FirebaseAuth.instance.currentUser!.uid;
+  final storagePath = 'user_photos/$uid/$filename';
+  _log('Uploading user photo to path=$storagePath');
   final ref = FirebaseStorage.instance
       .ref()
       .child('user_photos')
@@ -2046,3 +2476,6 @@ Future<String> uploadUserPhoto(File imageFile, String filename) async {
   await task;
   return await ref.getDownloadURL();
 }
+// ------------------------
+// Localization strings
+// ------------------------

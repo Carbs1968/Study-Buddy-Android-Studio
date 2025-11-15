@@ -1,0 +1,54 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(uid) {
+      return isSignedIn() && request.auth.uid == uid;
+    }
+
+    // ✅ User profiles
+    match /users/{userId} {
+      allow read, write: if isOwner(userId);
+
+      // ✅ Academic Settings
+      allow update: if isOwner(userId)
+        && (
+          !('academicSettings' in request.resource.data.diff(resource.data).affectedKeys())
+          || request.resource.data.keys().hasAll(['academicSettings'])
+        );
+
+      // ✅ Recordings
+      match /recordings/{docId} {
+        allow create: if isOwner(userId) &&
+          request.resource.data.uid == request.auth.uid;
+        allow get, list: if isOwner(userId);
+        allow update, delete: if isOwner(userId) &&
+          resource.data.uid == request.auth.uid;
+      }
+    }
+
+    // ✅ Legacy Users (uppercase)
+    match /Users/{userId} {
+      allow read, write: if isOwner(userId);
+    }
+
+    // ✅ AI Jobs
+    match /aiJobs/{docId} {
+      allow create: if isSignedIn() &&
+        request.resource.data.uid == request.auth.uid &&
+        request.resource.data.type in ['summary', 'notes', 'quiz'] &&
+        request.resource.data.recordingId is string;
+      allow read, update, delete: if isSignedIn() &&
+        resource.data.uid == request.auth.uid;
+    }
+
+    // 🚫 Default deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

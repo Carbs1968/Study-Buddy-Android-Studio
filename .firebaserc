@@ -1,5 +1,15 @@
 {
   "projects": {
     "default": "study-buddy-dev-25a7a"
-  }
+  },
+  "targets": {
+    "study-buddy-dev-25a7a": {
+      "storage": {
+        "rules": [
+          "study-buddy-dev-25a7a.firebasestorage.app"
+        ]
+      }
+    }
+  },
+  "etags": {}
 }
