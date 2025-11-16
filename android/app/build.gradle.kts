@@ -44,7 +44,7 @@ println("📦 Using versionName=$resolvedVersionName  versionCode=$resolvedVersi
 android {
     namespace = "com.carbs.studybuddy.study_buddy"
 
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.carbs.studybuddy.study_buddy"
@@ -56,26 +56,33 @@ android {
     }
 
     signingConfigs {
-        create("release") {
-            val alias = keystoreProperties["keyAlias"]?.toString()
-                ?: throw GradleException("Missing keyAlias in key.properties")
-            val keyPass = keystoreProperties["keyPassword"]?.toString()
-                ?: throw GradleException("Missing keyPassword in key.properties")
-            val storePath = keystoreProperties["storeFile"]?.toString()
-                ?: throw GradleException("Missing storeFile in key.properties")
-            val storePass = keystoreProperties["storePassword"]?.toString()
-                ?: throw GradleException("Missing storePassword in key.properties")
+        if (keystorePropertiesFile.exists()) {
+            create("release") {
+                val alias = keystoreProperties["keyAlias"]?.toString()
+                    ?: throw GradleException("Missing keyAlias in key.properties")
+                val keyPass = keystoreProperties["keyPassword"]?.toString()
+                    ?: throw GradleException("Missing keyPassword in key.properties")
+                val storePath = keystoreProperties["storeFile"]?.toString()
+                    ?: throw GradleException("Missing storeFile in key.properties")
+                val storePass = keystoreProperties["storePassword"]?.toString()
+                    ?: throw GradleException("Missing storePassword in key.properties")
 
-            keyAlias = alias
-            keyPassword = keyPass
-            storeFile = file(storePath)
-            storePassword = storePass
+                keyAlias = alias
+                keyPassword = keyPass
+                storeFile = file(storePath)
+                storePassword = storePass
+            }
         }
     }
 
     buildTypes {
         release {
-            signingConfig = signingConfigs.getByName("release")
+            if (keystorePropertiesFile.exists()) {
+                signingConfig = signingConfigs.getByName("release")
+            }
+            else {
+                signingConfig = signingConfigs.getByName("debug")
+            }
             isMinifyEnabled = false
             isShrinkResources = false
             proguardFiles(
@@ -83,8 +90,9 @@ android {
                 "proguard-rules.pro"
             )
         }
-        debug { /* defaults */ }
+        debug { }
     }
+
 
 
     compileOptions {

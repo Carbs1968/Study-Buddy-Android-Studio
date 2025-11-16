@@ -25,7 +25,7 @@ dependencies:
 
   # State & utils
   provider: ^6.1.2
-  intl: ^0.19.0
+  intl: ^0.20.2
   wakelock_plus: ^1.2.5
 
   # Google Sign-in + Drive
@@ -56,6 +56,7 @@ dependency_overrides:
 
 flutter:
   uses-material-design: true
+  generate: true
   assets:
     - assets/icons/app_icon.png
 
@@ -67,9 +68,9 @@ flutter_icons:
   adaptive_icon_background: "#FFFFFF"
   adaptive_icon_foreground: "assets/icons/app_icon.png"
 
-flutter_intl:
-  enabled: true
-  arb_dir: lib/l10n
-  template_arbs:
-    - app_en.arb
-  output_dir: lib/l10n
+#flutter_intl:
+#  enabled: true
+#  arb_dir: lib/l10n
+#  template_arbs:
+#    - app_en.arb
+#  output_dir: lib/l10n
