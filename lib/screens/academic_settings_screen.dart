@@ -28,6 +28,7 @@ class _AcademicSettingsScreenState extends State<AcademicSettingsScreen> {
   Future<void> _loadSettings() async {
     final user = fb.FirebaseAuth.instance.currentUser;
     if (user == null) return;
+
     final docRef = FirebaseFirestore.instance
         .collection('users')
         .doc(user.uid)
@@ -35,13 +36,44 @@ class _AcademicSettingsScreenState extends State<AcademicSettingsScreen> {
         .doc('current');
 
     final doc = await docRef.get();
+
     if (doc.exists) {
       final data = doc.data()!;
-      setState(() {
-        _selectedLevel = data['levelName'];
-        _selectedTerm = data['termName'];
-      });
+      String? level = data['levelName'];
+      String? term = data['termName'];
+
+      bool invalid = false;
+
+      // Check validity for level
+      if (level != null && _levels.contains(level)) {
+        _selectedLevel = level;
+      } else {
+        invalid = true;
+        _selectedLevel = null; // do NOT select invalid value
+      }
+
+      // Check validity for term
+      if (term != null && _terms.contains(term)) {
+        _selectedTerm = term;
+      } else {
+        invalid = true;
+        _selectedTerm = null; // do NOT select invalid value
+      }
+
+      if (invalid && mounted) {
+        // Show alert/snackbar for incorrect academic values
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text(
+                'Your saved academic values are incorrect. Please re-select.',
+              ),
+            ),
+          );
+        });
+      }
     }
+
     setState(() => _loading = false);
   }
 
