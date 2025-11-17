@@ -15,8 +15,6 @@ import '../l10n/strings.dart';
 import '../utils/app_logger.dart';
 import '../utils/utils.dart';
 
-// ✅ Single Functions handle (same app-wide region as your backend)
-late FirebaseFunctions functions;
 
 class LectureDetailScreen extends StatelessWidget {
   final String recordingId;
@@ -444,13 +442,25 @@ class LectureDetailScreen extends StatelessWidget {
                 status: (m['summaryStatus'] ?? 'none').toString(),
                 onRequest: () async {
                   final uid = FirebaseAuth.instance.currentUser?.uid;
-                  await FirebaseFirestore.instance.collection('aiJobs').add({
-                    'uid': uid,
-                    'type': 'summary',
-                    'recordingId': recordingId,
-                    'status': 'pending',
-                    'createdAt': DateTime.now().toIso8601String(),
-                  });
+                  debugPrint("::::::${uid}");
+                  try {
+                    await FirebaseFirestore.instance.collection('aiJobs').add({
+                      'uid': uid,
+                      'type': 'summary',
+                      'recordingId': recordingId,
+                      'status': 'pending',
+                      'createdAt': DateTime.now().toIso8601String(),
+                    });
+                    debugPrint('Document successfully written!');
+                  } on FirebaseException catch (e) {
+                    debugPrint('Error writing document: ${e.code} - ${e.message}');
+                    // Handle specific FirebaseException codes, e.g., permission-denied
+                    if (e.code == 'permission-denied') {
+                      // Show a user-friendly message or log the error
+                    }
+                  } catch (e) {
+                    debugPrint('An unexpected error occurred: $e');
+                  }
                 },
                 recordingId: recordingId,
                 viewAiOutput: _viewAiOutput,

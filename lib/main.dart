@@ -21,6 +21,7 @@ import 'package:firebase_auth/firebase_auth.dart' as fb;
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:cloud_functions/cloud_functions.dart'; // ✅ NEW
 import 'package:firebase_app_check/firebase_app_check.dart';
+import 'package:study_buddy/utils/utils.dart';
 
 // --------------------
 // Local project imports
@@ -57,8 +58,8 @@ Future<void> _ensureFirebaseReady() async {
   }
 }
 
-// ✅ Single Functions handle (same app-wide region as your backend)
-late FirebaseFunctions functions;
+// // ✅ Single Functions handle (same app-wide region as your backend)
+// late FirebaseFunctions functions;
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
