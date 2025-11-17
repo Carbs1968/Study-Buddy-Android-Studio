@@ -50,7 +50,10 @@ class _HomeShellState extends State<HomeShell> {
   Widget build(BuildContext context) {
     final strings = SBStrings.of(context);
     return Scaffold(
-      body: _tabs[_tab],
+      body: IndexedStack(
+        index: _tab,
+        children: _tabs,
+      ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _tab,
         onTap: (i) => setState(() => _tab = i),

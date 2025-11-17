@@ -384,6 +384,7 @@ class _RecorderPageState extends State<RecorderPage> {
       return;
     }
     final uid = user.uid;
+    final email = user.email!;
 
     final createdAt = DateTime.now();
     final filename = path.basename(_filePath!);
@@ -408,7 +409,7 @@ class _RecorderPageState extends State<RecorderPage> {
 
     // Upload to Firebase Storage using the new helper
     try {
-      await uploadRecording(fileOnDisk, uid);
+      await uploadRecording(fileOnDisk, uid, email);
     } catch (e) {
       appLogger('Firebase upload failed for path=recordings/$uid/$filename: $e');
       if (mounted) {
@@ -511,7 +512,7 @@ class _RecorderPageState extends State<RecorderPage> {
     }
   }
 
-  Future<void> uploadRecording(File file, String uid) async {
+  Future<void> uploadRecording(File file, String uid, String email) async {
     // Ensure Firebase initialized and user authenticated
     if (Firebase.apps.isEmpty) {
       await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
@@ -521,12 +522,12 @@ class _RecorderPageState extends State<RecorderPage> {
 
     // We no longer read or use academic level/term for building the storage path.
     // This restores the original upload structure where files are stored directly
-    // under recordings/{uid}/{filename}. Reading academic settings can be added
+    // under recordings/{email}/{filename}. Reading academic settings can be added
     // separately without influencing the storage path.
 
     final fileName = path.basename(file.path);
     // Upload under recordings/{uid}/{fileName} with no intermediate level/term.
-    final storagePath = "recordings/$uid/$fileName";
+    final storagePath = "recordings/$email/$fileName";
     appLogger("Uploading to Firebase Storage path=$storagePath");
 
     final storageRef = FirebaseStorage.instance.ref().child(storagePath);
