@@ -1,6 +1,3 @@
-// --------------------------------------
-// Class Lectures (drilldown per class)
-// --------------------------------------
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -10,7 +7,11 @@ import 'lecture_detail_screen.dart';
 
 class ClassLecturesScreen extends StatefulWidget {
   final String className;
-  const ClassLecturesScreen({super.key, required this.className});
+
+  const ClassLecturesScreen({
+    super.key,
+    required this.className,
+  });
 
   @override
   State<ClassLecturesScreen> createState() => _ClassLecturesScreenState();
@@ -28,18 +29,20 @@ class _ClassLecturesScreenState extends State<ClassLecturesScreen> {
   @override
   Widget build(BuildContext context) {
     final uid = FirebaseAuth.instance.currentUser?.uid;
+    final strings = SBStrings.of(context);
+
     if (uid == null) {
-      return Scaffold(body: Center(child: Text(SBStrings.of(context).notSignedIn)));
+      return Scaffold(
+        body: Center(child: Text(strings.notSignedIn)),
+      );
     }
 
-    // Filter at source: only this class + this user
     final q = FirebaseFirestore.instance
         .collection('users')
         .doc(uid)
-        .collection('recordings')
+        .collection('sessions')
         .where('className', isEqualTo: widget.className);
 
-    final strings = SBStrings.of(context);
     return Scaffold(
       appBar: AppBar(title: Text(widget.className)),
       body: Column(
@@ -56,12 +59,13 @@ class _ClassLecturesScreenState extends State<ClassLecturesScreen> {
             ),
           ),
           Expanded(
-            child: StreamBuilder<QuerySnapshot>(
+            child: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
               stream: q.snapshots(),
               builder: (ctx, snap) {
                 if (snap.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
                 }
+
                 if (snap.hasError) {
                   return Center(
                     child: Padding(
@@ -76,20 +80,17 @@ class _ClassLecturesScreenState extends State<ClassLecturesScreen> {
 
                 var docs = (snap.data?.docs ?? []).toList();
 
-                // Filter by topic (safe reads)
                 docs = docs.where((d) {
-                  final m = (d.data() as Map<String, dynamic>?) ?? const {};
-                  final top = (m['topic'] ?? '').toString().toLowerCase();
+                  final m = d.data();
+                  final topic = (m['topic'] ?? '').toString().toLowerCase();
                   if (_search.isEmpty) return true;
-                  return top.contains(_search);
+                  return topic.contains(_search);
                 }).toList();
 
-                // Sort newest first
                 docs.sort((a, b) {
-                  final ma = (a.data() as Map<String, dynamic>?) ?? const {};
-                  final mb = (b.data() as Map<String, dynamic>?) ?? const {};
-                  final da = _toDt(ma['createdAt']);
-                  final db = _toDt(mb['createdAt']);
+                  final da = _toDt(a.data()['createdAt']);
+                  final db = _toDt(b.data()['createdAt']);
+
                   if (da == null && db == null) return 0;
                   if (da == null) return 1;
                   if (db == null) return -1;
@@ -105,30 +106,41 @@ class _ClassLecturesScreenState extends State<ClassLecturesScreen> {
                   separatorBuilder: (_, __) => const Divider(height: 1),
                   itemBuilder: (ctx, i) {
                     final d = docs[i];
-                    final m = (d.data() as Map<String, dynamic>?) ?? const {};
-                    final title =
-                        '${(m['className'] ?? '').toString()} — ${(m['topic'] ?? '').toString()}';
+                    final m = d.data();
 
-                    final created = m['createdAt'];
-                    final dt = created is String
-                        ? DateTime.tryParse(created)
-                        : (created is Timestamp ? created.toDate() : null);
-
+                    final className = (m['className'] ?? '').toString();
+                    final topic = (m['topic'] ?? '').toString();
+                    final levelName = (m['levelName'] ?? '').toString();
+                    final semesterName = (m['semesterName'] ?? '').toString();
                     final status = (m['transcriptStatus'] ?? 'none').toString();
 
+                    final dt = _toDt(m['createdAt']);
+
+                    final subtitleParts = <String>[];
+                    if (levelName.isNotEmpty) subtitleParts.add(levelName);
+                    if (semesterName.isNotEmpty) subtitleParts.add(semesterName);
+                    if (dt != null) subtitleParts.add(dt.toLocal().toString());
+                    subtitleParts.add('${strings.transcript}: $status');
+
                     return ListTile(
-                      leading: const Icon(Icons.audiotrack),
-                      title: Text(title,
-                          maxLines: 1, overflow: TextOverflow.ellipsis),
+                      leading: const Icon(Icons.library_music),
+                      title: Text(
+                        '$className — $topic',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                       subtitle: Text(
-                        '${dt != null ? dt.toLocal().toString() : ''} • ${strings.transcript}: $status',
+                        subtitleParts.join(' • '),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
                       ),
                       trailing: const Icon(Icons.chevron_right),
                       onTap: () {
-                        Navigator.of(context).push(MaterialPageRoute(
-                          builder: (_) =>
-                              LectureDetailScreen(recordingId: d.id),
-                        ));
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => LectureDetailScreen(sessionId: d.id),
+                          ),
+                        );
                       },
                     );
                   },

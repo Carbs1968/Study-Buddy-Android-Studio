@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart' as fb;
+
 import '../l10n/strings.dart';
 
 class AcademicSettingsScreen extends StatefulWidget {
@@ -11,11 +12,9 @@ class AcademicSettingsScreen extends StatefulWidget {
 }
 
 class _AcademicSettingsScreenState extends State<AcademicSettingsScreen> {
-  final _levels = ['High School', 'Undergraduate', 'Graduate', 'Doctorate'];
-  final _terms = ['Spring', 'Summer', 'Fall', 'Winter'];
+  final TextEditingController _levelCtl = TextEditingController();
+  final TextEditingController _semesterCtl = TextEditingController();
 
-  String? _selectedLevel;
-  String? _selectedTerm;
   bool _saving = false;
   bool _loading = true;
 
@@ -25,95 +24,97 @@ class _AcademicSettingsScreenState extends State<AcademicSettingsScreen> {
     _loadSettings();
   }
 
+  @override
+  void dispose() {
+    _levelCtl.dispose();
+    _semesterCtl.dispose();
+    super.dispose();
+  }
+
   Future<void> _loadSettings() async {
     final user = fb.FirebaseAuth.instance.currentUser;
-    if (user == null) return;
-
-    final docRef = FirebaseFirestore.instance
-        .collection('users')
-        .doc(user.uid)
-        .collection('academicSettings')
-        .doc('current');
-
-    final doc = await docRef.get();
-
-    if (doc.exists) {
-      final data = doc.data()!;
-      String? level = data['levelName'];
-      String? term = data['termName'];
-
-      bool invalid = false;
-
-      // Check validity for level
-      if (level != null && _levels.contains(level)) {
-        _selectedLevel = level;
-      } else {
-        invalid = true;
-        _selectedLevel = null; // do NOT select invalid value
-      }
-
-      // Check validity for term
-      if (term != null && _terms.contains(term)) {
-        _selectedTerm = term;
-      } else {
-        invalid = true;
-        _selectedTerm = null; // do NOT select invalid value
-      }
-
-      if (invalid && mounted) {
-        // Show alert/snackbar for incorrect academic values
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text(
-                'Your saved academic values are incorrect. Please re-select.',
-              ),
-            ),
-          );
-        });
-      }
+    if (user == null) {
+      if (mounted) setState(() => _loading = false);
+      return;
     }
 
-    setState(() => _loading = false);
+    try {
+      final docRef = FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .collection('academicSettings')
+          .doc('current');
+
+      final doc = await docRef.get();
+
+      if (doc.exists) {
+        final data = doc.data()!;
+        _levelCtl.text = (data['levelName'] ?? '').toString();
+        _semesterCtl.text = (data['semesterName'] ?? data['termName'] ?? '').toString();
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to load academic settings: $e')),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _loading = false);
+    }
   }
 
   Future<void> _saveSettings() async {
     final user = fb.FirebaseAuth.instance.currentUser;
     if (user == null) return;
 
-    if (_selectedLevel == null || _selectedTerm == null) {
+    final levelName = _levelCtl.text.trim();
+    final semesterName = _semesterCtl.text.trim();
+
+    if (levelName.isEmpty || semesterName.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select both Level and Term.')),
+        const SnackBar(
+          content: Text('Please enter both academic level and semester.'),
+        ),
       );
       return;
     }
 
     setState(() => _saving = true);
 
-    final docRef = FirebaseFirestore.instance
-        .collection('users')
-        .doc(user.uid)
-        .collection('academicSettings')
-        .doc('current');
+    try {
+      final docRef = FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .collection('academicSettings')
+          .doc('current');
 
-    await docRef.set({
-      'levelName': _selectedLevel,
-      'termName': _selectedTerm,
-      'isActive': true,
-      'updatedAt': FieldValue.serverTimestamp(),
-    }, SetOptions(merge: true));
+      await docRef.set({
+        'levelName': levelName,
+        'semesterName': semesterName,
+        'isActive': true,
+        'updatedAt': FieldValue.serverTimestamp(),
+      }, SetOptions(merge: true));
 
-    setState(() => _saving = false);
+      if (!mounted) return;
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Academic settings saved successfully.')),
-    );
-    Navigator.pop(context);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Academic settings saved successfully.')),
+      );
+      Navigator.pop(context);
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to save academic settings: $e')),
+      );
+    } finally {
+      if (mounted) setState(() => _saving = false);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final strings = SBStrings.of(context);
+
     return Scaffold(
       appBar: AppBar(
         title: Text(strings.academicSettingsTitle),
@@ -127,43 +128,48 @@ class _AcademicSettingsScreenState extends State<AcademicSettingsScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              strings.selectAcademicLevel,
+              'Academic level / year',
               style: Theme.of(context).textTheme.titleLarge,
             ),
             const SizedBox(height: 8),
-            DropdownButtonFormField<String>(
-              value: _selectedLevel,
-              items: _levels
-                  .map((level) => DropdownMenuItem(
-                value: level,
-                child: Text(level),
-              ))
-                  .toList(),
+            TextField(
+              controller: _levelCtl,
+              textInputAction: TextInputAction.next,
               decoration: const InputDecoration(
                 border: OutlineInputBorder(),
-                hintText: 'Select Level',
+                hintText: 'Examples: Senior, Prepa, Primaria, Year 2',
               ),
-              onChanged: (val) => setState(() => _selectedLevel = val),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Enter the level or year exactly how it makes sense in your school system.',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: Colors.black54,
+              ),
             ),
             const SizedBox(height: 24),
             Text(
-              strings.selectTerm,
+              'Current semester / term',
               style: Theme.of(context).textTheme.titleLarge,
             ),
             const SizedBox(height: 8),
-            DropdownButtonFormField<String>(
-              value: _selectedTerm,
-              items: _terms
-                  .map((term) => DropdownMenuItem(
-                value: term,
-                child: Text(term),
-              ))
-                  .toList(),
+            TextField(
+              controller: _semesterCtl,
+              textInputAction: TextInputAction.done,
               decoration: const InputDecoration(
                 border: OutlineInputBorder(),
-                hintText: 'Select Term',
+                hintText: 'Examples: Fall 2026, 5to semestre, Term 1',
               ),
-              onChanged: (val) => setState(() => _selectedTerm = val),
+              onSubmitted: (_) {
+                if (!_saving) _saveSettings();
+              },
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Enter the semester, trimester, term, or period you are currently in.',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: Colors.black54,
+              ),
             ),
             const SizedBox(height: 40),
             SizedBox(

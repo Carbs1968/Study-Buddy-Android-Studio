@@ -8,60 +8,36 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:google_sign_in/google_sign_in.dart';
+import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
 import 'package:record/record.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
-
-import 'package:googleapis/drive/v3.dart' as drive;
-import 'package:http/http.dart' as http;
-import 'package:path/path.dart' as path;
 
 import '../../../firebase_options.dart';
 import '../../../l10n/strings.dart';
 import '../../../utils/app_logger.dart';
 import '../../../utils/helper.dart';
-import '../../login_screen.dart';
 
 // Android service channel for foreground recording
 const _recSvc = MethodChannel('study_buddy/recorder_service');
 
-
-// OUTSIDE the State class: small HTTP client wrapper for Google APIs.
-class _GoogleAuthClient extends http.BaseClient {
-  final Map<String, String> _headers;
-  final http.Client _client = http.Client();
-
-  _GoogleAuthClient(this._headers);
-
-  @override
-  Future<http.StreamedResponse> send(http.BaseRequest request) {
-    request.headers.addAll(_headers);
-    return _client.send(request);
-  }
-
-  void close() => _client.close();
-}
-
 class RecorderPage extends StatefulWidget {
   const RecorderPage({super.key});
+
   @override
   State<RecorderPage> createState() => _RecorderPageState();
 }
 
 class _RecorderPageState extends State<RecorderPage> {
-  // Focus node for topic field
   final FocusNode _topicFocus = FocusNode();
 
-  // Tracks if user selected from dropdown (existing class)
   bool _selectedExistingClass = false;
 
-  // Controllers
   final TextEditingController _classCtl = TextEditingController();
   final TextEditingController _topicCtl = TextEditingController();
 
-  // Recording state
   final AudioRecorder _recorder = AudioRecorder();
+
   Timer? _ticker;
   String? _filePath;
   bool _isRecording = false;
@@ -69,20 +45,16 @@ class _RecorderPageState extends State<RecorderPage> {
   bool _recordingComplete = false;
   int _elapsedSeconds = 0;
 
-  // Re-enable service by default (baseline behavior). Set to true only for debugging.
   static const bool _debugForcePluginRecorder = false;
 
-  // Upload state
   bool _isUploading = false;
-  double? _uploadProgress; // 0..1 or null for indeterminate
-  String? _uploadPhase; // 'Firebase' | 'Google Drive'
+  double? _uploadProgress;
+  String? _uploadPhase;
 
-  // Google Sign-In (kept here so Drive calls can reuse silently)
-  final GoogleSignIn _gsi = GoogleSignIn(
-    scopes: [drive.DriveApi.driveFileScope, 'email'],
-  );
+  bool _isLoadingAcademicSettings = true;
+  String? _levelName;
+  String? _semesterName;
 
-  // UI strings (now localized)
   String get _titleText {
     final strings = SBStrings.of(context);
     if (_recordingComplete) return strings.recordingComplete;
@@ -94,49 +66,34 @@ class _RecorderPageState extends State<RecorderPage> {
 
   String get _helperText {
     final strings = SBStrings.of(context);
+    if (_isLoadingAcademicSettings) return 'Loading...';
     if (_isUploading) return strings.uploading;
     if (_recordingComplete) return strings.chooseUploadOrDiscard;
     if (_isRecording && _isPaused) return strings.recordingPaused;
     if (_isRecording) return strings.tapRedToStop;
-    return strings.enterClassAndTopic;
+    return '';
   }
 
   bool get _isReadyToRecord =>
-      !_isRecording &&
+      !_isLoadingAcademicSettings &&
+          !_isRecording &&
+          (_levelName?.trim().isNotEmpty ?? false) &&
+          (_semesterName?.trim().isNotEmpty ?? false) &&
           _classCtl.text.trim().isNotEmpty &&
           _topicCtl.text.trim().isNotEmpty;
-
-  // Fetch distinct class names from Firestore for this user
-  Future<List<String>> _fetchClassNames() async {
-    final uid = FirebaseAuth.instance.currentUser?.uid;
-
-    if (uid == null) return [];
-    final snap = await FirebaseFirestore.instance
-        .collection('users')
-        .doc(uid)
-        .collection('recordings')
-        .get();
-
-
-    final classes = snap.docs
-        .map((d) => (d['className'] ?? '').toString().trim())
-        .where((s) => s.isNotEmpty)
-        .toSet()
-        .toList()
-      ..sort();
-    return classes;
-  }
 
   @override
   void initState() {
     super.initState();
     _classCtl.addListener(_recomputeReady);
     _topicCtl.addListener(_recomputeReady);
+    _loadAcademicSettings();
   }
 
   @override
   void dispose() {
     _ticker?.cancel();
+    _topicFocus.dispose();
     _classCtl.dispose();
     _topicCtl.dispose();
     super.dispose();
@@ -146,37 +103,91 @@ class _RecorderPageState extends State<RecorderPage> {
     if (mounted) setState(() {});
   }
 
-  Future<void> _logout() async {
+  Future<void> _loadAcademicSettings() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      if (mounted) {
+        setState(() => _isLoadingAcademicSettings = false);
+      }
+      return;
+    }
+
     try {
-      await FirebaseAuth.instance.signOut();
-      try {
-        final acc = await _gsi.signInSilently();
-        if (acc != null) {
-          await _gsi.signOut();
-          try {
-            await _gsi.disconnect();
-          } catch (_) {}
-        }
-      } catch (_) {}
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Logged out')),
-      );
-      Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(builder: (_) => const LoginScreen()),
-            (_) => false,
-      );
-    } catch (_) {}
+      final doc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .collection('academicSettings')
+          .doc('current')
+          .get();
+
+      final data = doc.data();
+      if (mounted) {
+        setState(() {
+          _levelName = (data?['levelName'] ?? '').toString().trim();
+          _semesterName = (data?['semesterName'] ?? '').toString().trim();
+          _isLoadingAcademicSettings = false;
+        });
+      }
+    } catch (e) {
+      appLogger('Failed to load academic settings: $e');
+      if (mounted) {
+        setState(() => _isLoadingAcademicSettings = false);
+      }
+    }
   }
 
-  // ---------------- Recording controls ----------------
+  Future<bool> _ensureAcademicSettingsReady() async {
+    if ((_levelName?.trim().isNotEmpty ?? false) &&
+        (_semesterName?.trim().isNotEmpty ?? false)) {
+      return true;
+    }
 
-  /// Polls for file existence & growth to confirm a recorder actually started.
-  Future<bool> _confirmFileAppearsAndGrows(String path,
-      {Duration timeout = const Duration(seconds: 3)}) async {
+    await _loadAcademicSettings();
+
+    final ok = (_levelName?.trim().isNotEmpty ?? false) &&
+        (_semesterName?.trim().isNotEmpty ?? false);
+
+    if (!ok && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Please save your academic level and semester first in Academic Settings.',
+          ),
+        ),
+      );
+    }
+
+    return ok;
+  }
+
+  Future<List<String>> _fetchClassNames() async {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid == null) return [];
+
+    final snap = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(uid)
+        .collection('sessions')
+        .get();
+
+    final classes = snap.docs
+        .map((d) => (d.data()['className'] ?? '').toString().trim())
+        .where((s) => s.isNotEmpty)
+        .toSet()
+        .toList()
+      ..sort();
+
+    return classes;
+  }
+
+  Future<bool> _confirmFileAppearsAndGrows(
+      String path, {
+        Duration timeout = const Duration(seconds: 3),
+      }) async {
     final f = File(path);
     final start = DateTime.now();
     int lastLen = -1;
+
     while (DateTime.now().difference(start) < timeout) {
       if (await f.exists()) {
         final len = await f.length();
@@ -194,6 +205,10 @@ class _RecorderPageState extends State<RecorderPage> {
 
   Future<void> _startRecording() async {
     appLogger('Record button pressed');
+
+    final academicReady = await _ensureAcademicSettingsReady();
+    if (!academicReady) return;
+
     final perm = await _recorder.hasPermission();
     if (!perm) {
       appLogger('Microphone permission missing/denied');
@@ -211,9 +226,9 @@ class _RecorderPageState extends State<RecorderPage> {
       topic: _topicCtl.text,
       when: DateTime.now(),
     );
-    final path = '${tmp.path}/$fname';
+    final filePath = '${tmp.path}/$fname';
 
-    await WakelockPlus.enable(); // keep screen on while recording
+    await WakelockPlus.enable();
 
     bool started = false;
     bool usedService = false;
@@ -222,10 +237,10 @@ class _RecorderPageState extends State<RecorderPage> {
       try {
         appLogger('Trying to start Android foreground service...');
         final result =
-        await _recSvc.invokeMethod('startService', {'path': path});
+        await _recSvc.invokeMethod('startService', {'path': filePath});
         appLogger('startService result: $result');
         usedService = true;
-        started = await _confirmFileAppearsAndGrows(path);
+        started = await _confirmFileAppearsAndGrows(filePath);
         appLogger('Service start verified=$started');
       } catch (e) {
         appLogger('startService failed: $e');
@@ -243,9 +258,9 @@ class _RecorderPageState extends State<RecorderPage> {
           encoder: AudioEncoder.aacLc,
           bitRate: 128000,
           sampleRate: 44100,
-          numChannels: 1, // force mono for broad compatibility
+          numChannels: 1,
         );
-        await _recorder.start(config, path: path);
+        await _recorder.start(config, path: filePath);
         started = true;
       } catch (e) {
         appLogger('record.start failed: $e');
@@ -260,7 +275,7 @@ class _RecorderPageState extends State<RecorderPage> {
     }
 
     setState(() {
-      _filePath = path;
+      _filePath = filePath;
       _isRecording = started;
       _isPaused = false;
       _recordingComplete = false;
@@ -279,7 +294,9 @@ class _RecorderPageState extends State<RecorderPage> {
       return;
     }
 
-    appLogger('Recording started. mode=${usedService ? 'service' : 'plugin'} path=$path');
+    appLogger(
+      'Recording started. mode=${usedService ? 'service' : 'plugin'} path=$filePath',
+    );
 
     _ticker?.cancel();
     _ticker = Timer.periodic(const Duration(seconds: 1), (_) {
@@ -300,7 +317,9 @@ class _RecorderPageState extends State<RecorderPage> {
         appLogger('Service ${_isPaused ? 'paused' : 'resumed'}');
         return;
       } catch (e) {
-        appLogger('Service pause/resume failed: $e -> falling back to plugin toggle');
+        appLogger(
+          'Service pause/resume failed: $e -> falling back to plugin toggle',
+        );
       }
     }
 
@@ -325,7 +344,8 @@ class _RecorderPageState extends State<RecorderPage> {
   Future<void> _stopRecording() async {
     appLogger('Stop tapped');
     try {
-      String? path = _filePath;
+      String? finalPath = _filePath;
+
       if (Platform.isAndroid) {
         try {
           await _recSvc.invokeMethod('stopService');
@@ -333,12 +353,12 @@ class _RecorderPageState extends State<RecorderPage> {
         } catch (e) {
           appLogger('Service stop failed: $e -> trying plugin stop');
           try {
-            path = await _recorder.stop();
+            finalPath = await _recorder.stop();
           } catch (_) {}
         }
       } else {
-        path = await _recorder.stop();
-        appLogger('Plugin stopped, path=$path');
+        finalPath = await _recorder.stop();
+        appLogger('Plugin stopped, path=$finalPath');
       }
 
       _ticker?.cancel();
@@ -346,7 +366,7 @@ class _RecorderPageState extends State<RecorderPage> {
         _isRecording = false;
         _isPaused = false;
         _recordingComplete = true;
-        if (path != null) _filePath = path;
+        if (finalPath != null) _filePath = finalPath;
       });
     } finally {
       await WakelockPlus.disable();
@@ -354,17 +374,20 @@ class _RecorderPageState extends State<RecorderPage> {
     }
   }
 
-  // ---------------- Upload flow ----------------
-
   Future<void> _uploadRecording() async {
     if (_filePath == null) return;
+
+    final academicReady = await _ensureAcademicSettingsReady();
+    if (!academicReady) return;
 
     final fileOnDisk = File(_filePath!);
     if (!await fileOnDisk.exists()) {
       appLogger('Upload requested but file missing: $_filePath');
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('File missing')),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('File missing')),
+        );
+      }
       return;
     }
 
@@ -374,26 +397,121 @@ class _RecorderPageState extends State<RecorderPage> {
       _uploadPhase = 'Firebase';
     });
 
-    // Ensure Firebase is initialized and user is authenticated
-    if (Firebase.apps.isEmpty) {
-      await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-    }
-    final user = FirebaseAuth.instance.currentUser;
-    if (user == null) {
-      appLogger('No authenticated user. Aborting upload.');
-      return;
-    }
-    final uid = user.uid;
-    final email = user.email!;
-
-    final createdAt = DateTime.now();
-    final filename = path.basename(_filePath!);
-
-    // ✅ Ensure the file is fully finalized before ANY upload
     try {
+      if (Firebase.apps.isEmpty) {
+        await Firebase.initializeApp(
+          options: DefaultFirebaseOptions.currentPlatform,
+        );
+      }
+
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) {
+        throw Exception('No authenticated user');
+      }
+
+      final uid = user.uid;
+      final createdAt = DateTime.now();
+      final filename = path.basename(_filePath!);
+      final className = _classCtl.text.trim();
+      final topic = _topicCtl.text.trim();
+      final durationSeconds = _elapsedSeconds;
+      final storagePath = 'recordings/$uid/$filename';
+
       await _ensureFinalizedRecording(fileOnDisk);
+
+      final sessionRef = FirebaseFirestore.instance
+          .collection('users')
+          .doc(uid)
+          .collection('sessions')
+          .doc();
+
+      await sessionRef.set({
+        'userId': uid,
+        'levelName': _levelName!.trim(),
+        'semesterName': _semesterName!.trim(),
+        'className': className,
+        'topic': topic,
+        'filename': filename,
+        'audioStoragePath': null,
+        'audioMimeType': 'audio/mp4',
+        'sizeBytes': 0,
+        'durationSeconds': durationSeconds,
+        'sessionStatus': 'uploading',
+        'audioStatus': 'local_ready',
+        'transcriptStatus': 'none',
+        'summaryStatus': 'none',
+        'notesStatus': 'none',
+        'quizStatus': 'none',
+        'flashcardsStatus': 'none',
+        'studyGuideStatus': 'none',
+        'embeddingStatus': 'none',
+        'transcribeRequested': false,
+        'createdAt': FieldValue.serverTimestamp(),
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+
+      final storageRef = FirebaseStorage.instance.ref().child(storagePath);
+      final uploadTask = storageRef.putFile(
+        fileOnDisk,
+        SettableMetadata(contentType: 'audio/mp4'),
+      );
+
+      StreamSubscription<TaskSnapshot>? progressSub;
+      progressSub = uploadTask.snapshotEvents.listen((snapshot) {
+        if (!mounted) return;
+        final total = snapshot.totalBytes;
+        final transferred = snapshot.bytesTransferred;
+        final progress = total > 0 ? transferred / total : null;
+
+        setState(() {
+          _uploadProgress = progress;
+          _uploadPhase = 'Firebase';
+        });
+      });
+
+      await uploadTask;
+      await progressSub.cancel();
+
+      final fileLen = await fileOnDisk.length();
+
+      await sessionRef.update({
+        'audioStoragePath': storagePath,
+        'sizeBytes': fileLen,
+        'sessionStatus': 'uploaded',
+        'audioStatus': 'uploaded',
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+
+      if (mounted) {
+        setState(() {
+          _isUploading = false;
+          _uploadProgress = null;
+          _uploadPhase = null;
+        });
+
+        _classCtl.clear();
+        _topicCtl.clear();
+        _selectedExistingClass = false;
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Upload complete. Ready for your next lecture!'),
+          ),
+        );
+      }
+
+      await _safeDeleteLocal(fileOnDisk);
+      appLogger('Local file deleted');
+
+      if (mounted) {
+        setState(() {
+          _filePath = null;
+          _recordingComplete = false;
+          _elapsedSeconds = 0;
+        });
+      }
     } catch (e) {
-      appLogger('Recording not ready for upload: $e');
+      appLogger('Upload failed: $e');
       if (mounted) {
         setState(() {
           _isUploading = false;
@@ -401,153 +519,10 @@ class _RecorderPageState extends State<RecorderPage> {
           _uploadPhase = null;
         });
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Recording not usable: $e')),
-        );
-      }
-      return;
-    }
-
-    // Upload to Firebase Storage using the new helper
-    try {
-      await uploadRecording(fileOnDisk, uid, email);
-    } catch (e) {
-      appLogger('Firebase upload failed for path=recordings/$uid/$filename: $e');
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Firebase upload failed: $e')),
-        );
-      }
-      setState(() {
-        _isUploading = false;
-        _uploadProgress = null;
-        _uploadPhase = null;
-      });
-      return;
-    }
-
-    // Now Google Drive — upload the original .m4a
-    setState(() {
-      _uploadPhase = 'Google Drive';
-      _uploadProgress = null; // indeterminate for Drive
-    });
-
-    // Ensure file length is stable (Android MediaRecorder finalization safety)
-    await _waitForStableFileLength(fileOnDisk);
-
-    // Upload original .m4a to Drive (no conversion)
-    File driveFile = fileOnDisk;
-    String driveFilename = filename;
-
-    String? driveId;
-    try {
-      driveId = await _uploadToGoogleDriveWithFolders(
-        fileOnDisk: driveFile,
-        filename: driveFilename,
-        className: _classCtl.text,
-        topic: _topicCtl.text,
-        createdAt: createdAt,
-      );
-      appLogger('Drive upload ok. fileId=$driveId');
-    } catch (e) {
-      appLogger('Drive upload failed: $e');
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Drive upload failed: $e')),
+          SnackBar(content: Text('Upload failed: $e')),
         );
       }
     }
-
-    // Firestore metadata (kept as before, with additive fields)
-    final durationSeconds = _elapsedSeconds;
-    final fileLen = await fileOnDisk.length();
-    try {
-      await _writeFirestoreMetadata(
-        filename: filename,
-        className: _classCtl.text,
-        topic: _topicCtl.text,
-        createdAt: createdAt,
-        durationSeconds: durationSeconds,
-        storageUrl: "", // Storage URL retrieval omitted in new helper; add if needed
-        storagePath: "recordings/$uid/$filename",
-        driveFileId: driveId,
-        sizeBytes: fileLen,
-        mimeType: 'audio/mp4',
-      );
-      appLogger('Firestore metadata written');
-    } on FirebaseException catch (e) {
-      appLogger('Firestore write failed (${e.code}): ${e.message}');
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Firestore write failed: ${e.message}')),
-        );
-      }
-    }
-
-    if (mounted) {
-      setState(() {
-        _isUploading = false;
-        _uploadProgress = null;
-        _uploadPhase = null;
-      });
-      // Clear class/topic inputs and reset selected class state
-      _classCtl.clear();
-      _topicCtl.clear();
-      _selectedExistingClass = false;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Upload complete. Ready for your next lecture!')),
-      );
-    }
-
-    // Cleanup local file
-    await _safeDeleteLocal(fileOnDisk);
-    appLogger('Local file deleted');
-
-    // Reset UI to fresh state
-    if (mounted) {
-      setState(() {
-        _filePath = null;
-        _recordingComplete = false;
-        _elapsedSeconds = 0;
-      });
-    }
-  }
-
-  Future<void> uploadRecording(File file, String uid, String email) async {
-    // Ensure Firebase initialized and user authenticated
-    if (Firebase.apps.isEmpty) {
-      await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-    }
-    final user = FirebaseAuth.instance.currentUser;
-    if (user == null) throw Exception('No authenticated user for upload');
-
-    // We no longer read or use academic level/term for building the storage path.
-    // This restores the original upload structure where files are stored directly
-    // under recordings/{email}/{filename}. Reading academic settings can be added
-    // separately without influencing the storage path.
-
-    final fileName = path.basename(file.path);
-    // Upload under recordings/{uid}/{fileName} with no intermediate level/term.
-    final storagePath = "recordings/$email/$fileName";
-    appLogger("Uploading to Firebase Storage path=$storagePath");
-
-    final storageRef = FirebaseStorage.instance.ref().child(storagePath);
-    await storageRef.putFile(
-      file,
-      SettableMetadata(contentType: 'audio/mp4'),
-    );
-
-    // Save metadata to Firestore. Use className and topic if available via
-    // outer context (e.g. passed in from the recording page) instead of level/term.
-    await FirebaseFirestore.instance
-        .collection('users')
-        .doc(uid)
-        .collection('recordings')
-        .add({
-      'filename': fileName,
-      'storagePath': storagePath,
-      'createdAt': FieldValue.serverTimestamp(),
-      'uid': uid,
-    });
   }
 
   Future<void> _discardRecording() async {
@@ -566,71 +541,18 @@ class _RecorderPageState extends State<RecorderPage> {
 
   Future<void> _safeDeleteLocal(File f) async {
     try {
-      if (await f.exists()) await f.delete();
+      if (await f.exists()) {
+        await f.delete();
+      }
     } catch (_) {}
   }
 
-  // ✅ NEW: finalize + minimum-size guard to prevent empty/corrupt uploads
   Future<void> _ensureFinalizedRecording(File f) async {
     final len = await _waitForStableFileLength(f);
     appLogger('Finalized file length before upload: $len bytes');
     if (len < 4096) {
-      // ~4 KB guard to catch empty/corrupt recordings
       throw 'Recording looks empty or corrupt (size $len bytes). Please record again.';
     }
-  }
-
-  Future<void> _writeFirestoreMetadata({
-    required String filename,
-    required String className,
-    required String topic,
-    required DateTime createdAt,
-    required int durationSeconds,
-    required String storageUrl,
-    required String storagePath,
-    required String? driveFileId,
-    int? sizeBytes,            // NEW optional
-    String? mimeType,          // NEW optional
-  }) async {
-    final uid = FirebaseAuth.instance.currentUser?.uid;
-    final meta = <String, dynamic>{
-      'filename': filename,
-      'className': className,
-      'topic': topic,
-      'createdAt': createdAt.toIso8601String(),
-      'durationSeconds': durationSeconds,
-      'storageUrl': storageUrl,
-      'storagePath': storagePath,
-      'driveFileId': driveFileId,
-      'uid': uid,
-
-      // Phase-2 additive fields (non-breaking)
-      'transcriptStatus': 'none',
-      'transcribeRequested': false,
-      'transcriptDriveFileId': null,
-      'subtitleDriveFileIds': <String>[],
-      'summaryStatus': 'none',
-      'notesStatus': 'none',
-      'quizStatus': 'none',
-    };
-    if (sizeBytes != null) meta['sizeBytes'] = sizeBytes;
-    if (mimeType != null) meta['mimeType'] = mimeType;
-    if (uid == null) throw 'No authenticated user';
-    await FirebaseFirestore.instance
-        .collection('users')
-        .doc(uid)
-        .collection('recordings')
-        .add(meta);
-  }
-
-  // -------- Google Drive helpers --------
-
-  // Small helper to compute semester string safely
-  String _semesterFor(DateTime dt) {
-    final m = dt.month;
-    if (m >= 1 && m <= 5) return 'Spring';
-    if (m >= 6 && m <= 8) return 'Summer';
-    return 'Fall';
   }
 
   Future<int> _waitForStableFileLength(
@@ -661,100 +583,100 @@ class _RecorderPageState extends State<RecorderPage> {
       }
       await Future.delayed(pollEvery);
     }
+
     return await f.length();
   }
 
-  Future<String?> _uploadToGoogleDriveWithFolders({
-    required File fileOnDisk,
-    required String filename,
-    required String className,
-    required String topic,
-    required DateTime createdAt,
-  }) async {
-    // Sign in (silently first)
-    GoogleSignInAccount? acc = await _gsi.signInSilently();
-    acc ??= await _gsi.signIn();
-    if (acc == null) throw 'Google Sign-In failed';
+  Widget _buildAcademicInfoCard(BuildContext context) {
+      final hasSettings =
+          (_levelName?.trim().isNotEmpty ?? false) &&
+              (_semesterName?.trim().isNotEmpty ?? false);
 
-    final authHeaders = await acc.authHeaders;
-    final httpClient = _GoogleAuthClient(authHeaders);
+      final theme = Theme.of(context);
+      final isDark = theme.brightness == Brightness.dark;
 
-    try {
-      final api = drive.DriveApi(httpClient);
+      final bgColor = hasSettings
+          ? (isDark ? const Color(0xFF1E1A2E) : const Color(0xFFF2ECFF))
+          : (isDark ? const Color(0xFF3A2416) : const Color(0xFFFFF4E5));
 
-      // Build/ensure folder chain:
-      // Study Buddy / {Year}_{Semester} / {Class Name} / {Lecture Topic}
-      final rootFolderId =
-      await _getOrCreateFolder(api, 'Study Buddy', parentId: 'root');
-      final sem = _semesterFor(createdAt);
-      final yearSem = '${createdAt.year}_$sem';
-      final yearFolderId =
-      await _getOrCreateFolder(api, yearSem, parentId: rootFolderId);
-      final classFolderId =
-      await _getOrCreateFolder(api, className, parentId: yearFolderId);
-      final topicFolderId =
-      await _getOrCreateFolder(api, topic, parentId: classFolderId);
+      final borderColor = hasSettings
+          ? (isDark ? const Color(0xFF6E56CF) : const Color(0xFFD5C7FF))
+          : (isDark ? const Color(0xFFFFB366) : const Color(0xFFFFD8A8));
 
-      // Ensure filesystem has fully flushed/closed the file & stream exact bytes
-      final finalLength = await fileOnDisk.length();
-      final stream = fileOnDisk.openRead(0, finalLength);
+      final titleColor = theme.textTheme.titleMedium?.color ?? Colors.white;
+      final textColor = theme.textTheme.bodyMedium?.color ?? Colors.white70;
 
-      final meta = drive.File()
-        ..name = filename
-        ..parents = [topicFolderId];
-      if (filename.toLowerCase().endsWith('.mp3')) {
-        meta.mimeType = 'audio/mpeg';
-      } else if (filename.toLowerCase().endsWith('.m4a')) {
-        meta.mimeType = 'audio/mp4';
-      }
-
-      // Resumable upload — reliable for large recordings
-      final media = drive.Media(stream, finalLength);
-      final uploaded = await api.files.create(
-        meta,
-        uploadMedia: media,
-        uploadOptions: drive.ResumableUploadOptions(),
+      return Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: bgColor,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: borderColor, width: 1.2),
+        ),
+        child: _isLoadingAcademicSettings
+            ? Row(
+          children: [
+            const SizedBox(
+              width: 16,
+              height: 16,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                'Loading academic settings...',
+                style: TextStyle(color: textColor),
+              ),
+            ),
+          ],
+        )
+            : hasSettings
+            ? Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Current academic defaults',
+              style: TextStyle(
+                fontWeight: FontWeight.w700,
+                fontSize: 16,
+                color: titleColor,
+              ),
+            ),
+            const SizedBox(height: 10),
+            Text(
+              'Level: ${_levelName!}',
+              style: TextStyle(
+                color: textColor,
+                fontSize: 15,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              'Semester: ${_semesterName!}',
+              style: TextStyle(
+                color: textColor,
+                fontSize: 15,
+              ),
+            ),
+          ],
+        )
+            : Text(
+          'Please save your academic level and semester in Academic Settings before recording.',
+          style: TextStyle(
+            color: textColor,
+            fontSize: 15,
+          ),
+        ),
       );
-
-      return uploaded.id;
-    } finally {
-      httpClient.close(); // close only after the upload is done
     }
-  }
 
-  Future<String> _getOrCreateFolder(
-      drive.DriveApi api,
-      String name, {
-        required String parentId,
-      }) async {
-    final q =
-        "mimeType='application/vnd.google-apps.folder' and name='${_escapeForDriveQuery(name)}' and '$parentId' in parents and trashed=false";
-    final res = await api.files.list(
-      q: q,
-      $fields: 'files(id,name)',
-      spaces: 'drive',
-      pageSize: 1,
-    );
-    if (res.files != null && res.files!.isNotEmpty) {
-      return res.files!.first.id!;
-    }
-    final folderMeta = drive.File()
-      ..name = name
-      ..mimeType = 'application/vnd.google-apps.folder'
-      ..parents = [parentId];
-    final created = await api.files.create(folderMeta);
-    return created.id!;
-  }
-
-  String _escapeForDriveQuery(String name) => name.replaceAll("'", r"\'");
-
-  // ---------------- UI ----------------
   @override
   Widget build(BuildContext context) {
     final w = MediaQuery.of(context).size.width;
     final big = min(w * 0.6, 300.0);
-
     final strings = SBStrings.of(context);
+
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -769,7 +691,10 @@ class _RecorderPageState extends State<RecorderPage> {
       body: LayoutBuilder(
         builder: (context, constraints) {
           return RefreshIndicator(
-            onRefresh: _fetchClassNames,
+            onRefresh: () async {
+              await _loadAcademicSettings();
+              await _fetchClassNames();
+            },
             child: SingleChildScrollView(
               padding: EdgeInsets.only(
                 left: 20,
@@ -781,9 +706,7 @@ class _RecorderPageState extends State<RecorderPage> {
                   ? const AlwaysScrollableScrollPhysics()
                   : const NeverScrollableScrollPhysics(),
               child: ConstrainedBox(
-                constraints: BoxConstraints(
-                  minHeight: constraints.maxHeight,
-                ),
+                constraints: BoxConstraints(minHeight: constraints.maxHeight),
                 child: Center(
                   child: ConstrainedBox(
                     constraints: const BoxConstraints(maxWidth: 680),
@@ -815,27 +738,34 @@ class _RecorderPageState extends State<RecorderPage> {
                           ],
                         ),
                         const SizedBox(height: 12),
-                        Text(
-                          _helperText,
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(
-                            color: Colors.black54,
-                            fontSize: 14,
+                        if (_helperText.isNotEmpty) ...[
+                          Text(
+                            _helperText,
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.7),
+                              fontSize: 14,
+                            ),
                           ),
-                        ),
+                          const SizedBox(height: 12),
+                        ],
+
+                        _buildAcademicInfoCard(context),
                         const SizedBox(height: 12),
 
-                        // Inputs
                         FutureBuilder<List<String>>(
                           future: _fetchClassNames(),
                           builder: (context, snapshot) {
                             final classList = snapshot.data ?? [];
-                            // Determine dropdown value
-                            String? dropdownValue = classList.contains(_classCtl.text) ? _classCtl.text : null;
+                            final dropdownValue = classList.contains(_classCtl.text)
+                                ? _classCtl.text
+                                : null;
+
                             return Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                if (snapshot.connectionState == ConnectionState.waiting)
+                                if (snapshot.connectionState ==
+                                    ConnectionState.waiting)
                                   const LinearProgressIndicator(minHeight: 2),
                                 DropdownButtonFormField<String>(
                                   value: dropdownValue,
@@ -844,20 +774,21 @@ class _RecorderPageState extends State<RecorderPage> {
                                     border: const OutlineInputBorder(),
                                   ),
                                   items: classList
-                                      .map((name) => DropdownMenuItem(
-                                    value: name,
-                                    child: Text(name),
-                                  ))
+                                      .map(
+                                        (name) => DropdownMenuItem(
+                                      value: name,
+                                      child: Text(name),
+                                    ),
+                                  )
                                       .toList(),
                                   onChanged: (val) {
                                     setState(() {
                                       if (val != null) {
                                         _selectedExistingClass = true;
                                         _classCtl.text = val;
-                                        // Focus the topic field
-                                        FocusScope.of(context).requestFocus(_topicFocus);
+                                        FocusScope.of(context)
+                                            .requestFocus(_topicFocus);
                                       } else {
-                                        // Cleared dropdown selection
                                         _selectedExistingClass = false;
                                         _classCtl.clear();
                                       }
@@ -869,7 +800,9 @@ class _RecorderPageState extends State<RecorderPage> {
                                 if (!_selectedExistingClass)
                                   TextField(
                                     controller: _classCtl,
-                                    enabled: !_isRecording && !_isUploading && !_recordingComplete,
+                                    enabled: !_isRecording &&
+                                        !_isUploading &&
+                                        !_recordingComplete,
                                     decoration: InputDecoration(
                                       labelText: strings.enterNewClass,
                                       border: const OutlineInputBorder(),
@@ -879,19 +812,22 @@ class _RecorderPageState extends State<RecorderPage> {
                             );
                           },
                         ),
+
                         const SizedBox(height: 12),
+
                         TextField(
                           controller: _topicCtl,
                           focusNode: _topicFocus,
-                          enabled: !_isRecording && !_isUploading && !_recordingComplete,
+                          enabled:
+                          !_isRecording && !_isUploading && !_recordingComplete,
                           decoration: InputDecoration(
                             labelText: strings.lectureTopic,
                             border: const OutlineInputBorder(),
                           ),
                         ),
+
                         const SizedBox(height: 14),
 
-                        // Record / Stop
                         SizedBox(
                           width: big,
                           height: big,
@@ -899,7 +835,9 @@ class _RecorderPageState extends State<RecorderPage> {
                             style: ElevatedButton.styleFrom(
                               shape: const CircleBorder(),
                               backgroundColor: (_isRecording || _isReadyToRecord)
-                                  ? (_isRecording ? Colors.red : Colors.deepPurple.shade600)
+                                  ? (_isRecording
+                                  ? Colors.red
+                                  : Colors.deepPurple.shade600)
                                   : Colors.grey[400],
                             ),
                             onPressed: _isRecording
@@ -907,13 +845,16 @@ class _RecorderPageState extends State<RecorderPage> {
                                 : (_isReadyToRecord ? _startRecording : null),
                             child: Text(
                               _isRecording ? strings.stop : strings.record,
-                              style: const TextStyle(color: Colors.white, fontSize: 22),
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 22,
+                              ),
                             ),
                           ),
                         ),
+
                         const SizedBox(height: 12),
 
-                        // Pause / Resume
                         SizedBox(
                           width: double.infinity,
                           child: ElevatedButton(
@@ -940,7 +881,6 @@ class _RecorderPageState extends State<RecorderPage> {
 
                         const SizedBox(height: 14),
 
-                        // Upload progress
                         if (_isUploading) ...[
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
@@ -949,7 +889,9 @@ class _RecorderPageState extends State<RecorderPage> {
                                 const SizedBox(
                                   width: 18,
                                   height: 18,
-                                  child: CircularProgressIndicator(strokeWidth: 2),
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                  ),
                                 ),
                               const SizedBox(width: 8),
                               Text(
@@ -962,10 +904,11 @@ class _RecorderPageState extends State<RecorderPage> {
                           const SizedBox(height: 8),
                           if (_uploadProgress != null)
                             LinearProgressIndicator(
-                                value: _uploadProgress, minHeight: 6),
+                              value: _uploadProgress,
+                              minHeight: 6,
+                            ),
                         ],
 
-                        // Upload / Discard
                         if (_recordingComplete) ...[
                           const SizedBox(height: 8),
                           Row(
@@ -975,8 +918,9 @@ class _RecorderPageState extends State<RecorderPage> {
                                   onPressed: _isUploading ? null : _uploadRecording,
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: Colors.deepPurple.shade600,
-                                    padding:
-                                    const EdgeInsets.symmetric(vertical: 14),
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 14,
+                                    ),
                                   ),
                                   child: Text(strings.upload),
                                 ),
@@ -987,8 +931,9 @@ class _RecorderPageState extends State<RecorderPage> {
                                   onPressed: _isUploading ? null : _discardRecording,
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: Colors.red,
-                                    padding:
-                                    const EdgeInsets.symmetric(vertical: 14),
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 14,
+                                    ),
                                   ),
                                   child: Text(strings.discard),
                                 ),

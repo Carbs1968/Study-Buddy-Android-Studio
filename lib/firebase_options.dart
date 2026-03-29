@@ -63,6 +63,9 @@ class DefaultFirebaseOptions {
     messagingSenderId: '905658157082',
     projectId: 'study-buddy-dev-25a7a',
     storageBucket: 'study-buddy-dev-25a7a.firebasestorage.app',
+    androidClientId: '905658157082-11djdtga1hdkcu9e0h6i00ltv3atrtfs.apps.googleusercontent.com',
+    iosClientId: '905658157082-evu32vrc0mnpe8q00gechjecmm5qn610.apps.googleusercontent.com',
     iosBundleId: 'com.carbs.studybuddy.studyBuddy',
   );
+
 }

@@ -1,12 +1,8 @@
-// ---------------------------
-// Lecture Detail (safe reads + Drive playback preference)
-// ---------------------------
-
 import 'dart:convert';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -15,19 +11,20 @@ import '../l10n/strings.dart';
 import '../utils/app_logger.dart';
 import '../utils/utils.dart';
 
-
 class LectureDetailScreen extends StatelessWidget {
-  final String recordingId;
-  const LectureDetailScreen({super.key, required this.recordingId});
+  final String sessionId;
 
-  /// Helper to fetch AI output and show dialog (formatted UI + Copy button)
+  const LectureDetailScreen({
+    super.key,
+    required this.sessionId,
+  });
+
   Future<void> _viewAiOutput(
       BuildContext context,
-      String recordingId,
+      String sessionId,
       String type,
       ) async {
     try {
-      // spinner
       showDialog(
         context: context,
         barrierDismissible: false,
@@ -41,12 +38,13 @@ class LectureDetailScreen extends StatelessWidget {
 
       final callable = functions.httpsCallable('getAiJobOutput');
       final result = await callable.call({
-        'recordingId': recordingId,
+        'recordingId': sessionId, // backward-compatible param name
+        'sessionId': sessionId,
         'type': type,
       });
 
       if (Navigator.of(context).canPop()) {
-        Navigator.of(context).pop(); // close spinner
+        Navigator.of(context).pop();
       }
 
       final Map data = (result.data as Map?) ?? {};
@@ -69,12 +67,10 @@ class LectureDetailScreen extends StatelessWidget {
         return;
       }
 
-      // Ensure we have a Map for formatting; if not, coerce via JSON roundtrip
       Map<String, dynamic> parsed;
       if (payload is Map) {
         parsed = Map<String, dynamic>.from(payload as Map);
       } else {
-        // Fallback: stringify then decode
         final prettyJson = const JsonEncoder.withIndent('  ').convert(payload);
         parsed = (json.decode(prettyJson) as Map).cast<String, dynamic>();
       }
@@ -115,7 +111,7 @@ class LectureDetailScreen extends StatelessWidget {
       );
     } catch (e) {
       if (Navigator.of(context).canPop()) {
-        Navigator.of(context).pop(); // ensure spinner closes on error
+        Navigator.of(context).pop();
       }
       showDialog(
         context: context,
@@ -144,8 +140,10 @@ class LectureDetailScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             if (title != null)
-              Text(title.toString(),
-                  style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+              Text(
+                title.toString(),
+                style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
             if (abstract != null) ...[
               const SizedBox(height: 8),
               Text(abstract.toString()),
@@ -154,10 +152,12 @@ class LectureDetailScreen extends StatelessWidget {
               const SizedBox(height: 12),
               const Text('Key Points', style: TextStyle(fontWeight: FontWeight.bold)),
               const SizedBox(height: 4),
-              ...keyPoints.map((p) => Padding(
-                padding: const EdgeInsets.symmetric(vertical: 2),
-                child: Text('• $p'),
-              )),
+              ...keyPoints.map(
+                    (p) => Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 2),
+                  child: Text('• $p'),
+                ),
+              ),
             ],
             if (terms.isNotEmpty) ...[
               const SizedBox(height: 12),
@@ -170,21 +170,26 @@ class LectureDetailScreen extends StatelessWidget {
 
       case 'notes':
         final outline = List<Map<String, dynamic>>.from(
-            (data['outline'] as List? ?? const []).map((e) => Map<String, dynamic>.from(e as Map)));
+          (data['outline'] as List? ?? const [])
+              .map((e) => Map<String, dynamic>.from(e as Map)),
+        );
         final equations = List<String>.from(data['equations'] ?? const []);
         final refs = List<String>.from(data['references'] ?? const []);
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             for (final sec in outline) ...[
-              Text(sec['heading']?.toString() ?? '',
-                  style: const TextStyle(fontWeight: FontWeight.bold)),
+              Text(
+                sec['heading']?.toString() ?? '',
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
               const SizedBox(height: 4),
-              ...List<String>.from(sec['bullets'] ?? const [])
-                  .map((b) => Padding(
-                padding: const EdgeInsets.symmetric(vertical: 2),
-                child: Text('• $b'),
-              )),
+              ...List<String>.from(sec['bullets'] ?? const []).map(
+                    (b) => Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 2),
+                  child: Text('• $b'),
+                ),
+              ),
               const SizedBox(height: 10),
             ],
             if (equations.isNotEmpty) ...[
@@ -203,7 +208,9 @@ class LectureDetailScreen extends StatelessWidget {
 
       case 'quiz':
         final questions = List<Map<String, dynamic>>.from(
-            (data['questions'] as List? ?? const []).map((e) => Map<String, dynamic>.from(e as Map)));
+          (data['questions'] as List? ?? const [])
+              .map((e) => Map<String, dynamic>.from(e as Map)),
+        );
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -215,18 +222,23 @@ class LectureDetailScreen extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(q['prompt']?.toString() ?? '',
-                          style: const TextStyle(fontWeight: FontWeight.bold)),
+                      Text(
+                        q['prompt']?.toString() ?? '',
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      ),
                       if (q['type'] == 'mcq') ...[
                         const SizedBox(height: 6),
-                        ...List<String>.from(q['choices'] ?? const [])
-                            .map((c) => Text('○ $c')),
+                        ...List<String>.from(q['choices'] ?? const []).map(
+                              (c) => Text('○ $c'),
+                        ),
                       ],
                       const SizedBox(height: 8),
                       Text('Answer: ${q['answer']?.toString() ?? ''}'),
                       if (q['rationale'] != null)
-                        Text('Why: ${q['rationale']}',
-                            style: const TextStyle(color: Colors.black54)),
+                        Text(
+                          'Why: ${q['rationale']}',
+                          style: const TextStyle(color: Colors.black54),
+                        ),
                     ],
                   ),
                 ),
@@ -235,104 +247,143 @@ class LectureDetailScreen extends StatelessWidget {
         );
 
       default:
-      // Fallback: show raw map
         return Text(data.toString());
+    }
+  }
+
+  Future<String?> _getPlaybackUrl(String storagePath) async {
+    if (storagePath.trim().isEmpty) return null;
+    try {
+      return await FirebaseStorage.instance.ref(storagePath).getDownloadURL();
+    } catch (e) {
+      appLogger('Failed to get playback URL for $storagePath: $e');
+      return null;
+    }
+  }
+
+  Future<void> _openUrl(BuildContext context, String url) async {
+    final strings = SBStrings.of(context);
+    final uri = Uri.parse(url);
+    if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(strings.couldNotOpenLink)),
+        );
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final uid = FirebaseAuth.instance.currentUser?.uid;
+    final strings = SBStrings.of(context);
+
+    if (uid == null) {
+      return Scaffold(
+        appBar: AppBar(title: Text(strings.appTitle)),
+        body: Center(child: Text(strings.notSignedIn)),
+      );
+    }
+
     final docRef = FirebaseFirestore.instance
         .collection('users')
         .doc(uid)
-        .collection('recordings')
-        .doc(recordingId);
+        .collection('sessions')
+        .doc(sessionId);
 
-    return StreamBuilder<DocumentSnapshot>(
+    return StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
       stream: docRef.snapshots(),
       builder: (ctx, snap) {
         if (!snap.hasData) {
           return const Scaffold(
-              body: Center(child: CircularProgressIndicator()));
+            body: Center(child: CircularProgressIndicator()),
+          );
         }
 
         final doc = snap.data!;
-        final m = (doc.data() as Map<String, dynamic>?) ?? const {};
+        final m = doc.data() ?? <String, dynamic>{};
 
         final className = (m['className'] ?? '').toString();
         final topic = (m['topic'] ?? '').toString();
+        final levelName = (m['levelName'] ?? '').toString();
+        final semesterName = (m['semesterName'] ?? '').toString();
 
-        final status = (m['transcriptStatus'] ?? 'none').toString();
-        final transcriptId = m['transcriptDriveFileId'];
-        final subs =
-            (m['subtitleDriveFileIds'] as List?)?.cast<String>() ??
-                const <String>[];
+        final sessionStatus = (m['sessionStatus'] ?? 'unknown').toString();
+        final audioStatus = (m['audioStatus'] ?? 'unknown').toString();
+        final transcriptStatus = (m['transcriptStatus'] ?? 'none').toString();
 
-        final driveFileId = (m['driveFileId'] ?? '').toString();
-        final storageUrl = (m['storageUrl'] ?? '').toString();
+        final summaryStatus = (m['summaryStatus'] ?? 'none').toString();
+        final notesStatus = (m['notesStatus'] ?? 'none').toString();
+        final quizStatus = (m['quizStatus'] ?? 'none').toString();
 
-        // Prefer Drive for playback; fall back to Storage URL for older docs
-        final driveViewUrl = driveFileId.isNotEmpty
-            ? 'https://drive.google.com/file/d/$driveFileId/view'
-            : '';
-        final playbackText = driveViewUrl.isNotEmpty
-            ? 'Open in Drive:\n$driveViewUrl'
-            : (storageUrl.isNotEmpty ? storageUrl : 'No playback URL available');
+        final audioStoragePath = (m['audioStoragePath'] ?? '').toString();
+        final filename = (m['filename'] ?? '').toString();
+        final durationSeconds = (m['durationSeconds'] ?? 0) as int;
 
-        final strings = SBStrings.of(context);
         return Scaffold(
           appBar: AppBar(title: Text('$className — $topic')),
           body: ListView(
             padding: const EdgeInsets.all(16),
             children: [
-              // Playback (Drive preferred, Storage fallback) — button only
-              Text(strings.playback, style: const TextStyle(fontWeight: FontWeight.bold)),
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(14),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if (levelName.isNotEmpty) Text('Level: $levelName'),
+                      if (semesterName.isNotEmpty) Text('Semester: $semesterName'),
+                      if (filename.isNotEmpty) Text('File: $filename'),
+                      Text('Duration: $durationSeconds sec'),
+                      Text('Session status: $sessionStatus'),
+                      Text('Audio status: $audioStatus'),
+                      Text('Transcript status: $transcriptStatus'),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+
+              Text(
+                strings.playback,
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
               const SizedBox(height: 8),
-              Builder(
-                builder: (context) {
-                  Future<void> _open(String url) async {
-                    final uri = Uri.parse(url);
-                    if (!await launchUrl(uri,
-                        mode: LaunchMode.externalApplication)) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text(strings.couldNotOpenLink)),
+              if (audioStoragePath.isEmpty)
+                Text(
+                  strings.noPlaybackLinkAvailable,
+                  style: const TextStyle(color: Colors.black54),
+                )
+              else
+                FutureBuilder<String?>(
+                  future: _getPlaybackUrl(audioStoragePath),
+                  builder: (context, playbackSnap) {
+                    if (playbackSnap.connectionState == ConnectionState.waiting) {
+                      return const SizedBox(
+                        height: 44,
+                        child: Center(child: CircularProgressIndicator()),
                       );
                     }
-                  }
 
-                  if (driveViewUrl.isNotEmpty) {
-                    return ElevatedButton(
-                      onPressed: () => _open(driveViewUrl),
-                      child: Text(strings.openInGoogleDrive),
-                    );
-                  }
+                    final url = playbackSnap.data;
+                    if (url == null || url.isEmpty) {
+                      return Text(
+                        strings.noPlaybackLinkAvailable,
+                        style: const TextStyle(color: Colors.black54),
+                      );
+                    }
 
-                  if (storageUrl.isNotEmpty) {
                     return ElevatedButton(
-                      onPressed: () => _open(storageUrl),
+                      onPressed: () => _openUrl(context, url),
                       child: Text(strings.openFromFirebaseStorage),
                     );
-                  }
+                  },
+                ),
 
-                  return Text(
-                    strings.noPlaybackLinkAvailable,
-                    style: const TextStyle(color: Colors.black54),
-                  );
-                },
-              ),
               const SizedBox(height: 16),
               const Divider(),
 
-              ListTile(
-                leading: const Icon(Icons.description),
-                title: Text(strings.transcriptStatus),
-                subtitle: Text(status),
-              ),
-
-              // Show “View transcript” when done (private fetch via callable)
-              if (status == 'done') ...[
-                const SizedBox(height: 8),
+              if (transcriptStatus == 'done') ...[
                 ElevatedButton(
                   onPressed: () async {
                     try {
@@ -346,14 +397,20 @@ class LectureDetailScreen extends StatelessWidget {
                           ),
                         ),
                       );
-                      final full = await fetchTranscript(recordingId);
-                      Navigator.of(context).pop(); // close progress
+
+                      final full = await fetchTranscript(sessionId);
+
+                      if (Navigator.of(context).canPop()) {
+                        Navigator.of(context).pop();
+                      }
+
                       if (full.isEmpty) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(content: Text(strings.transcriptIsEmpty)),
                         );
                         return;
                       }
+
                       showDialog(
                         context: context,
                         builder: (_) => AlertDialog(
@@ -372,7 +429,7 @@ class LectureDetailScreen extends StatelessWidget {
                       );
                     } catch (e) {
                       if (Navigator.of(context).canPop()) {
-                        Navigator.of(context).pop(); // ensure spinner closes on error
+                        Navigator.of(context).pop();
                       }
                       final msg = e.toString();
                       appLogger('Transcript UI error: $msg');
@@ -393,10 +450,7 @@ class LectureDetailScreen extends StatelessWidget {
                   },
                   child: Text(strings.viewTranscript),
                 ),
-              ],
-
-              const SizedBox(height: 8),
-              if (status == 'none' || status == 'error')
+              ] else ...[
                 ElevatedButton.icon(
                   icon: const Icon(Icons.text_snippet_outlined),
                   label: Text(strings.requestTranscription),
@@ -405,96 +459,108 @@ class LectureDetailScreen extends StatelessWidget {
                       await docRef.update({
                         'transcribeRequested': true,
                         'transcriptStatus': 'pending',
+                        'sessionStatus': 'processing',
+                        'updatedAt': FieldValue.serverTimestamp(),
                       });
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                            content: Text(strings.transcriptionRequested)),
-                      );
+
+                      await FirebaseFirestore.instance.collection('aiJobs').add({
+                        'uid': uid,
+                        'type': 'transcript',
+                        'sessionId': sessionId,
+                        'recordingId': sessionId, // backward-compatible
+                        'status': 'pending',
+                        'createdAt': FieldValue.serverTimestamp(),
+                        'updatedAt': FieldValue.serverTimestamp(),
+                      });
+
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text(strings.transcriptionRequested)),
+                        );
+                      }
                     } catch (e) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('${strings.failed}: $e')),
-                      );
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('${strings.failed}: $e')),
+                        );
+                      }
                     }
                   },
                 ),
-
-              if (transcriptId != null)
-                ListTile(
-                  leading: const Icon(Icons.article),
-                  title: Text(strings.transcriptGoogleDrive),
-                  subtitle: Text('${strings.fileId}: $transcriptId'),
-                ),
-
-              for (final id in subs)
-                ListTile(
-                  leading: const Icon(Icons.subtitles),
-                  title: Text(strings.subtitlesGoogleDrive),
-                  subtitle: Text('${strings.fileId}: $id'),
-                ),
+              ],
 
               const SizedBox(height: 24),
               const Divider(),
-              Text(strings.aiOutputs, style: const TextStyle(fontWeight: FontWeight.bold)),
+              Text(
+                strings.aiOutputs,
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
               const SizedBox(height: 8),
 
               _AiActionRow(
                 title: strings.generateSummary,
-                status: (m['summaryStatus'] ?? 'none').toString(),
+                status: summaryStatus,
                 onRequest: () async {
-                  final uid = FirebaseAuth.instance.currentUser?.uid;
-                  debugPrint("::::::${uid}");
-                  try {
-                    await FirebaseFirestore.instance.collection('aiJobs').add({
-                      'uid': uid,
-                      'type': 'summary',
-                      'recordingId': recordingId,
-                      'status': 'pending',
-                      'createdAt': DateTime.now().toIso8601String(),
-                    });
-                    debugPrint('Document successfully written!');
-                  } on FirebaseException catch (e) {
-                    debugPrint('Error writing document: ${e.code} - ${e.message}');
-                    // Handle specific FirebaseException codes, e.g., permission-denied
-                    if (e.code == 'permission-denied') {
-                      // Show a user-friendly message or log the error
-                    }
-                  } catch (e) {
-                    debugPrint('An unexpected error occurred: $e');
-                  }
+                  await FirebaseFirestore.instance.collection('aiJobs').add({
+                    'uid': uid,
+                    'type': 'summary',
+                    'sessionId': sessionId,
+                    'recordingId': sessionId,
+                    'status': 'pending',
+                    'createdAt': FieldValue.serverTimestamp(),
+                    'updatedAt': FieldValue.serverTimestamp(),
+                  });
+
+                  await docRef.update({
+                    'summaryStatus': 'pending',
+                    'updatedAt': FieldValue.serverTimestamp(),
+                  });
                 },
-                recordingId: recordingId,
+                sessionId: sessionId,
                 viewAiOutput: _viewAiOutput,
               ),
               _AiActionRow(
                 title: strings.generateNotes,
-                status: (m['notesStatus'] ?? 'none').toString(),
+                status: notesStatus,
                 onRequest: () async {
-                  final uid = FirebaseAuth.instance.currentUser?.uid;
                   await FirebaseFirestore.instance.collection('aiJobs').add({
                     'uid': uid,
                     'type': 'notes',
-                    'recordingId': recordingId,
+                    'sessionId': sessionId,
+                    'recordingId': sessionId,
                     'status': 'pending',
-                    'createdAt': DateTime.now().toIso8601String(),
+                    'createdAt': FieldValue.serverTimestamp(),
+                    'updatedAt': FieldValue.serverTimestamp(),
+                  });
+
+                  await docRef.update({
+                    'notesStatus': 'pending',
+                    'updatedAt': FieldValue.serverTimestamp(),
                   });
                 },
-                recordingId: recordingId,
+                sessionId: sessionId,
                 viewAiOutput: _viewAiOutput,
               ),
               _AiActionRow(
                 title: strings.generatePracticeTest,
-                status: (m['quizStatus'] ?? 'none').toString(),
+                status: quizStatus,
                 onRequest: () async {
-                  final uid = FirebaseAuth.instance.currentUser?.uid;
                   await FirebaseFirestore.instance.collection('aiJobs').add({
                     'uid': uid,
                     'type': 'quiz',
-                    'recordingId': recordingId,
+                    'sessionId': sessionId,
+                    'recordingId': sessionId,
                     'status': 'pending',
-                    'createdAt': DateTime.now().toIso8601String(),
+                    'createdAt': FieldValue.serverTimestamp(),
+                    'updatedAt': FieldValue.serverTimestamp(),
+                  });
+
+                  await docRef.update({
+                    'quizStatus': 'pending',
+                    'updatedAt': FieldValue.serverTimestamp(),
                   });
                 },
-                recordingId: recordingId,
+                sessionId: sessionId,
                 viewAiOutput: _viewAiOutput,
               ),
               const SizedBox(height: 8),
@@ -506,19 +572,18 @@ class LectureDetailScreen extends StatelessWidget {
   }
 }
 
-
 class _AiActionRow extends StatelessWidget {
   final String title;
   final String status;
   final Future<void> Function() onRequest;
-  final String recordingId;
+  final String sessionId;
   final Future<void> Function(BuildContext, String, String)? viewAiOutput;
 
   const _AiActionRow({
     required this.title,
     required this.status,
     required this.onRequest,
-    required this.recordingId,
+    required this.sessionId,
     this.viewAiOutput,
   });
 
@@ -532,8 +597,9 @@ class _AiActionRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final type = _typeFromTitle(title);
     final strings = SBStrings.of(context);
+    final type = _typeFromTitle(title);
+
     return ListTile(
       leading: const Icon(Icons.auto_awesome),
       title: Text(title),
@@ -542,7 +608,7 @@ class _AiActionRow extends StatelessWidget {
         onPressed: (status == 'none' || status == 'error')
             ? onRequest
             : (status == 'done' && viewAiOutput != null && type.isNotEmpty
-            ? () => viewAiOutput!(context, recordingId, type)
+            ? () => viewAiOutput!(context, sessionId, type)
             : null),
         child: Text(
           (status == 'done') ? strings.view : strings.request,

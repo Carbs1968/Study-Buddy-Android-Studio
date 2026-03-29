@@ -14,6 +14,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "905658157082-11djdtga1hdkcu9e0h6i00ltv3atrtfs.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.carbs.studybuddy.study_buddy",
+            "certificate_hash": "070f529aaa1340e826f35b1c2fb4a7c134ed6d26"
+          }
+        },
+        {
           "client_id": "905658157082-7c580374faf348daio00ghug9pqml22j.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
@@ -27,6 +35,14 @@
           "android_info": {
             "package_name": "com.carbs.studybuddy.study_buddy",
             "certificate_hash": "dc5e9ec4b7817676113a5d4f5981fb09941ffaa2"
+          }
+        },
+        {
+          "client_id": "905658157082-a5sc1h61c98maru0t375b1t0l5c1v0br.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.carbs.studybuddy.study_buddy",
+            "certificate_hash": "2d7c79cfd2c985edca26fceaf8d58dd34911b52c"
           }
         },
         {

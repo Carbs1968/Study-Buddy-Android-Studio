@@ -1,6 +1,3 @@
-// ----------------------------
-// Bottom-Nav Shell (Additive)
-// ----------------------------
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -13,17 +10,14 @@ import 'pages/settings_page.dart';
 
 class HomeShell extends StatefulWidget {
   const HomeShell({super.key});
+
   @override
   State<HomeShell> createState() => _HomeShellState();
 }
 
 class _HomeShellState extends State<HomeShell> {
   int _tab = 0;
-  final _tabs = const [
-    RecorderPage(),
-    LibraryPage(),
-    SettingsPage(),
-  ];
+  int _recorderRefreshKey = 0;
 
   @override
   void initState() {
@@ -35,7 +29,8 @@ class _HomeShellState extends State<HomeShell> {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return;
     try {
-      final doc = await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
+      final doc =
+      await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
       final data = doc.data();
       if (data != null && data['locale'] != null) {
         final code = data['locale'] as String;
@@ -46,21 +41,47 @@ class _HomeShellState extends State<HomeShell> {
     } catch (_) {}
   }
 
+  void _onTabTapped(int index) {
+    setState(() {
+      // Rebuild RecorderPage whenever returning to the Record tab
+      if (index == 0 && _tab != 0) {
+        _recorderRefreshKey++;
+      }
+      _tab = index;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final strings = SBStrings.of(context);
+
+    final tabs = [
+      RecorderPage(key: ValueKey('recorder_$_recorderRefreshKey')),
+      const LibraryPage(),
+      const SettingsPage(),
+    ];
+
     return Scaffold(
       body: IndexedStack(
         index: _tab,
-        children: _tabs,
+        children: tabs,
       ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _tab,
-        onTap: (i) => setState(() => _tab = i),
+        onTap: _onTabTapped,
         items: [
-          BottomNavigationBarItem(icon: const Icon(Icons.mic), label: strings.record),
-          BottomNavigationBarItem(icon: const Icon(Icons.library_music), label: strings.library),
-          BottomNavigationBarItem(icon: const Icon(Icons.settings), label: strings.settings),
+          BottomNavigationBarItem(
+            icon: const Icon(Icons.mic),
+            label: strings.record,
+          ),
+          BottomNavigationBarItem(
+            icon: const Icon(Icons.library_music),
+            label: strings.library,
+          ),
+          BottomNavigationBarItem(
+            icon: const Icon(Icons.settings),
+            label: strings.settings,
+          ),
         ],
       ),
     );
