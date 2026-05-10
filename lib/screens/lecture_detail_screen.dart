@@ -132,6 +132,7 @@ class LectureDetailScreen extends StatelessWidget {
   Widget _formatAiOutput(String type, Map<String, dynamic> data) {
     switch (type) {
       case 'summary':
+        final summary = data['summary'];
         final title = data['title'];
         final abstract = data['abstract'];
         final keyPoints = List<String>.from(data['key_points'] ?? const []);
@@ -139,6 +140,8 @@ class LectureDetailScreen extends StatelessWidget {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            if (summary != null)
+              Text(summary.toString()),
             if (title != null)
               Text(
                 title.toString(),
@@ -169,9 +172,9 @@ class LectureDetailScreen extends StatelessWidget {
         );
 
       case 'notes':
+        final rawNotes = data['notes'] ?? data['outline'] ?? const [];
         final outline = List<Map<String, dynamic>>.from(
-          (data['outline'] as List? ?? const [])
-              .map((e) => Map<String, dynamic>.from(e as Map)),
+          (rawNotes as List).map((e) => Map<String, dynamic>.from(e as Map)),
         );
         final equations = List<String>.from(data['equations'] ?? const []);
         final refs = List<String>.from(data['references'] ?? const []);
@@ -223,10 +226,10 @@ class LectureDetailScreen extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        q['prompt']?.toString() ?? '',
+                        (q['question'] ?? q['prompt'] ?? '').toString(),
                         style: const TextStyle(fontWeight: FontWeight.bold),
                       ),
-                      if (q['type'] == 'mcq') ...[
+                      if ((q['choices'] as List?)?.isNotEmpty ?? false) ...[
                         const SizedBox(height: 6),
                         ...List<String>.from(q['choices'] ?? const []).map(
                               (c) => Text('○ $c'),
@@ -234,9 +237,9 @@ class LectureDetailScreen extends StatelessWidget {
                       ],
                       const SizedBox(height: 8),
                       Text('Answer: ${q['answer']?.toString() ?? ''}'),
-                      if (q['rationale'] != null)
+                      if (q['explanation'] != null || q['rationale'] != null)
                         Text(
-                          'Why: ${q['rationale']}',
+                          'Why: ${(q['explanation'] ?? q['rationale']).toString()}',
                           style: const TextStyle(color: Colors.black54),
                         ),
                     ],
