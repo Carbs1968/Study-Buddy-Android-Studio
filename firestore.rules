@@ -21,6 +21,12 @@ service cloud.firestore {
           || request.resource.data.keys().hasAll(['academicSettings'])
         );
 
+      // ✅ Academic Settings
+      match /academicSettings/{settingsId} {
+        allow get, list: if isOwner(userId);
+        allow create, update, delete: if isOwner(userId);
+      }
+
       // ✅ Sessions
       match /sessions/{sessionId} {
         allow create: if isOwner(userId)
