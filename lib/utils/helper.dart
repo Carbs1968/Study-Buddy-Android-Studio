@@ -1,6 +1,5 @@
-// Helper to normalize file names: replace non-alphanumeric with underscores
+// Helper to format recording file names while preserving readable class/topic text.
 import 'dart:io';
-import 'dart:math';
 
 import 'package:firebase_storage/firebase_storage.dart';
 
@@ -12,8 +11,10 @@ String fileNameFormatted({
   required DateTime when,
 }) {
   String clean(String s) {
-    final base = s.trim().toLowerCase().replaceAll(RegExp(r'\s+'), '_');
-    return base.replaceAll(RegExp(r'[^a-z0-9_-]'), '_');
+    return s
+        .trim()
+        .replaceAll(RegExp(r'[\/\\:*?"<>|\x00-\x1F]'), '_')
+        .replaceAll(RegExp(r'\s+'), ' ');
   }
   final c = clean(className);
   final t = clean(topic);
@@ -22,9 +23,7 @@ String fileNameFormatted({
   final d = when.day.toString().padLeft(2, '0');
   final hh = when.hour.toString().padLeft(2, '0');
   final mm = when.minute.toString().padLeft(2, '0');
-  final ss = when.second.toString().padLeft(2, '0');
-  final rand = Random().nextInt(9999).toString().padLeft(4, '0');
-  return '${c}_${t}_$y-$m-${d}_$hh-$mm-${ss}_$rand.m4a';
+  return '$c - $t - $y-$m-${d}_$hh-$mm.m4a';
 }
 
 
