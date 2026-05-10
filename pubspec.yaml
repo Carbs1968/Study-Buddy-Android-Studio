@@ -69,9 +69,9 @@ flutter_icons:
   adaptive_icon_background: "#FFFFFF"
   adaptive_icon_foreground: "assets/icons/app_icon.png"
 
-#flutter_intl:
-#  enabled: true
-#  arb_dir: lib/l10n
-#  template_arbs:
-#    - app_en.arb
-#  output_dir: lib/l10n
+flutter_intl:
+  enabled: true
+  arb_dir: lib/l10n
+  template_arbs:
+    - app_en.arb
+  output_dir: lib/l10n

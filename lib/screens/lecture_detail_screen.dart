@@ -500,6 +500,7 @@ class LectureDetailScreen extends StatelessWidget {
               _AiActionRow(
                 title: strings.generateSummary,
                 status: summaryStatus,
+                transcriptReady: transcriptStatus == 'done',
                 onRequest: () async {
                   await FirebaseFirestore.instance.collection('aiJobs').add({
                     'uid': uid,
@@ -522,6 +523,7 @@ class LectureDetailScreen extends StatelessWidget {
               _AiActionRow(
                 title: strings.generateNotes,
                 status: notesStatus,
+                transcriptReady: transcriptStatus == 'done',
                 onRequest: () async {
                   await FirebaseFirestore.instance.collection('aiJobs').add({
                     'uid': uid,
@@ -544,6 +546,7 @@ class LectureDetailScreen extends StatelessWidget {
               _AiActionRow(
                 title: strings.generatePracticeTest,
                 status: quizStatus,
+                transcriptReady: transcriptStatus == 'done',
                 onRequest: () async {
                   await FirebaseFirestore.instance.collection('aiJobs').add({
                     'uid': uid,
@@ -576,6 +579,7 @@ class _AiActionRow extends StatelessWidget {
   final String title;
   final String status;
   final Future<void> Function() onRequest;
+  final bool transcriptReady;
   final String sessionId;
   final Future<void> Function(BuildContext, String, String)? viewAiOutput;
 
@@ -583,6 +587,7 @@ class _AiActionRow extends StatelessWidget {
     required this.title,
     required this.status,
     required this.onRequest,
+    required this.transcriptReady,
     required this.sessionId,
     this.viewAiOutput,
   });
@@ -605,11 +610,13 @@ class _AiActionRow extends StatelessWidget {
       title: Text(title),
       subtitle: Text('${strings.status}: $status'),
       trailing: ElevatedButton(
-        onPressed: (status == 'none' || status == 'error')
-            ? onRequest
-            : (status == 'done' && viewAiOutput != null && type.isNotEmpty
-            ? () => viewAiOutput!(context, sessionId, type)
-            : null),
+        onPressed: !transcriptReady
+            ? null
+            : (status == 'none' || status == 'error')
+                ? onRequest
+                : (status == 'done' && viewAiOutput != null && type.isNotEmpty)
+                    ? () => viewAiOutput!(context, sessionId, type)
+                    : null,
         child: Text(
           (status == 'done') ? strings.view : strings.request,
         ),
