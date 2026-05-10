@@ -17,6 +17,7 @@ initializeApp();
 
 const REGION = "us-central1";
 const OPENAI_API_KEY = defineSecret("OPENAI_API_KEY");
+const CHAT_MODEL = "gpt-4o-mini";
 const TRANSCRIPT_TYPE = "transcript";
 const SUPPORTED_OUTPUT_TYPES = new Set(["summary", "notes", "quiz"]);
 
@@ -61,9 +62,12 @@ function safeTmpAudioPath(jobId, audioStoragePath) {
   return path.join(os.tmpdir(), `${jobId}-${Date.now()}-${safeFileName}`);
 }
 
+function openAiClient() {
+  return new OpenAI({ apiKey: OPENAI_API_KEY.value() });
+}
+
 async function transcribeAudioFile(localAudioPath) {
-  const openai = new OpenAI({ apiKey: OPENAI_API_KEY.value() });
-  const transcription = await openai.audio.transcriptions.create({
+  const transcription = await openAiClient().audio.transcriptions.create({
     file: fs.createReadStream(localAudioPath),
     model: "whisper-1",
   });
@@ -97,29 +101,109 @@ async function writeSessionError(sessionRef, type, errorCode, message) {
   );
 }
 
-function buildDeterministicOutput(type, transcriptText) {
+function jsonParseError(message) {
+  const error = new Error(message);
+  error.code = "openai-json-parse-failed";
+  return error;
+}
+
+function parseJsonContent(content) {
+  const text = trimOrEmpty(content);
+  if (!text) {
+    throw jsonParseError("OpenAI returned an empty JSON response.");
+  }
+
+  try {
+    return JSON.parse(text);
+  } catch (error) {
+    throw jsonParseError(`OpenAI returned invalid JSON: ${error.message}.`);
+  }
+}
+
+function promptForType(type, transcriptText) {
+  const basePrompt =
+    "Use the transcript to create useful student study material. " +
+    "Return valid JSON only. Do not include Markdown or extra text.";
+
   switch (type) {
     case "summary":
       return {
-        text: `Diagnostic summary stub for transcript: ${transcriptText}`,
+        system:
+          `${basePrompt} The JSON must be exactly: ` +
+          `{"summary":"<concise student-friendly lecture summary>"}.`,
+        user: `Transcript:\n${transcriptText}`,
       };
     case "notes":
       return {
-        text: `Diagnostic notes stub for transcript: ${transcriptText}`,
-        bullets: ["Diagnostic notes stub generated from the existing transcript."],
+        system:
+          `${basePrompt} The JSON must be exactly: ` +
+          `{"notes":[{"heading":"<section heading>","bullets":["<bullet 1>","<bullet 2>"]}]}.`,
+        user: `Transcript:\n${transcriptText}`,
       };
     case "quiz":
       return {
-        questions: [
-          {
-            question: "Diagnostic quiz stub: was transcript text available?",
-            answer: "Yes.",
-          },
-        ],
+        system:
+          `${basePrompt} The JSON must be exactly: ` +
+          `{"questions":[{"question":"<question>","choices":["A","B","C","D"],"answer":"<correct choice text or letter>","explanation":"<brief explanation>"}]}.`,
+        user: `Transcript:\n${transcriptText}`,
       };
     default:
-      return { text: `Diagnostic ${type} stub.` };
+      throw new Error(`Unsupported OpenAI output type '${type}'.`);
   }
+}
+
+function validateGeneratedOutput(type, output) {
+  if (!output || typeof output !== "object" || Array.isArray(output)) {
+    throw jsonParseError("OpenAI JSON response must be an object.");
+  }
+
+  if (type === "summary") {
+    if (!trimOrEmpty(output.summary)) {
+      throw jsonParseError("OpenAI JSON response is missing summary text.");
+    }
+    return { summary: output.summary };
+  }
+
+  if (type === "notes") {
+    if (!Array.isArray(output.notes)) {
+      throw jsonParseError("OpenAI JSON response is missing notes array.");
+    }
+    return { notes: output.notes };
+  }
+
+  if (type === "quiz") {
+    if (!Array.isArray(output.questions)) {
+      throw jsonParseError("OpenAI JSON response is missing questions array.");
+    }
+    return { questions: output.questions };
+  }
+
+  return output;
+}
+
+async function generateOpenAiOutput(type, transcriptText) {
+  const prompt = promptForType(type, transcriptText);
+  const completion = await openAiClient().chat.completions.create({
+    model: CHAT_MODEL,
+    messages: [
+      { role: "system", content: prompt.system },
+      { role: "user", content: prompt.user },
+    ],
+    response_format: { type: "json_object" },
+    temperature: 0.2,
+  });
+
+  const content =
+    completion.choices &&
+    completion.choices[0] &&
+    completion.choices[0].message &&
+    completion.choices[0].message.content;
+
+  return validateGeneratedOutput(type, parseJsonContent(content));
+}
+
+function errorCodeForGenerationFailure(type, error) {
+  return error && error.code ? error.code : `${type}-generation-failed`;
 }
 
 exports.onAiJobCreated = onDocumentCreated(
@@ -304,7 +388,7 @@ exports.onAiJobCreated = onDocumentCreated(
     const transcriptText = trimOrEmpty(session.transcriptText);
     if (session.transcriptStatus !== "done" || !transcriptText) {
       const message =
-        `Cannot create ${type} stub because transcriptStatus is not done or transcriptText is empty.`;
+        `Cannot create ${type} output because transcriptStatus is not done or transcriptText is empty.`;
       await writeAiJobError(jobRef, "transcript-not-ready", message, {
         sessionPath,
       });
@@ -312,30 +396,60 @@ exports.onAiJobCreated = onDocumentCreated(
       return;
     }
 
-    const output = buildDeterministicOutput(type, transcriptText);
-    const timestamp = now();
-
-    await sessionRef.set(
-      {
-        [statusFieldForType(type)]: "done",
-        [`${type}Output`]: output,
-        updatedAt: timestamp,
-      },
-      { merge: true },
-    );
+    const startedAt = now();
 
     await jobRef.set(
       {
-        status: "done",
-        output,
-        sessionPath,
-        completedAt: timestamp,
-        updatedAt: timestamp,
+        status: "running",
+        startedAt,
+        updatedAt: startedAt,
       },
       { merge: true },
     );
 
-    console.log(`Completed diagnostic ${type} job ${jobId} for ${sessionPath}.`);
+    await sessionRef.set(
+      {
+        [statusFieldForType(type)]: "processing",
+        updatedAt: startedAt,
+      },
+      { merge: true },
+    );
+
+    try {
+      const output = await generateOpenAiOutput(type, transcriptText);
+      const timestamp = now();
+
+      await sessionRef.set(
+        {
+          [statusFieldForType(type)]: "done",
+          [`${type}Output`]: output,
+          updatedAt: timestamp,
+        },
+        { merge: true },
+      );
+
+      await jobRef.set(
+        {
+          status: "done",
+          output,
+          sessionPath,
+          completedAt: timestamp,
+          updatedAt: timestamp,
+        },
+        { merge: true },
+      );
+
+      console.log(`Completed OpenAI ${type} job ${jobId} for ${sessionPath}.`);
+    } catch (error) {
+      const errorMessage =
+        error && error.message ? error.message : String(error);
+      const message =
+        `OpenAI ${type} generation failed for ${sessionPath}: ${errorMessage}`;
+      const errorCode = errorCodeForGenerationFailure(type, error);
+
+      await writeAiJobError(jobRef, errorCode, message, { sessionPath });
+      await writeSessionError(sessionRef, type, errorCode, message);
+    }
   },
 );
 
