@@ -1,6 +1,12 @@
+const fs = require("fs");
+const os = require("os");
+const path = require("path");
+
+const OpenAI = require("openai");
 const { initializeApp } = require("firebase-admin/app");
 const { getFirestore, FieldValue } = require("firebase-admin/firestore");
 const { getStorage } = require("firebase-admin/storage");
+const { defineSecret } = require("firebase-functions/params");
 const { onCall, HttpsError } = require("firebase-functions/v2/https");
 const {
   onDocumentCreated,
@@ -10,6 +16,7 @@ const {
 initializeApp();
 
 const REGION = "us-central1";
+const OPENAI_API_KEY = defineSecret("OPENAI_API_KEY");
 const TRANSCRIPT_TYPE = "transcript";
 const SUPPORTED_OUTPUT_TYPES = new Set(["summary", "notes", "quiz"]);
 
@@ -46,6 +53,22 @@ function timestampMillis(value) {
 function latestAiJobSortValue(snapshot) {
   const job = snapshot.data() || {};
   return timestampMillis(job.completedAt) || timestampMillis(job.updatedAt);
+}
+
+function safeTmpAudioPath(jobId, audioStoragePath) {
+  const audioFileName = path.basename(audioStoragePath) || "audio-file";
+  const safeFileName = audioFileName.replace(/[^a-zA-Z0-9._-]/g, "_");
+  return path.join(os.tmpdir(), `${jobId}-${Date.now()}-${safeFileName}`);
+}
+
+async function transcribeAudioFile(localAudioPath) {
+  const openai = new OpenAI({ apiKey: OPENAI_API_KEY.value() });
+  const transcription = await openai.audio.transcriptions.create({
+    file: fs.createReadStream(localAudioPath),
+    model: "whisper-1",
+  });
+
+  return trimOrEmpty(transcription && transcription.text);
 }
 
 async function writeAiJobError(jobRef, errorCode, message, extra = {}) {
@@ -100,7 +123,13 @@ function buildDeterministicOutput(type, transcriptText) {
 }
 
 exports.onAiJobCreated = onDocumentCreated(
-  { document: "aiJobs/{jobId}", region: REGION },
+  {
+    document: "aiJobs/{jobId}",
+    region: REGION,
+    secrets: [OPENAI_API_KEY],
+    timeoutSeconds: 540,
+    memory: "1GiB",
+  },
   async (event) => {
     const snapshot = event.data;
     if (!snapshot) return;
@@ -187,32 +216,88 @@ exports.onAiJobCreated = onDocumentCreated(
         return;
       }
 
-      const stubText =
-        `Diagnostic transcription stub: audio file found at ${audioStoragePath}.`;
-      const timestamp = now();
-
-      await sessionRef.set(
-        {
-          transcriptStatus: "done",
-          sessionStatus: "ready",
-          transcriptText: stubText,
-          transcriptUpdatedAt: timestamp,
-          updatedAt: timestamp,
-        },
-        { merge: true },
-      );
+      const localAudioPath = safeTmpAudioPath(jobId, audioStoragePath);
+      const startedAt = now();
 
       await jobRef.set(
         {
-          status: "done",
-          output: { text: stubText },
-          sessionPath,
-          audioStoragePath,
-          completedAt: timestamp,
-          updatedAt: timestamp,
+          status: "running",
+          startedAt,
+          updatedAt: startedAt,
         },
         { merge: true },
       );
+
+      await sessionRef.set(
+        {
+          transcriptStatus: "processing",
+          sessionStatus: "processing",
+          updatedAt: startedAt,
+        },
+        { merge: true },
+      );
+
+      try {
+        await storage.bucket().file(audioStoragePath).download({
+          destination: localAudioPath,
+        });
+
+        const transcriptText = await transcribeAudioFile(localAudioPath);
+        if (!transcriptText) {
+          throw new Error("OpenAI returned an empty transcription response.");
+        }
+
+        const timestamp = now();
+
+        await sessionRef.set(
+          {
+            transcriptStatus: "done",
+            sessionStatus: "ready",
+            transcriptText,
+            transcriptUpdatedAt: timestamp,
+            updatedAt: timestamp,
+          },
+          { merge: true },
+        );
+
+        await jobRef.set(
+          {
+            status: "done",
+            output: { text: transcriptText },
+            sessionPath,
+            audioStoragePath,
+            completedAt: timestamp,
+            updatedAt: timestamp,
+          },
+          { merge: true },
+        );
+      } catch (error) {
+        const errorMessage =
+          error && error.message ? error.message : String(error);
+        const message =
+          `Audio download or OpenAI transcription failed for '${audioStoragePath}': ${errorMessage}`;
+        await writeAiJobError(jobRef, "transcription-failed", message, {
+          sessionPath,
+          audioStoragePath,
+        });
+        await writeSessionError(
+          sessionRef,
+          TRANSCRIPT_TYPE,
+          "transcription-failed",
+          message,
+        );
+      } finally {
+        try {
+          if (fs.existsSync(localAudioPath)) {
+            fs.unlinkSync(localAudioPath);
+          }
+        } catch (cleanupError) {
+          console.warn(
+            `Failed to clean up temporary audio file '${localAudioPath}'.`,
+            cleanupError,
+          );
+        }
+      }
       return;
     }
 
