@@ -21,6 +21,16 @@ service cloud.firestore {
           || request.resource.data.keys().hasAll(['academicSettings'])
         );
 
+      // ✅ Sessions
+      match /sessions/{sessionId} {
+        allow create: if isOwner(userId)
+          && request.resource.data.userId == request.auth.uid;
+        allow get, list: if isOwner(userId);
+        allow update, delete: if isOwner(userId)
+          && resource.data.userId == request.auth.uid
+          && request.resource.data.userId == request.auth.uid;
+      }
+
       // ✅ Recordings
       match /recordings/{docId} {
         allow create: if isOwner(userId) &&
@@ -40,7 +50,7 @@ service cloud.firestore {
     match /aiJobs/{docId} {
       allow create: if isSignedIn() &&
         request.resource.data.uid == request.auth.uid &&
-        request.resource.data.type in ['summary', 'notes', 'quiz'] &&
+        request.resource.data.type in ['transcript', 'summary', 'notes', 'quiz'] &&
         request.resource.data.recordingId is string;
       allow read, update, delete: if isSignedIn() &&
         resource.data.uid == request.auth.uid;
