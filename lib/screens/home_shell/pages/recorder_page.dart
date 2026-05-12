@@ -702,9 +702,7 @@ class _RecorderPageState extends State<RecorderPage> {
                 top: 16,
                 bottom: 16 + MediaQuery.of(context).padding.bottom,
               ),
-              physics: constraints.maxHeight < 700
-                  ? const AlwaysScrollableScrollPhysics()
-                  : const NeverScrollableScrollPhysics(),
+              physics: const AlwaysScrollableScrollPhysics(),
               child: ConstrainedBox(
                 constraints: BoxConstraints(minHeight: constraints.maxHeight),
                 child: Center(
@@ -729,9 +727,9 @@ class _RecorderPageState extends State<RecorderPage> {
                             const SizedBox(height: 4),
                             Text(
                               _clockText,
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 22,
-                                color: Colors.black54,
+                                color: Theme.of(context).textTheme.titleLarge?.color,
                               ),
                               textAlign: TextAlign.center,
                             ),
