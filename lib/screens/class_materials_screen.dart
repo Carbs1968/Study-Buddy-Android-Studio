@@ -374,6 +374,8 @@ class _ClassMaterialsScreenState extends State<ClassMaterialsScreen> {
               ];
 
               final downloadUrl = (data['downloadUrl'] ?? '').toString();
+              final storagePath = (data['storagePath'] ?? '').toString();
+              final materialRef = docs[index].reference;
 
               return ListTile(
                 leading: Icon(_iconForMaterialType(type)),
@@ -390,6 +392,8 @@ class _ClassMaterialsScreenState extends State<ClassMaterialsScreen> {
                               builder: (_) => _MaterialImagePreviewScreen(
                                 title: title,
                                 imageUrl: downloadUrl,
+                                materialRef: materialRef,
+                                storagePath: storagePath,
                               ),
                             ),
                           );
@@ -405,6 +409,8 @@ class _ClassMaterialsScreenState extends State<ClassMaterialsScreen> {
                               downloadUrl: downloadUrl,
                               mimeType: (data['mimeType'] ?? '').toString(),
                               sizeBytes: data['sizeBytes'],
+                              materialRef: materialRef,
+                              storagePath: storagePath,
                             ),
                           ),
                         );
@@ -418,13 +424,79 @@ class _ClassMaterialsScreenState extends State<ClassMaterialsScreen> {
   }
 }
 
+
+Future<void> _deleteMaterial(
+  BuildContext context, {
+  required DocumentReference<Map<String, dynamic>> materialRef,
+  required String storagePath,
+}) async {
+  final confirmed = await showDialog<bool>(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: const Text('Delete material?'),
+      content: const Text(
+        'This will remove the material from this class and delete the uploaded file.',
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context, false),
+          child: const Text('Cancel'),
+        ),
+        FilledButton(
+          onPressed: () => Navigator.pop(context, true),
+          child: const Text('Delete'),
+        ),
+      ],
+    ),
+  );
+
+  if (confirmed != true) return;
+
+  try {
+    if (storagePath.trim().isNotEmpty) {
+      try {
+        await FirebaseStorage.instance.ref().child(storagePath).delete();
+      } catch (storageError) {
+        final message = storageError.toString();
+        final objectAlreadyMissing = message.contains('object-not-found') ||
+            message.contains('Object does not exist') ||
+            message.contains('No object exists');
+
+        if (!objectAlreadyMissing) {
+          rethrow;
+        }
+      }
+    }
+
+    await materialRef.delete();
+
+    if (!context.mounted) return;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Material deleted.')),
+    );
+
+    Navigator.pop(context);
+  } catch (error) {
+    if (!context.mounted) return;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Delete failed: $error')),
+    );
+  }
+}
+
 class _MaterialImagePreviewScreen extends StatelessWidget {
   final String title;
   final String imageUrl;
+  final DocumentReference<Map<String, dynamic>> materialRef;
+  final String storagePath;
 
   const _MaterialImagePreviewScreen({
     required this.title,
     required this.imageUrl,
+    required this.materialRef,
+    required this.storagePath,
   });
 
   @override
@@ -432,6 +504,17 @@ class _MaterialImagePreviewScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(title),
+        actions: [
+          IconButton(
+            tooltip: 'Delete material',
+            icon: const Icon(Icons.delete_outline),
+            onPressed: () => _deleteMaterial(
+              context,
+              materialRef: materialRef,
+              storagePath: storagePath,
+            ),
+          ),
+        ],
       ),
       body: InteractiveViewer(
         minScale: 0.5,
@@ -473,6 +556,8 @@ class _MaterialFileDetailsScreen extends StatelessWidget {
   final String downloadUrl;
   final String mimeType;
   final dynamic sizeBytes;
+  final DocumentReference<Map<String, dynamic>> materialRef;
+  final String storagePath;
 
   const _MaterialFileDetailsScreen({
     required this.title,
@@ -480,6 +565,8 @@ class _MaterialFileDetailsScreen extends StatelessWidget {
     required this.downloadUrl,
     required this.mimeType,
     required this.sizeBytes,
+    required this.materialRef,
+    required this.storagePath,
   });
 
   String _formatSize(dynamic value) {
@@ -495,6 +582,17 @@ class _MaterialFileDetailsScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(title),
+        actions: [
+          IconButton(
+            tooltip: 'Delete material',
+            icon: const Icon(Icons.delete_outline),
+            onPressed: () => _deleteMaterial(
+              context,
+              materialRef: materialRef,
+              storagePath: storagePath,
+            ),
+          ),
+        ],
       ),
       body: ListView(
         padding: const EdgeInsets.all(16),

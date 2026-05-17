@@ -45,8 +45,16 @@ service cloud.firestore {
 
             match /materials/{materialId} {
               allow get, list: if isOwner(userId);
-              allow create, update, delete: if isOwner(userId)
+
+              allow create: if isOwner(userId)
                 && request.resource.data.userId == request.auth.uid;
+
+              allow update: if isOwner(userId)
+                && resource.data.userId == request.auth.uid
+                && request.resource.data.userId == request.auth.uid;
+
+              allow delete: if isOwner(userId)
+                && resource.data.userId == request.auth.uid;
             }
           }
         }
