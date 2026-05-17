@@ -374,6 +374,26 @@ class _RecorderPageState extends State<RecorderPage> {
     }
   }
 
+
+  String _stableDocumentId(String value) {
+    final normalized = value
+        .trim()
+        .toLowerCase()
+        .replaceAll(RegExp(r'[áàäâã]'), 'a')
+        .replaceAll(RegExp(r'[éèëê]'), 'e')
+        .replaceAll(RegExp(r'[íìïî]'), 'i')
+        .replaceAll(RegExp(r'[óòöôõ]'), 'o')
+        .replaceAll(RegExp(r'[úùüû]'), 'u')
+        .replaceAll('ñ', 'n')
+        .replaceAll('ç', 'c');
+
+    final slug = normalized
+        .replaceAll(RegExp(r'[^a-z0-9]+'), '-')
+        .replaceAll(RegExp(r'^-+|-+$'), '');
+
+    return slug.isEmpty ? 'unnamed' : slug;
+  }
+
   Future<void> _uploadRecording() async {
     if (_filePath == null) return;
 
@@ -410,25 +430,68 @@ class _RecorderPageState extends State<RecorderPage> {
       }
 
       final uid = user.uid;
-      final createdAt = DateTime.now();
       final filename = path.basename(_filePath!);
       final className = _classCtl.text.trim();
       final topic = _topicCtl.text.trim();
       final durationSeconds = _elapsedSeconds;
       final storagePath = 'recordings/$uid/$filename';
+      final academicYearName = _levelName!.trim();
+      final semesterName = _semesterName!.trim();
+      final academicYearId = _stableDocumentId(academicYearName);
+      final semesterId = _stableDocumentId(semesterName);
+      final classId = _stableDocumentId(className);
 
       await _ensureFinalizedRecording(fileOnDisk);
 
-      final sessionRef = FirebaseFirestore.instance
-          .collection('users')
-          .doc(uid)
-          .collection('sessions')
-          .doc();
+      final userRef = FirebaseFirestore.instance.collection('users').doc(uid);
+      final academicYearRef = userRef
+          .collection('academicYears')
+          .doc(academicYearId);
+      final semesterRef = academicYearRef
+          .collection('semesters')
+          .doc(semesterId);
+      final classRef = semesterRef
+          .collection('classes')
+          .doc(classId);
+      final sessionRef = userRef.collection('sessions').doc();
+
+      await academicYearRef.set({
+        'userId': uid,
+        'academicYearId': academicYearId,
+        'academicYearName': academicYearName,
+        'createdAt': FieldValue.serverTimestamp(),
+        'updatedAt': FieldValue.serverTimestamp(),
+      }, SetOptions(merge: true));
+
+      await semesterRef.set({
+        'userId': uid,
+        'academicYearId': academicYearId,
+        'semesterId': semesterId,
+        'semesterName': semesterName,
+        'createdAt': FieldValue.serverTimestamp(),
+        'updatedAt': FieldValue.serverTimestamp(),
+      }, SetOptions(merge: true));
+
+      await classRef.set({
+        'userId': uid,
+        'academicYearId': academicYearId,
+        'academicYearName': academicYearName,
+        'semesterId': semesterId,
+        'semesterName': semesterName,
+        'classId': classId,
+        'className': className,
+        'createdAt': FieldValue.serverTimestamp(),
+        'updatedAt': FieldValue.serverTimestamp(),
+      }, SetOptions(merge: true));
 
       await sessionRef.set({
         'userId': uid,
-        'levelName': _levelName!.trim(),
-        'semesterName': _semesterName!.trim(),
+        'academicYearId': academicYearId,
+        'academicYearName': academicYearName,
+        'levelName': academicYearName,
+        'semesterId': semesterId,
+        'semesterName': semesterName,
+        'classId': classId,
         'className': className,
         'topic': topic,
         'filename': filename,

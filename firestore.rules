@@ -27,6 +27,25 @@ service cloud.firestore {
         allow create, update, delete: if isOwner(userId);
       }
 
+      // ✅ Academic hierarchy
+      match /academicYears/{academicYearId} {
+        allow get, list: if isOwner(userId);
+        allow create, update, delete: if isOwner(userId)
+          && request.resource.data.userId == request.auth.uid;
+
+        match /semesters/{semesterId} {
+          allow get, list: if isOwner(userId);
+          allow create, update, delete: if isOwner(userId)
+            && request.resource.data.userId == request.auth.uid;
+
+          match /classes/{classId} {
+            allow get, list: if isOwner(userId);
+            allow create, update, delete: if isOwner(userId)
+              && request.resource.data.userId == request.auth.uid;
+          }
+        }
+      }
+
       // ✅ Sessions
       match /sessions/{sessionId} {
         allow create: if isOwner(userId)
