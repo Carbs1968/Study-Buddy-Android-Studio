@@ -497,6 +497,8 @@ exports.onAiJobCreated = onDocumentCreated(
             sessionStatus: "ready",
             transcriptText,
             transcriptUpdatedAt: timestamp,
+            transcriptErrorCode: null,
+            transcriptErrorMessage: null,
             transcriptWasChunked: transcriptionResult.chunked,
             transcriptChunkCount: transcriptionResult.chunkCount,
             transcriptChunksCompleted: transcriptionResult.chunkCount,
