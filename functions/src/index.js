@@ -1,6 +1,8 @@
 const fs = require("fs");
 const os = require("os");
 const path = require("path");
+const { execFile } = require("child_process");
+const ffmpegPath = require("ffmpeg-static");
 
 const OpenAI = require("openai");
 const { initializeApp } = require("firebase-admin/app");
@@ -23,6 +25,8 @@ const TRANSCRIPT_TYPE = "transcript";
 const SUPPORTED_OUTPUT_TYPES = new Set(["summary", "notes", "quiz"]);
 const AUDIO_RETENTION_DAYS_AFTER_TRANSCRIPT = 5;
 const AUDIO_CLEANUP_BATCH_LIMIT = 100;
+const OPENAI_AUDIO_SAFE_LIMIT_BYTES = 20 * 1024 * 1024;
+const AUDIO_CHUNK_SECONDS = 10 * 60;
 
 const db = getFirestore();
 const storage = getStorage();
@@ -71,17 +75,136 @@ function safeTmpAudioPath(jobId, audioStoragePath) {
   return path.join(os.tmpdir(), `${jobId}-${Date.now()}-${safeFileName}`);
 }
 
+function safeTmpChunkDir(jobId) {
+  return path.join(os.tmpdir(), `${jobId}-${Date.now()}-audio-chunks`);
+}
+
 function openAiClient() {
   return new OpenAI({ apiKey: OPENAI_API_KEY.value() });
 }
 
-async function transcribeAudioFile(localAudioPath) {
+function localFileSizeBytes(localPath) {
+  return fs.statSync(localPath).size;
+}
+
+function runFfmpeg(args) {
+  return new Promise((resolve, reject) => {
+    execFile(ffmpegPath, args, (error, stdout, stderr) => {
+      if (error) {
+        const message =
+          `ffmpeg failed: ${error.message}. stderr: ${stderr || "<empty>"}`;
+        reject(new Error(message));
+        return;
+      }
+
+      resolve({ stdout, stderr });
+    });
+  });
+}
+
+async function splitAudioIntoChunks(localAudioPath, chunkDir) {
+  fs.mkdirSync(chunkDir, { recursive: true });
+
+  const chunkPattern = path.join(chunkDir, "chunk-%03d.mp3");
+
+  await runFfmpeg([
+    "-y",
+    "-i",
+    localAudioPath,
+    "-vn",
+    "-ac",
+    "1",
+    "-ar",
+    "16000",
+    "-b:a",
+    "48k",
+    "-f",
+    "segment",
+    "-segment_time",
+    String(AUDIO_CHUNK_SECONDS),
+    "-reset_timestamps",
+    "1",
+    chunkPattern,
+  ]);
+
+  const chunks = fs
+    .readdirSync(chunkDir)
+    .filter((fileName) => fileName.endsWith(".mp3"))
+    .sort()
+    .map((fileName) => path.join(chunkDir, fileName));
+
+  if (!chunks.length) {
+    throw new Error("Audio chunking did not create any chunk files.");
+  }
+
+  return chunks;
+}
+
+async function transcribeSingleAudioFile(localAudioPath) {
   const transcription = await openAiClient().audio.transcriptions.create({
     file: fs.createReadStream(localAudioPath),
     model: "whisper-1",
   });
 
   return trimOrEmpty(transcription && transcription.text);
+}
+
+async function transcribeAudioFile(localAudioPath, progressCallback) {
+  const originalSizeBytes = localFileSizeBytes(localAudioPath);
+
+  if (originalSizeBytes <= OPENAI_AUDIO_SAFE_LIMIT_BYTES) {
+    const text = await transcribeSingleAudioFile(localAudioPath);
+    return {
+      text,
+      chunked: false,
+      originalSizeBytes,
+      chunkCount: 1,
+    };
+  }
+
+  const chunkDir = safeTmpChunkDir(path.basename(localAudioPath));
+  const chunks = await splitAudioIntoChunks(localAudioPath, chunkDir);
+  const transcriptParts = [];
+
+  try {
+    for (let index = 0; index < chunks.length; index += 1) {
+      const chunkPath = chunks[index];
+      const chunkSizeBytes = localFileSizeBytes(chunkPath);
+
+      if (chunkSizeBytes > OPENAI_AUDIO_SAFE_LIMIT_BYTES) {
+        throw new Error(
+          `Audio chunk ${index + 1} is still too large for transcription ` +
+            `(${chunkSizeBytes} bytes).`,
+        );
+      }
+
+      if (typeof progressCallback === "function") {
+        await progressCallback({
+          chunkIndex: index + 1,
+          chunkCount: chunks.length,
+          chunkSizeBytes,
+        });
+      }
+
+      const chunkText = await transcribeSingleAudioFile(chunkPath);
+      if (chunkText) {
+        transcriptParts.push(chunkText);
+      }
+    }
+
+    return {
+      text: trimOrEmpty(transcriptParts.join("\n\n")),
+      chunked: true,
+      originalSizeBytes,
+      chunkCount: chunks.length,
+    };
+  } finally {
+    try {
+      fs.rmSync(chunkDir, { recursive: true, force: true });
+    } catch (cleanupError) {
+      console.warn(`Failed to clean up audio chunk dir '${chunkDir}'.`, cleanupError);
+    }
+  }
 }
 
 async function writeAiJobError(jobRef, errorCode, message, extra = {}) {
@@ -335,7 +458,33 @@ exports.onAiJobCreated = onDocumentCreated(
           destination: localAudioPath,
         });
 
-        const transcriptText = await transcribeAudioFile(localAudioPath);
+        const transcriptionResult = await transcribeAudioFile(
+          localAudioPath,
+          async ({ chunkIndex, chunkCount, chunkSizeBytes }) => {
+            await sessionRef.set(
+              {
+                transcriptStatus: "processing",
+                transcriptChunkCount: chunkCount,
+                transcriptChunksCompleted: chunkIndex - 1,
+                transcriptCurrentChunkSizeBytes: chunkSizeBytes,
+                updatedAt: now(),
+              },
+              { merge: true },
+            );
+
+            await jobRef.set(
+              {
+                transcriptChunkCount: chunkCount,
+                transcriptChunksCompleted: chunkIndex - 1,
+                transcriptCurrentChunkSizeBytes: chunkSizeBytes,
+                updatedAt: now(),
+              },
+              { merge: true },
+            );
+          },
+        );
+
+        const transcriptText = transcriptionResult.text;
         if (!transcriptText) {
           throw new Error("OpenAI returned an empty transcription response.");
         }
@@ -348,6 +497,10 @@ exports.onAiJobCreated = onDocumentCreated(
             sessionStatus: "ready",
             transcriptText,
             transcriptUpdatedAt: timestamp,
+            transcriptWasChunked: transcriptionResult.chunked,
+            transcriptChunkCount: transcriptionResult.chunkCount,
+            transcriptChunksCompleted: transcriptionResult.chunkCount,
+            transcriptOriginalAudioSizeBytes: transcriptionResult.originalSizeBytes,
             audioDeletionStatus: "scheduled",
             audioDeleteAfter: audioDeleteAfterDate(),
             audioDeletedAt: null,
@@ -362,6 +515,9 @@ exports.onAiJobCreated = onDocumentCreated(
             output: { text: transcriptText },
             sessionPath,
             audioStoragePath,
+            transcriptWasChunked: transcriptionResult.chunked,
+            transcriptChunkCount: transcriptionResult.chunkCount,
+            transcriptOriginalAudioSizeBytes: transcriptionResult.originalSizeBytes,
             completedAt: timestamp,
             updatedAt: timestamp,
           },
