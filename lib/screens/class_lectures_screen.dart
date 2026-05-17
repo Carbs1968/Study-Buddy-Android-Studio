@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import '../l10n/strings.dart';
+import 'class_materials_screen.dart';
 import 'lecture_detail_screen.dart';
 
 class ClassLecturesScreen extends StatefulWidget {
@@ -62,7 +63,30 @@ class _ClassLecturesScreenState extends State<ClassLecturesScreen> {
             .where('className', isEqualTo: widget.className);
 
     return Scaffold(
-      appBar: AppBar(title: Text(widget.className)),
+      appBar: AppBar(
+        title: Text(widget.className),
+        actions: [
+          IconButton(
+            tooltip: 'Materials',
+            icon: const Icon(Icons.folder_copy_outlined),
+            onPressed: hasStableClassContext
+                ? () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => ClassMaterialsScreen(
+                          academicYearId: widget.academicYearId,
+                          semesterId: widget.semesterId,
+                          classId: widget.classId,
+                          className: widget.className,
+                        ),
+                      ),
+                    );
+                  }
+                : null,
+          ),
+        ],
+      ),
       body: Column(
         children: [
           Padding(
