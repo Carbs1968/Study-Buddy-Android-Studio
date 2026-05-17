@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -67,24 +68,86 @@ class _ClassMaterialsScreenState extends State<ClassMaterialsScreen> {
     return null;
   }
 
-  Future<void> _addImageFromGallery() async {
+  String _extensionForFileName(String fileName) {
+    final dotIndex = fileName.lastIndexOf('.');
+    if (dotIndex < 0 || dotIndex == fileName.length - 1) return '';
+    return fileName.substring(dotIndex + 1).toLowerCase();
+  }
+
+  String _materialTypeForFileName(String fileName) {
+    final extension = _extensionForFileName(fileName);
+
+    if (extension == 'pdf') return 'pdf';
+    if (extension == 'txt') return 'text';
+    if (extension == 'doc' || extension == 'docx') return 'document';
+    if (extension == 'csv' || extension == 'xls' || extension == 'xlsx') {
+      return 'spreadsheet';
+    }
+    if (extension == 'ppt' || extension == 'pptx') return 'presentation';
+
+    return 'other';
+  }
+
+  String _mimeTypeForFileName(String fileName) {
+    final extension = _extensionForFileName(fileName);
+
+    switch (extension) {
+      case 'pdf':
+        return 'application/pdf';
+      case 'txt':
+        return 'text/plain';
+      case 'csv':
+        return 'text/csv';
+      case 'doc':
+        return 'application/msword';
+      case 'docx':
+        return 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+      case 'xls':
+        return 'application/vnd.ms-excel';
+      case 'xlsx':
+        return 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+      case 'ppt':
+        return 'application/vnd.ms-powerpoint';
+      case 'pptx':
+        return 'application/vnd.openxmlformats-officedocument.presentationml.presentation';
+      default:
+        return 'application/octet-stream';
+    }
+  }
+
+  IconData _iconForMaterialType(String type) {
+    switch (type) {
+      case 'image':
+        return Icons.image_outlined;
+      case 'pdf':
+        return Icons.picture_as_pdf_outlined;
+      case 'spreadsheet':
+        return Icons.table_chart_outlined;
+      case 'presentation':
+        return Icons.slideshow_outlined;
+      case 'document':
+      case 'text':
+        return Icons.description_outlined;
+      default:
+        return Icons.insert_drive_file_outlined;
+    }
+  }
+
+  Future<void> _uploadMaterialFile({
+    required File file,
+    required String originalFileName,
+    required String mimeType,
+    required String materialType,
+    required String sourceKind,
+  }) async {
     final uid = FirebaseAuth.instance.currentUser?.uid;
     if (uid == null || _uploading) return;
-
-    final picked = await _picker.pickImage(
-      source: ImageSource.gallery,
-      imageQuality: 90,
-    );
-
-    if (picked == null) return;
 
     setState(() => _uploading = true);
 
     try {
-      final file = File(picked.path);
       final sizeBytes = await file.length();
       final materialRef = _materialsRef(uid).doc();
-      final originalFileName = _fileNameFromPath(picked.path);
       final safeFileName = _safeFileName(originalFileName);
 
       final storagePath =
@@ -94,7 +157,7 @@ class _ClassMaterialsScreenState extends State<ClassMaterialsScreen> {
 
       await storageRef.putFile(
         file,
-        SettableMetadata(contentType: picked.mimeType ?? 'image/jpeg'),
+        SettableMetadata(contentType: mimeType),
       );
 
       final downloadUrl = await storageRef.getDownloadURL();
@@ -107,13 +170,13 @@ class _ClassMaterialsScreenState extends State<ClassMaterialsScreen> {
         'classId': widget.classId,
         'className': widget.className,
         'materialId': materialRef.id,
-        'materialType': 'image',
-        'sourceKind': 'gallery',
+        'materialType': materialType,
+        'sourceKind': sourceKind,
         'fileName': safeFileName,
         'originalFileName': originalFileName,
         'storagePath': storagePath,
         'downloadUrl': downloadUrl,
-        'mimeType': picked.mimeType ?? 'image/jpeg',
+        'mimeType': mimeType,
         'sizeBytes': sizeBytes,
         'status': 'uploaded',
         'extractionStatus': 'not_started',
@@ -137,6 +200,105 @@ class _ClassMaterialsScreenState extends State<ClassMaterialsScreen> {
     }
   }
 
+  Future<void> _addImageFromGallery() async {
+    if (_uploading) return;
+
+    final picked = await _picker.pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 90,
+    );
+
+    if (picked == null) return;
+
+    await _uploadMaterialFile(
+      file: File(picked.path),
+      originalFileName: _fileNameFromPath(picked.path),
+      mimeType: picked.mimeType ?? 'image/jpeg',
+      materialType: 'image',
+      sourceKind: 'gallery',
+    );
+  }
+
+  Future<void> _addAcademicFile() async {
+    if (_uploading) return;
+
+    final result = await FilePicker.pickFiles(
+      type: FileType.custom,
+      allowMultiple: false,
+      allowedExtensions: [
+        'pdf',
+        'txt',
+        'doc',
+        'docx',
+        'csv',
+        'xls',
+        'xlsx',
+        'ppt',
+        'pptx',
+      ],
+      withData: false,
+    );
+
+    if (result == null || result.files.isEmpty) return;
+
+    final picked = result.files.single;
+    final pickedPath = picked.path;
+
+    if (pickedPath == null || pickedPath.trim().isEmpty) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Could not access the selected file.')),
+      );
+      return;
+    }
+
+    final originalFileName = picked.name.trim().isEmpty
+        ? _fileNameFromPath(pickedPath)
+        : picked.name.trim();
+
+    await _uploadMaterialFile(
+      file: File(pickedPath),
+      originalFileName: originalFileName,
+      mimeType: _mimeTypeForFileName(originalFileName),
+      materialType: _materialTypeForFileName(originalFileName),
+      sourceKind: 'file',
+    );
+  }
+
+  Future<void> _showAddMaterialOptions() async {
+    if (_uploading) return;
+
+    await showModalBottomSheet<void>(
+      context: context,
+      builder: (context) {
+        return SafeArea(
+          child: Wrap(
+            children: [
+              ListTile(
+                leading: const Icon(Icons.add_photo_alternate_outlined),
+                title: const Text('Add image'),
+                subtitle: const Text('Upload a photo or image from your gallery.'),
+                onTap: () {
+                  Navigator.pop(context);
+                  _addImageFromGallery();
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.upload_file_outlined),
+                title: const Text('Add file'),
+                subtitle: const Text('PDF, Word, PowerPoint, text, CSV, or Excel.'),
+                onTap: () {
+                  Navigator.pop(context);
+                  _addAcademicFile();
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final uid = FirebaseAuth.instance.currentUser?.uid;
@@ -152,15 +314,15 @@ class _ClassMaterialsScreenState extends State<ClassMaterialsScreen> {
         title: Text('${widget.className} Materials'),
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: _uploading ? null : _addImageFromGallery,
+        onPressed: _uploading ? null : _showAddMaterialOptions,
         icon: _uploading
             ? const SizedBox(
                 height: 18,
                 width: 18,
                 child: CircularProgressIndicator(strokeWidth: 2),
               )
-            : const Icon(Icons.add_photo_alternate_outlined),
-        label: Text(_uploading ? 'Uploading...' : 'Add image'),
+            : const Icon(Icons.add_outlined),
+        label: Text(_uploading ? 'Uploading...' : 'Add material'),
       ),
       body: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
         stream: _materialsRef(uid).orderBy('createdAt', descending: true).snapshots(),
@@ -214,19 +376,35 @@ class _ClassMaterialsScreenState extends State<ClassMaterialsScreen> {
               final downloadUrl = (data['downloadUrl'] ?? '').toString();
 
               return ListTile(
-                leading: const Icon(Icons.image_outlined),
+                leading: Icon(_iconForMaterialType(type)),
                 title: Text(title),
                 subtitle: Text(subtitleParts.join(' • ')),
                 trailing: const Icon(Icons.chevron_right),
                 onTap: downloadUrl.isEmpty
                     ? null
                     : () {
+                        if (type == 'image') {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => _MaterialImagePreviewScreen(
+                                title: title,
+                                imageUrl: downloadUrl,
+                              ),
+                            ),
+                          );
+                          return;
+                        }
+
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (_) => _MaterialImagePreviewScreen(
+                            builder: (_) => _MaterialFileDetailsScreen(
                               title: title,
-                              imageUrl: downloadUrl,
+                              materialType: type,
+                              downloadUrl: downloadUrl,
+                              mimeType: (data['mimeType'] ?? '').toString(),
+                              sizeBytes: data['sizeBytes'],
                             ),
                           ),
                         );
@@ -284,6 +462,67 @@ class _MaterialImagePreviewScreen extends StatelessWidget {
             },
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _MaterialFileDetailsScreen extends StatelessWidget {
+  final String title;
+  final String materialType;
+  final String downloadUrl;
+  final String mimeType;
+  final dynamic sizeBytes;
+
+  const _MaterialFileDetailsScreen({
+    required this.title,
+    required this.materialType,
+    required this.downloadUrl,
+    required this.mimeType,
+    required this.sizeBytes,
+  });
+
+  String _formatSize(dynamic value) {
+    final bytes = value is int ? value : int.tryParse(value.toString());
+    if (bytes == null) return 'Unknown size';
+    if (bytes < 1024) return '$bytes B';
+    if (bytes < 1024 * 1024) return '${(bytes / 1024).toStringAsFixed(1)} KB';
+    return '${(bytes / (1024 * 1024)).toStringAsFixed(1)} MB';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(title),
+      ),
+      body: ListView(
+        padding: const EdgeInsets.all(16),
+        children: [
+          Icon(
+            Icons.insert_drive_file_outlined,
+            size: 56,
+            color: Theme.of(context).colorScheme.primary,
+          ),
+          const SizedBox(height: 16),
+          Text(
+            title,
+            style: Theme.of(context).textTheme.titleLarge,
+          ),
+          const SizedBox(height: 12),
+          Text('Type: $materialType'),
+          Text('MIME type: ${mimeType.isEmpty ? 'Unknown' : mimeType}'),
+          Text('Size: ${_formatSize(sizeBytes)}'),
+          const SizedBox(height: 24),
+          const Text(
+            'This file is uploaded and saved as class material. File preview and AI text extraction will be added in a later step.',
+          ),
+          const SizedBox(height: 16),
+          SelectableText(
+            downloadUrl,
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
+        ],
       ),
     );
   }
