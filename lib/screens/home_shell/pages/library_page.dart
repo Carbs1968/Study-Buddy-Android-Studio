@@ -85,7 +85,26 @@ class _LibraryPageState extends State<LibraryPage> {
                   if (className.isEmpty) continue;
 
                   final createdAt = _toDt(m['createdAt']);
-                  final row = classes.putIfAbsent(className, () => _ClassRow(className));
+                  final academicYearId =
+                      (m['academicYearId'] ?? '').toString().trim();
+                  final semesterId = (m['semesterId'] ?? '').toString().trim();
+                  final classId = (m['classId'] ?? '').toString().trim();
+
+                  final classKey = academicYearId.isNotEmpty &&
+                          semesterId.isNotEmpty &&
+                          classId.isNotEmpty
+                      ? '$academicYearId/$semesterId/$classId'
+                      : 'legacy/$className';
+
+                  final row = classes.putIfAbsent(
+                    classKey,
+                    () => _ClassRow(
+                      className: className,
+                      academicYearId: academicYearId,
+                      semesterId: semesterId,
+                      classId: classId,
+                    ),
+                  );
                   row.count += 1;
 
                   if (createdAt != null &&
@@ -142,7 +161,12 @@ class _LibraryPageState extends State<LibraryPage> {
                       onTap: () {
                         Navigator.of(context).push(
                           MaterialPageRoute(
-                            builder: (_) => ClassLecturesScreen(className: r.className),
+                            builder: (_) => ClassLecturesScreen(
+                              className: r.className,
+                              academicYearId: r.academicYearId,
+                              semesterId: r.semesterId,
+                              classId: r.classId,
+                            ),
                           ),
                         );
                       },
@@ -160,8 +184,16 @@ class _LibraryPageState extends State<LibraryPage> {
 
 class _ClassRow {
   final String className;
+  final String academicYearId;
+  final String semesterId;
+  final String classId;
   int count = 0;
   DateTime? latest;
 
-  _ClassRow(this.className);
+  _ClassRow({
+    required this.className,
+    required this.academicYearId,
+    required this.semesterId,
+    required this.classId,
+  });
 }

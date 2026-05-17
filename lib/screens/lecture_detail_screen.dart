@@ -502,6 +502,7 @@ class LectureDetailScreen extends StatelessWidget {
 
               _AiActionRow(
                 title: strings.generateSummary,
+                type: 'summary',
                 status: summaryStatus,
                 transcriptReady: transcriptStatus == 'done',
                 onRequest: () async {
@@ -525,6 +526,7 @@ class LectureDetailScreen extends StatelessWidget {
               ),
               _AiActionRow(
                 title: strings.generateNotes,
+                type: 'notes',
                 status: notesStatus,
                 transcriptReady: transcriptStatus == 'done',
                 onRequest: () async {
@@ -548,6 +550,7 @@ class LectureDetailScreen extends StatelessWidget {
               ),
               _AiActionRow(
                 title: strings.generatePracticeTest,
+                type: 'quiz',
                 status: quizStatus,
                 transcriptReady: transcriptStatus == 'done',
                 onRequest: () async {
@@ -580,6 +583,7 @@ class LectureDetailScreen extends StatelessWidget {
 
 class _AiActionRow extends StatelessWidget {
   final String title;
+  final String type;
   final String status;
   final Future<void> Function() onRequest;
   final bool transcriptReady;
@@ -588,6 +592,7 @@ class _AiActionRow extends StatelessWidget {
 
   const _AiActionRow({
     required this.title,
+    required this.type,
     required this.status,
     required this.onRequest,
     required this.transcriptReady,
@@ -595,18 +600,9 @@ class _AiActionRow extends StatelessWidget {
     this.viewAiOutput,
   });
 
-  String _typeFromTitle(String t) {
-    final lower = t.toLowerCase();
-    if (lower.contains('summary')) return 'summary';
-    if (lower.contains('notes')) return 'notes';
-    if (lower.contains('practice') || lower.contains('quiz')) return 'quiz';
-    return '';
-  }
-
   @override
   Widget build(BuildContext context) {
     final strings = SBStrings.of(context);
-    final type = _typeFromTitle(title);
 
     return ListTile(
       leading: const Icon(Icons.auto_awesome),

@@ -7,10 +7,16 @@ import 'lecture_detail_screen.dart';
 
 class ClassLecturesScreen extends StatefulWidget {
   final String className;
+  final String academicYearId;
+  final String semesterId;
+  final String classId;
 
   const ClassLecturesScreen({
     super.key,
     required this.className,
+    this.academicYearId = '',
+    this.semesterId = '',
+    this.classId = '',
   });
 
   @override
@@ -37,11 +43,23 @@ class _ClassLecturesScreenState extends State<ClassLecturesScreen> {
       );
     }
 
-    final q = FirebaseFirestore.instance
-        .collection('users')
-        .doc(uid)
-        .collection('sessions')
-        .where('className', isEqualTo: widget.className);
+    final hasStableClassContext = widget.academicYearId.trim().isNotEmpty &&
+        widget.semesterId.trim().isNotEmpty &&
+        widget.classId.trim().isNotEmpty;
+
+    final q = hasStableClassContext
+        ? FirebaseFirestore.instance
+            .collection('users')
+            .doc(uid)
+            .collection('sessions')
+            .where('academicYearId', isEqualTo: widget.academicYearId)
+            .where('semesterId', isEqualTo: widget.semesterId)
+            .where('classId', isEqualTo: widget.classId)
+        : FirebaseFirestore.instance
+            .collection('users')
+            .doc(uid)
+            .collection('sessions')
+            .where('className', isEqualTo: widget.className);
 
     return Scaffold(
       appBar: AppBar(title: Text(widget.className)),
