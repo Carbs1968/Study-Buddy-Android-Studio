@@ -7,6 +7,7 @@ const { initializeApp } = require("firebase-admin/app");
 const { getFirestore, FieldValue } = require("firebase-admin/firestore");
 const { getStorage } = require("firebase-admin/storage");
 const { defineSecret } = require("firebase-functions/params");
+const { onSchedule } = require("firebase-functions/v2/scheduler");
 const { onCall, HttpsError } = require("firebase-functions/v2/https");
 const {
   onDocumentCreated,
@@ -20,12 +21,20 @@ const OPENAI_API_KEY = defineSecret("OPENAI_API_KEY");
 const CHAT_MODEL = "gpt-4o-mini";
 const TRANSCRIPT_TYPE = "transcript";
 const SUPPORTED_OUTPUT_TYPES = new Set(["summary", "notes", "quiz"]);
+const AUDIO_RETENTION_DAYS_AFTER_TRANSCRIPT = 5;
+const AUDIO_CLEANUP_BATCH_LIMIT = 100;
 
 const db = getFirestore();
 const storage = getStorage();
 
 function now() {
   return FieldValue.serverTimestamp();
+}
+
+function audioDeleteAfterDate() {
+  const date = new Date();
+  date.setDate(date.getDate() + AUDIO_RETENTION_DAYS_AFTER_TRANSCRIPT);
+  return date;
 }
 
 function trimOrEmpty(value) {
@@ -339,6 +348,9 @@ exports.onAiJobCreated = onDocumentCreated(
             sessionStatus: "ready",
             transcriptText,
             transcriptUpdatedAt: timestamp,
+            audioDeletionStatus: "scheduled",
+            audioDeleteAfter: audioDeleteAfterDate(),
+            audioDeletedAt: null,
             updatedAt: timestamp,
           },
           { merge: true },
@@ -553,3 +565,81 @@ exports.getAiJobOutput = onCall({ region: REGION }, async (request) => {
     type: requestedType,
   };
 });
+
+exports.cleanupTranscribedAudio = onSchedule(
+  {
+    schedule: "every day 03:00",
+    timeZone: "America/Merida",
+    region: REGION,
+    timeoutSeconds: 540,
+    memory: "512MiB",
+  },
+  async () => {
+    const snapshot = await db
+      .collectionGroup("sessions")
+      .where("transcriptStatus", "==", "done")
+      .where("audioDeletionStatus", "==", "scheduled")
+      .where("audioDeleteAfter", "<=", new Date())
+      .limit(AUDIO_CLEANUP_BATCH_LIMIT)
+      .get();
+
+    if (snapshot.empty) {
+      console.log("No transcribed audio files ready for cleanup.");
+      return;
+    }
+
+    for (const doc of snapshot.docs) {
+      const session = doc.data() || {};
+      const audioStoragePath = trimOrEmpty(session.audioStoragePath);
+
+      if (!audioStoragePath) {
+        await doc.ref.set(
+          {
+            audioDeletionStatus: "skipped",
+            audioDeletionErrorCode: "missing-audio-storage-path",
+            audioDeletionErrorMessage:
+              "Audio cleanup skipped because audioStoragePath is missing.",
+            updatedAt: now(),
+          },
+          { merge: true },
+        );
+        continue;
+      }
+
+      try {
+        const file = storage.bucket().file(audioStoragePath);
+        const [exists] = await file.exists();
+
+        if (exists) {
+          await file.delete();
+        }
+
+        await doc.ref.set(
+          {
+            audioDeletionStatus: "deleted",
+            audioDeletedAt: now(),
+            audioDownloadUrl: null,
+            updatedAt: now(),
+          },
+          { merge: true },
+        );
+
+        console.log(`Deleted transcribed audio file: ${audioStoragePath}`);
+      } catch (error) {
+        const message = error && error.message ? error.message : String(error);
+
+        await doc.ref.set(
+          {
+            audioDeletionStatus: "error",
+            audioDeletionErrorCode: "audio-delete-failed",
+            audioDeletionErrorMessage: message,
+            updatedAt: now(),
+          },
+          { merge: true },
+        );
+
+        console.error(`Failed to delete audio file '${audioStoragePath}'.`, error);
+      }
+    }
+  },
+);
