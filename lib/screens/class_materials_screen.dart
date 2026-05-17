@@ -1,5 +1,8 @@
+import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
+import 'package:archive/archive.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -7,6 +10,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:pdfrx/pdfrx.dart';
+import 'package:xml/xml.dart';
 
 class ClassMaterialsScreen extends StatefulWidget {
   final String academicYearId;
@@ -376,6 +380,7 @@ class _ClassMaterialsScreenState extends State<ClassMaterialsScreen> {
 
               final downloadUrl = (data['downloadUrl'] ?? '').toString();
               final storagePath = (data['storagePath'] ?? '').toString();
+              final mimeType = (data['mimeType'] ?? '').toString();
               final materialRef = docs[index].reference;
 
               return ListTile(
@@ -416,6 +421,26 @@ class _ClassMaterialsScreenState extends State<ClassMaterialsScreen> {
                           return;
                         }
 
+                        final isDocx = title.toLowerCase().endsWith('.docx') ||
+                            mimeType.contains(
+                              'openxmlformats-officedocument.wordprocessingml.document',
+                            );
+
+                        if (isDocx) {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => _MaterialDocxTextPreviewScreen(
+                                title: title,
+                                docxUrl: downloadUrl,
+                                materialRef: materialRef,
+                                storagePath: storagePath,
+                              ),
+                            ),
+                          );
+                          return;
+                        }
+
                         Navigator.push(
                           context,
                           MaterialPageRoute(
@@ -423,7 +448,7 @@ class _ClassMaterialsScreenState extends State<ClassMaterialsScreen> {
                               title: title,
                               materialType: type,
                               downloadUrl: downloadUrl,
-                              mimeType: (data['mimeType'] ?? '').toString(),
+                              mimeType: mimeType,
                               sizeBytes: data['sizeBytes'],
                               materialRef: materialRef,
                               storagePath: storagePath,
@@ -599,6 +624,161 @@ class _MaterialPdfPreviewScreen extends StatelessWidget {
       ),
       body: PdfViewer.uri(
         Uri.parse(pdfUrl),
+      ),
+    );
+  }
+}
+
+
+Future<Uint8List> _downloadMaterialBytes(String url) async {
+  final request = await HttpClient().getUrl(Uri.parse(url));
+  final response = await request.close();
+
+  if (response.statusCode < 200 || response.statusCode >= 300) {
+    throw Exception('Download failed with status ${response.statusCode}.');
+  }
+
+  final bytes = <int>[];
+  await for (final chunk in response) {
+    bytes.addAll(chunk);
+  }
+
+  return Uint8List.fromList(bytes);
+}
+
+String _extractTextFromDocxBytes(Uint8List bytes) {
+  final archive = ZipDecoder().decodeBytes(bytes);
+  final documentFile = archive.files
+      .where((file) => file.name == 'word/document.xml')
+      .firstOrNull;
+
+  if (documentFile == null) {
+    throw Exception('DOCX document body was not found.');
+  }
+
+  final content = documentFile.content;
+  final xmlText = content is List<int>
+      ? utf8.decode(content)
+      : utf8.decode(List<int>.from(content as Iterable));
+
+  final document = XmlDocument.parse(xmlText);
+  final paragraphs = document.descendants
+      .whereType<XmlElement>()
+      .where((element) => element.name.local == 'p');
+
+  final paragraphText = <String>[];
+
+  for (final paragraph in paragraphs) {
+    final text = paragraph.descendants
+        .whereType<XmlElement>()
+        .where((element) => element.name.local == 't')
+        .map((element) => element.innerText)
+        .join();
+
+    final trimmed = text.trim();
+    if (trimmed.isNotEmpty) {
+      paragraphText.add(trimmed);
+    }
+  }
+
+  if (paragraphText.isNotEmpty) {
+    return paragraphText.join('\n\n');
+  }
+
+  final fallbackText = document.descendants
+      .whereType<XmlElement>()
+      .where((element) => element.name.local == 't')
+      .map((element) => element.innerText)
+      .join(' ')
+      .trim();
+
+  if (fallbackText.isEmpty) {
+    throw Exception('No readable text was found in this DOCX file.');
+  }
+
+  return fallbackText;
+}
+
+class _MaterialDocxTextPreviewScreen extends StatelessWidget {
+  final String title;
+  final String docxUrl;
+  final DocumentReference<Map<String, dynamic>> materialRef;
+  final String storagePath;
+
+  const _MaterialDocxTextPreviewScreen({
+    required this.title,
+    required this.docxUrl,
+    required this.materialRef,
+    required this.storagePath,
+  });
+
+  Future<String> _loadText() async {
+    final bytes = await _downloadMaterialBytes(docxUrl);
+    return _extractTextFromDocxBytes(bytes);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(title),
+        actions: [
+          IconButton(
+            tooltip: 'Delete material',
+            icon: const Icon(Icons.delete_outline),
+            onPressed: () => _deleteMaterial(
+              context,
+              materialRef: materialRef,
+              storagePath: storagePath,
+            ),
+          ),
+        ],
+      ),
+      body: FutureBuilder<String>(
+        future: _loadText(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          if (snapshot.hasError) {
+            return Padding(
+              padding: const EdgeInsets.all(24),
+              child: Center(
+                child: Text(
+                  'Could not preview DOCX text: ${snapshot.error}',
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            );
+          }
+
+          final docText = snapshot.data?.trim() ?? '';
+
+          if (docText.isEmpty) {
+            return const Center(
+              child: Padding(
+                padding: EdgeInsets.all(24),
+                child: Text(
+                  'No readable text was found in this DOCX file.',
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            );
+          }
+
+          return ListView(
+            padding: const EdgeInsets.all(16),
+            children: [
+              Text(
+                title,
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+              const SizedBox(height: 16),
+              SelectableText(docText),
+            ],
+          );
+        },
       ),
     );
   }
