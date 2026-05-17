@@ -6,6 +6,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:pdfrx/pdfrx.dart';
 
 class ClassMaterialsScreen extends StatefulWidget {
   final String academicYearId;
@@ -400,6 +401,21 @@ class _ClassMaterialsScreenState extends State<ClassMaterialsScreen> {
                           return;
                         }
 
+                        if (type == 'pdf') {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => _MaterialPdfPreviewScreen(
+                                title: title,
+                                pdfUrl: downloadUrl,
+                                materialRef: materialRef,
+                                storagePath: storagePath,
+                              ),
+                            ),
+                          );
+                          return;
+                        }
+
                         Navigator.push(
                           context,
                           MaterialPageRoute(
@@ -545,6 +561,44 @@ class _MaterialImagePreviewScreen extends StatelessWidget {
             },
           ),
         ),
+      ),
+    );
+  }
+}
+
+
+class _MaterialPdfPreviewScreen extends StatelessWidget {
+  final String title;
+  final String pdfUrl;
+  final DocumentReference<Map<String, dynamic>> materialRef;
+  final String storagePath;
+
+  const _MaterialPdfPreviewScreen({
+    required this.title,
+    required this.pdfUrl,
+    required this.materialRef,
+    required this.storagePath,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(title),
+        actions: [
+          IconButton(
+            tooltip: 'Delete material',
+            icon: const Icon(Icons.delete_outline),
+            onPressed: () => _deleteMaterial(
+              context,
+              materialRef: materialRef,
+              storagePath: storagePath,
+            ),
+          ),
+        ],
+      ),
+      body: PdfViewer.uri(
+        Uri.parse(pdfUrl),
       ),
     );
   }
