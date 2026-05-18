@@ -11,6 +11,7 @@ class ClassLecturesScreen extends StatefulWidget {
   final String academicYearId;
   final String semesterId;
   final String classId;
+  final bool useStableSessionQuery;
 
   const ClassLecturesScreen({
     super.key,
@@ -18,6 +19,7 @@ class ClassLecturesScreen extends StatefulWidget {
     this.academicYearId = '',
     this.semesterId = '',
     this.classId = '',
+    this.useStableSessionQuery = false,
   });
 
   @override
@@ -48,7 +50,10 @@ class _ClassLecturesScreenState extends State<ClassLecturesScreen> {
         widget.semesterId.trim().isNotEmpty &&
         widget.classId.trim().isNotEmpty;
 
-    final q = hasStableClassContext
+    final useStableSessionQuery =
+        widget.useStableSessionQuery && hasStableClassContext;
+
+    final q = useStableSessionQuery
         ? FirebaseFirestore.instance
             .collection('users')
             .doc(uid)

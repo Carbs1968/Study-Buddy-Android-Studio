@@ -85,16 +85,34 @@ class _LibraryPageState extends State<LibraryPage> {
                   if (className.isEmpty) continue;
 
                   final createdAt = _toDt(m['createdAt']);
-                  final academicYearId =
+                  final storedAcademicYearId =
                       (m['academicYearId'] ?? '').toString().trim();
-                  final semesterId = (m['semesterId'] ?? '').toString().trim();
-                  final classId = (m['classId'] ?? '').toString().trim();
+                  final storedSemesterId =
+                      (m['semesterId'] ?? '').toString().trim();
+                  final storedClassId = (m['classId'] ?? '').toString().trim();
 
-                  final classKey = academicYearId.isNotEmpty &&
-                          semesterId.isNotEmpty &&
-                          classId.isNotEmpty
-                      ? '$academicYearId/$semesterId/$classId'
-                      : 'legacy/$className';
+                  final hasStoredStableContext = storedAcademicYearId.isNotEmpty &&
+                      storedSemesterId.isNotEmpty &&
+                      storedClassId.isNotEmpty;
+
+                  final academicYearName =
+                      (m['academicYearName'] ?? m['levelName'] ?? 'legacy')
+                          .toString()
+                          .trim();
+                  final semesterName =
+                      (m['semesterName'] ?? 'legacy-term').toString().trim();
+
+                  final academicYearId = hasStoredStableContext
+                      ? storedAcademicYearId
+                      : _stableDocumentId(academicYearName);
+                  final semesterId = hasStoredStableContext
+                      ? storedSemesterId
+                      : _stableDocumentId(semesterName);
+                  final classId = hasStoredStableContext
+                      ? storedClassId
+                      : _stableDocumentId(className);
+
+                  final classKey = '$academicYearId/$semesterId/$classId';
 
                   final row = classes.putIfAbsent(
                     classKey,
@@ -103,6 +121,7 @@ class _LibraryPageState extends State<LibraryPage> {
                       academicYearId: academicYearId,
                       semesterId: semesterId,
                       classId: classId,
+                      useStableSessionQuery: hasStoredStableContext,
                     ),
                   );
                   row.count += 1;
@@ -166,6 +185,7 @@ class _LibraryPageState extends State<LibraryPage> {
                               academicYearId: r.academicYearId,
                               semesterId: r.semesterId,
                               classId: r.classId,
+                              useStableSessionQuery: r.useStableSessionQuery,
                             ),
                           ),
                         );
@@ -182,11 +202,32 @@ class _LibraryPageState extends State<LibraryPage> {
   }
 }
 
+
+String _stableDocumentId(String value) {
+  final normalized = value
+      .trim()
+      .toLowerCase()
+      .replaceAll(RegExp(r'[áàäâã]'), 'a')
+      .replaceAll(RegExp(r'[éèëê]'), 'e')
+      .replaceAll(RegExp(r'[íìïî]'), 'i')
+      .replaceAll(RegExp(r'[óòöôõ]'), 'o')
+      .replaceAll(RegExp(r'[úùüû]'), 'u')
+      .replaceAll('ñ', 'n')
+      .replaceAll('ç', 'c');
+
+  final slug = normalized
+      .replaceAll(RegExp(r'[^a-z0-9]+'), '-')
+      .replaceAll(RegExp(r'^-+|-+$'), '');
+
+  return slug.isEmpty ? 'legacy' : slug;
+}
+
 class _ClassRow {
   final String className;
   final String academicYearId;
   final String semesterId;
   final String classId;
+  final bool useStableSessionQuery;
   int count = 0;
   DateTime? latest;
 
@@ -195,5 +236,6 @@ class _ClassRow {
     required this.academicYearId,
     required this.semesterId,
     required this.classId,
+    required this.useStableSessionQuery,
   });
 }
