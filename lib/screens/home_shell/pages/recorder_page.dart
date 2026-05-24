@@ -220,13 +220,16 @@ class _RecorderPageState extends State<RecorderPage> {
       return;
     }
 
-    final tmp = await getTemporaryDirectory();
+    final docs = await getApplicationDocumentsDirectory();
+    final recordingsDir = Directory(path.join(docs.path, 'pending_recordings'));
+    await recordingsDir.create(recursive: true);
+
     final fname = fileNameFormatted(
       className: _classCtl.text,
       topic: _topicCtl.text,
       when: DateTime.now(),
     );
-    final filePath = '${tmp.path}/$fname';
+    final filePath = path.join(recordingsDir.path, fname);
 
     await WakelockPlus.enable();
 
