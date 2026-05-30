@@ -17,7 +17,11 @@ class HomeShell extends StatefulWidget {
 
 class _HomeShellState extends State<HomeShell> {
   int _tab = 0;
-  int _recorderRefreshKey = 0;
+  final List<Widget> _tabs = const [
+    RecorderPage(),
+    LibraryPage(),
+    SettingsPage(),
+  ];
 
   @override
   void initState() {
@@ -43,10 +47,6 @@ class _HomeShellState extends State<HomeShell> {
 
   void _onTabTapped(int index) {
     setState(() {
-      // Rebuild RecorderPage whenever returning to the Record tab
-      if (index == 0 && _tab != 0) {
-        _recorderRefreshKey++;
-      }
       _tab = index;
     });
   }
@@ -55,16 +55,10 @@ class _HomeShellState extends State<HomeShell> {
   Widget build(BuildContext context) {
     final strings = SBStrings.of(context);
 
-    final tabs = [
-      RecorderPage(key: ValueKey('recorder_$_recorderRefreshKey')),
-      const LibraryPage(),
-      const SettingsPage(),
-    ];
-
     return Scaffold(
       body: IndexedStack(
         index: _tab,
-        children: tabs,
+        children: _tabs,
       ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _tab,
