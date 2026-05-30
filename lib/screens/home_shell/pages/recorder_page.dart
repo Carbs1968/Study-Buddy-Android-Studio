@@ -28,7 +28,7 @@ class RecorderPage extends StatefulWidget {
   State<RecorderPage> createState() => _RecorderPageState();
 }
 
-class _RecorderPageState extends State<RecorderPage> {
+class _RecorderPageState extends State<RecorderPage> with WidgetsBindingObserver {
   final FocusNode _topicFocus = FocusNode();
 
   bool _selectedExistingClass = false;
@@ -85,18 +85,28 @@ class _RecorderPageState extends State<RecorderPage> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _classCtl.addListener(_recomputeReady);
     _topicCtl.addListener(_recomputeReady);
     _loadAcademicSettings();
+    _restoreRecoverableRecordingState();
   }
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _ticker?.cancel();
     _topicFocus.dispose();
     _classCtl.dispose();
     _topicCtl.dispose();
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _restoreRecoverableRecordingState();
+    }
   }
 
   void _recomputeReady() {
@@ -203,6 +213,127 @@ class _RecorderPageState extends State<RecorderPage> {
     return false;
   }
 
+  void _startTicker() {
+    _ticker?.cancel();
+    _ticker = Timer.periodic(const Duration(seconds: 1), (_) {
+      if (mounted && _isRecording && !_isPaused) {
+        setState(() => _elapsedSeconds += 1);
+      }
+    });
+  }
+
+  Future<Directory> _pendingRecordingsDirectory() async {
+    final docs = await getApplicationDocumentsDirectory();
+    return Directory(path.join(docs.path, 'pending_recordings'));
+  }
+
+  Future<void> _restoreRecoverableRecordingState() async {
+    if (_isRecording || _recordingComplete || _isUploading) return;
+
+    final restoredNative = await _restoreNativeRecordingState();
+    if (!restoredNative) {
+      await _restoreLatestPendingRecording();
+    }
+  }
+
+  Future<bool> _restoreNativeRecordingState() async {
+    if (!Platform.isAndroid || _debugForcePluginRecorder) return false;
+
+    try {
+      final raw = await _recSvc.invokeMapMethod<String, dynamic>('getServiceState');
+      if (raw == null) return false;
+
+      final isRecording = raw['isRecording'] == true;
+      final restoredPath = raw['path']?.toString();
+      if (!isRecording || restoredPath == null || restoredPath.isEmpty) {
+        return false;
+      }
+
+      final elapsedMillis = raw['elapsedMillis'];
+      final restoredElapsedSeconds =
+          elapsedMillis is num ? (elapsedMillis / 1000).floor() : _elapsedSeconds;
+
+      if (!mounted) return false;
+      setState(() {
+        _filePath = restoredPath;
+        _isRecording = true;
+        _isPaused = raw['isPaused'] == true;
+        _recordingComplete = false;
+        _elapsedSeconds = restoredElapsedSeconds;
+      });
+      await WakelockPlus.enable();
+      _startTicker();
+      appLogger('Restored native recording state: path=$restoredPath');
+      return true;
+    } catch (e) {
+      appLogger('Native recording state restore skipped: $e');
+      return false;
+    }
+  }
+
+  Future<void> _restoreLatestPendingRecording() async {
+    try {
+      final recordingsDir = await _pendingRecordingsDirectory();
+      if (!await recordingsDir.exists()) return;
+
+      final candidates = <File>[];
+      await for (final entity in recordingsDir.list(followLinks: false)) {
+        if (entity is File &&
+            path.extension(entity.path).toLowerCase() == '.m4a' &&
+            await entity.exists() &&
+            await entity.length() > 0) {
+          candidates.add(entity);
+        }
+      }
+
+      if (candidates.isEmpty) return;
+
+      candidates.sort((a, b) {
+        return b.lastModifiedSync().compareTo(a.lastModifiedSync());
+      });
+
+      final latest = candidates.first;
+      _restoreClassAndTopicFromFilename(latest.path);
+
+      if (!mounted || _isRecording || _recordingComplete || _isUploading) return;
+      setState(() {
+        _filePath = latest.path;
+        _isRecording = false;
+        _isPaused = false;
+        _recordingComplete = true;
+        _elapsedSeconds = 0;
+      });
+
+      final len = await latest.length();
+      appLogger('Restored pending recording for upload/discard: ${latest.path}');
+      if (len < 4096 && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Recovered a pending recording, but it looks very small ($len bytes). You can try uploading it or discard it.',
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      appLogger('Pending recording restore skipped: $e');
+    }
+  }
+
+  void _restoreClassAndTopicFromFilename(String filePath) {
+    final fileName = path.basename(filePath);
+    final match = RegExp(
+      r'^(.+) - (.+) - \d{4}-\d{2}-\d{2}_\d{2}-\d{2}\.m4a$',
+    ).firstMatch(fileName);
+    if (match == null) return;
+
+    final className = match.group(1)?.trim() ?? '';
+    final topic = match.group(2)?.trim() ?? '';
+    if (className.isNotEmpty) _classCtl.text = className;
+    if (topic.isNotEmpty) _topicCtl.text = topic;
+    _selectedExistingClass = false;
+  }
+
   Future<void> _startRecording() async {
     appLogger('Record button pressed');
 
@@ -220,8 +351,7 @@ class _RecorderPageState extends State<RecorderPage> {
       return;
     }
 
-    final docs = await getApplicationDocumentsDirectory();
-    final recordingsDir = Directory(path.join(docs.path, 'pending_recordings'));
+    final recordingsDir = await _pendingRecordingsDirectory();
     await recordingsDir.create(recursive: true);
 
     final fname = fileNameFormatted(
@@ -301,12 +431,7 @@ class _RecorderPageState extends State<RecorderPage> {
       'Recording started. mode=${usedService ? 'service' : 'plugin'} path=$filePath',
     );
 
-    _ticker?.cancel();
-    _ticker = Timer.periodic(const Duration(seconds: 1), (_) {
-      if (mounted && _isRecording && !_isPaused) {
-        setState(() => _elapsedSeconds += 1);
-      }
-    });
+    _startTicker();
   }
 
   Future<void> _pauseOrResume() async {

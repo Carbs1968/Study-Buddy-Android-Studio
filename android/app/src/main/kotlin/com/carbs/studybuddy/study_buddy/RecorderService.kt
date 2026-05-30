@@ -10,9 +10,78 @@ import android.media.MediaRecorder
 import android.os.Build
 import android.os.IBinder
 import android.os.PowerManager
+import android.os.SystemClock
 import androidx.core.app.NotificationCompat
 
 class RecorderService : Service() {
+
+    companion object {
+        private val stateLock = Any()
+        private var stateIsRecording: Boolean = false
+        private var stateIsPaused: Boolean = false
+        private var statePath: String? = null
+        private var stateStartedAtMillis: Long = 0L
+        private var statePausedAtMillis: Long = 0L
+        private var statePausedTotalMillis: Long = 0L
+
+        fun serviceState(): Map<String, Any?> = synchronized(stateLock) {
+            val now = SystemClock.elapsedRealtime()
+            val elapsedMillis = if (!stateIsRecording || stateStartedAtMillis == 0L) {
+                0L
+            } else {
+                val activeUntil = if (stateIsPaused && statePausedAtMillis > 0L) {
+                    statePausedAtMillis
+                } else {
+                    now
+                }
+                (activeUntil - stateStartedAtMillis - statePausedTotalMillis)
+                    .coerceAtLeast(0L)
+            }
+
+            mapOf(
+                "isRecording" to stateIsRecording,
+                "isPaused" to stateIsPaused,
+                "path" to statePath,
+                "elapsedMillis" to elapsedMillis,
+            )
+        }
+
+        private fun markStarted(path: String) = synchronized(stateLock) {
+            stateIsRecording = true
+            stateIsPaused = false
+            statePath = path
+            stateStartedAtMillis = SystemClock.elapsedRealtime()
+            statePausedAtMillis = 0L
+            statePausedTotalMillis = 0L
+        }
+
+        private fun markPaused() = synchronized(stateLock) {
+            if (stateIsRecording && !stateIsPaused) {
+                stateIsPaused = true
+                statePausedAtMillis = SystemClock.elapsedRealtime()
+            }
+        }
+
+        private fun markResumed() = synchronized(stateLock) {
+            if (stateIsRecording && stateIsPaused) {
+                if (statePausedAtMillis > 0L) {
+                    statePausedTotalMillis +=
+                        SystemClock.elapsedRealtime() - statePausedAtMillis
+                }
+                stateIsPaused = false
+                statePausedAtMillis = 0L
+            }
+        }
+
+        private fun markStopped() = synchronized(stateLock) {
+            stateIsRecording = false
+            stateIsPaused = false
+            statePath = null
+            stateStartedAtMillis = 0L
+            statePausedAtMillis = 0L
+            statePausedTotalMillis = 0L
+        }
+    }
 
     private var recorder: MediaRecorder? = null
     private var hasStarted: Boolean = false
@@ -46,12 +115,18 @@ class RecorderService : Service() {
             }
             "PAUSE" -> {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                    try { recorder?.pause() } catch (_: Exception) {}
+                    try {
+                        recorder?.pause()
+                        markPaused()
+                    } catch (_: Exception) {}
                 }
             }
             "RESUME" -> {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                    try { recorder?.resume() } catch (_: Exception) {}
+                    try {
+                        recorder?.resume()
+                        markResumed()
+                    } catch (_: Exception) {}
                 }
             }
             "STOP" -> stopRecordingInternal()
@@ -86,6 +161,7 @@ class RecorderService : Service() {
             r.prepare()
             r.start()
             hasStarted = true
+            markStarted(path)
 
         } catch (e: Exception) {
             // If anything fails, make sure we release cleanly so next start works
@@ -94,12 +170,17 @@ class RecorderService : Service() {
             recorder = null
             hasStarted = false
             currentPath = null
+            markStopped()
             // We stay foreground so Flutter can report/start again; no crash.
         }
     }
 
     private fun stopRecordingInternal() {
-        val r = recorder ?: return
+        val r = recorder
+        if (r == null) {
+            markStopped()
+            return
+        }
 
         // Try to finalize the MP4 atom so players (browser/WMP/device) can read it
         try {
@@ -113,6 +194,8 @@ class RecorderService : Service() {
             try { r.release() } catch (_: Exception) {}
             recorder = null
             hasStarted = false
+            currentPath = null
+            markStopped()
         }
 
         // Keep the service alive only while actively recording

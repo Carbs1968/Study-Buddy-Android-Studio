@@ -48,6 +48,9 @@ class MainActivity : FlutterActivity() {
                         send("STOP")
                         result.success(null)
                     }
+                    "getServiceState" -> {
+                        result.success(RecorderService.serviceState())
+                    }
                     else -> result.notImplemented()
                 }
             }
