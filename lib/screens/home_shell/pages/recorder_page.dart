@@ -227,6 +227,40 @@ class _RecorderPageState extends State<RecorderPage> with WidgetsBindingObserver
     _ticker = Timer.periodic(const Duration(seconds: 1), (_) {
       if (mounted && _isRecording && !_isPaused) {
         setState(() => _elapsedSeconds += 1);
+        if (_elapsedSeconds % 5 == 0) {
+          unawaited(_verifyActiveRecordingHealth());
+        }
+      }
+    });
+  }
+
+  Future<Directory> _pendingRecordingsDirectory() async {
+    final docs = await getApplicationDocumentsDirectory();
+    return Directory(path.join(docs.path, 'pending_recordings'));
+  }
+
+  Future<void> _restoreRecoverableRecordingState() async {
+    if (_isRecording || _recordingComplete || _isUploading) return;
+
+    final restoredNative = await _restoreNativeRecordingState();
+    if (!restoredNative) {
+      await _restoreLatestPendingRecording();
+    }
+  }
+
+  Future<bool> _restoreNativeRecordingState() async {
+    if (!Platform.isAndroid || _debugForcePluginRecorder) return false;
+
+    try {
+      final raw = await _recSvc.invokeMapMethod<String, dynamic>('getServiceState');
+      if (raw == null) return false;
+
+      final isRecording = raw['isRecording'] == true;
+      final restoredPath = raw['path']?.toString();
+      if (!isRecording || restoredPath == null || restoredPath.isEmpty) {
+        return false;
+      }
+
       if (!_isHealthyNativeRecordingState(raw)) {
         appLogger('Native recording state looks stale/unhealthy: $raw');
         final recovered = await _recoverPartialNativeRecording(
@@ -247,6 +281,40 @@ class _RecorderPageState extends State<RecorderPage> with WidgetsBindingObserver
         _isPaused = raw['isPaused'] == true;
         _recordingComplete = false;
         _elapsedSeconds = restoredElapsedSeconds;
+        _recordingBackend = _RecordingBackend.nativeService;
+      });
+      await WakelockPlus.enable();
+      _startTicker();
+      appLogger('Restored native recording state: path=$restoredPath');
+      return true;
+    } catch (e) {
+      appLogger('Native recording state restore skipped: $e');
+      return false;
+    }
+  }
+
+  Future<void> _restoreLatestPendingRecording() async {
+    try {
+      final recordingsDir = await _pendingRecordingsDirectory();
+      if (!await recordingsDir.exists()) return;
+
+      final candidates = <File>[];
+      await for (final entity in recordingsDir.list(followLinks: false)) {
+        if (entity is File &&
+            path.extension(entity.path).toLowerCase() == '.m4a' &&
+            await entity.exists() &&
+            await entity.length() > 0) {
+          candidates.add(entity);
+        }
+      }
+
+      if (candidates.isEmpty) return;
+
+      candidates.sort((a, b) {
+        return b.lastModifiedSync().compareTo(a.lastModifiedSync());
+      });
+
+      final latest = candidates.first;
       await _restorePendingRecordingFile(latest);
     } catch (e) {
       appLogger('Pending recording restore skipped: $e');
