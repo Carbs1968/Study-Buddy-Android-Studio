@@ -23,7 +23,8 @@ String fileNameFormatted({
   final d = when.day.toString().padLeft(2, '0');
   final hh = when.hour.toString().padLeft(2, '0');
   final mm = when.minute.toString().padLeft(2, '0');
-  return '$c - $t - $y-$m-${d}_$hh-$mm.m4a';
+  final ss = when.second.toString().padLeft(2, '0');
+  return '$c - $t - $y-$m-${d}_$hh-$mm-$ss.m4a';
 }
 
 
