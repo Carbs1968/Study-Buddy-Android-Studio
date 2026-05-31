@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import '../l10n/strings.dart';
+import '../utils/helper.dart';
 import 'class_materials_screen.dart';
 import 'lecture_detail_screen.dart';
 
@@ -155,11 +156,11 @@ class _ClassLecturesScreenState extends State<ClassLecturesScreen> {
                     final d = docs[i];
                     final m = d.data();
 
-                    final className = (m['className'] ?? '').toString();
                     final topic = (m['topic'] ?? '').toString();
                     final levelName = (m['levelName'] ?? '').toString();
                     final semesterName = (m['semesterName'] ?? '').toString();
                     final status = (m['transcriptStatus'] ?? 'none').toString();
+                    final durationSeconds = m['durationSeconds'];
 
                     final dt = _toDt(m['createdAt']);
 
@@ -167,12 +168,17 @@ class _ClassLecturesScreenState extends State<ClassLecturesScreen> {
                     if (levelName.isNotEmpty) subtitleParts.add(levelName);
                     if (semesterName.isNotEmpty) subtitleParts.add(semesterName);
                     if (dt != null) subtitleParts.add(dt.toLocal().toString());
+                    if (durationSeconds is num && durationSeconds > 0) {
+                      subtitleParts.add(
+                        formatDuration(Duration(seconds: durationSeconds.round())),
+                      );
+                    }
                     subtitleParts.add('${strings.transcript}: $status');
 
                     return ListTile(
                       leading: const Icon(Icons.library_music),
                       title: Text(
-                        '$className — $topic',
+                        topic.isEmpty ? strings.lectureTopic : topic,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
