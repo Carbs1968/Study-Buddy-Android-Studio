@@ -48,6 +48,21 @@ class RecorderService : Service() {
                 (activeUntil - stateStartedAtMillis - statePausedTotalMillis)
                     .coerceAtLeast(0L)
             }
+            val fileStaleMillis = if (
+                stateIsRecording &&
+                !stateIsPaused &&
+                stateLastFileGrowthAtMillis > 0L
+            ) {
+                now - stateLastFileGrowthAtMillis
+            } else {
+                0L
+            }
+
+            mapOf(
+                "isRecording" to stateIsRecording,
+                "isPaused" to stateIsPaused,
+                "path" to statePath,
+                "elapsedMillis" to elapsedMillis,
                 "recorderPresent" to stateRecorderPresent,
                 "hasStarted" to stateHasStarted,
                 "fileExists" to stateFileExists,
@@ -76,6 +91,12 @@ class RecorderService : Service() {
             if (stateIsRecording && !stateIsPaused) {
                 stateIsPaused = true
                 statePausedAtMillis = SystemClock.elapsedRealtime()
+                updateFileHealthLocked(statePausedAtMillis)
+            }
+        }
+
+        private fun markResumed() = synchronized(stateLock) {
+            if (stateIsRecording && stateIsPaused) {
                 val now = SystemClock.elapsedRealtime()
                 if (statePausedAtMillis > 0L) {
                     statePausedTotalMillis +=
@@ -89,6 +110,13 @@ class RecorderService : Service() {
         }
 
         private fun markStopped() = synchronized(stateLock) {
+            updateFileHealthLocked(SystemClock.elapsedRealtime())
+            stateIsRecording = false
+            stateIsPaused = false
+            statePath = null
+            stateStartedAtMillis = 0L
+            statePausedAtMillis = 0L
+            statePausedTotalMillis = 0L
             stateRecorderPresent = false
             stateHasStarted = false
             stateLastObservedSizeBytes = 0L
@@ -223,6 +251,23 @@ class RecorderService : Service() {
             r.start()
             hasStarted = true
             markStarted(path)
+            startHealthMonitor()
+
+        } catch (e: Exception) {
+            // If anything fails, make sure we release cleanly so next start works
+            try { r.reset() } catch (_: Exception) {}
+            try { r.release() } catch (_: Exception) {}
+            recorder = null
+            hasStarted = false
+            currentPath = null
+            markStopped()
+            // We stay foreground so Flutter can report/start again; no crash.
+        }
+    }
+
+    private fun stopRecordingInternal() {
+        val r = recorder
+        if (r == null) {
             stopHealthMonitor()
             markStopped()
             return
