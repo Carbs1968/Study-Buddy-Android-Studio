@@ -809,6 +809,9 @@ class _RecorderPageState extends State<RecorderPage> with WidgetsBindingObserver
       _uploadPhase = 'Firebase';
     });
 
+    Reference? uploadedStorageRef;
+    var sessionVerified = false;
+
     try {
       if (Firebase.apps.isEmpty) {
         await Firebase.initializeApp(
@@ -911,6 +914,7 @@ class _RecorderPageState extends State<RecorderPage> with WidgetsBindingObserver
       }, SetOptions(merge: true));
 
       final storageRef = FirebaseStorage.instance.ref().child(storagePath);
+      uploadedStorageRef = storageRef;
       final uploadTask = storageRef.putFile(
         fileOnDisk,
         SettableMetadata(contentType: 'audio/mp4'),
@@ -983,6 +987,7 @@ class _RecorderPageState extends State<RecorderPage> with WidgetsBindingObserver
           savedData['topic'] != topic) {
         throw Exception('Session metadata verification failed');
       }
+      sessionVerified = true;
       appLogger(
         'Verified saved session metadata: '
         'classId=${savedData['classId']} '
@@ -1021,6 +1026,14 @@ class _RecorderPageState extends State<RecorderPage> with WidgetsBindingObserver
       }
     } catch (e) {
       appLogger('Upload failed: $e');
+      if (!sessionVerified && uploadedStorageRef != null) {
+        try {
+          await uploadedStorageRef.delete();
+          appLogger('Deleted orphaned Storage upload after Firestore failure');
+        } catch (cleanupError) {
+          appLogger('Could not delete orphaned Storage upload: $cleanupError');
+        }
+      }
       if (mounted) {
         setState(() {
           _isUploading = false;
