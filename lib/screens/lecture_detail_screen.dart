@@ -459,14 +459,18 @@ class LectureDetailScreen extends StatelessWidget {
                   label: Text(strings.requestTranscription),
                   onPressed: () async {
                     try {
-                      await docRef.update({
+                      final firestore = FirebaseFirestore.instance;
+                      final batch = firestore.batch();
+                      final aiJobRef = firestore.collection('aiJobs').doc();
+
+                      batch.update(docRef, {
                         'transcribeRequested': true,
                         'transcriptStatus': 'pending',
                         'sessionStatus': 'processing',
                         'updatedAt': FieldValue.serverTimestamp(),
                       });
 
-                      await FirebaseFirestore.instance.collection('aiJobs').add({
+                      batch.set(aiJobRef, {
                         'uid': uid,
                         'type': 'transcript',
                         'sessionId': sessionId,
@@ -475,6 +479,8 @@ class LectureDetailScreen extends StatelessWidget {
                         'createdAt': FieldValue.serverTimestamp(),
                         'updatedAt': FieldValue.serverTimestamp(),
                       });
+
+                      await batch.commit();
 
                       if (context.mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
