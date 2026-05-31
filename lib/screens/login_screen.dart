@@ -47,19 +47,22 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Future<void> _createUserIfNeeded(User? u) async {
     if (u == null) return;
+
     final ref = FirebaseFirestore.instance.collection('users').doc(u.uid);
-    final snap = await ref.get();
-    if (!snap.exists) {
-      await ref.set({
-        'uid': u.uid,
-        'email': u.email,
-        'displayName': u.displayName,
-        'photoURL': u.photoURL,
-        'createdAt': FieldValue.serverTimestamp(),
-        'provider': 'google',
-        'locale': appLocale.value.languageCode, // Save user's language
-      });
-    }
+    final email = u.email?.trim();
+    final emailLower = email?.toLowerCase();
+
+    await ref.set({
+      'uid': u.uid,
+      'email': email,
+      'emailLower': emailLower,
+      'displayName': u.displayName,
+      'photoURL': u.photoURL,
+      'provider': 'google',
+      'locale': appLocale.value.languageCode, // Save user's language
+      'updatedAt': FieldValue.serverTimestamp(),
+      'lastLoginAt': FieldValue.serverTimestamp(),
+    }, SetOptions(merge: true));
   }
 
   @override
