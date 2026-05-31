@@ -1,6 +1,7 @@
 package com.carbs.studybuddy.study_buddy
 
 import android.content.Intent
+import android.media.MediaMetadataRetriever
 import android.os.Build
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
@@ -23,6 +24,18 @@ class MainActivity : FlutterActivity() {
                         startForegroundService(intent)
                     } else {
                         startService(intent)
+                    }
+                }
+
+                fun audioDurationMillis(path: String): Long? {
+                    val retriever = MediaMetadataRetriever()
+                    return try {
+                        retriever.setDataSource(path)
+                        retriever
+                            .extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)
+                            ?.toLongOrNull()
+                    } finally {
+                        try { retriever.release() } catch (_: Exception) {}
                     }
                 }
 
@@ -50,6 +63,22 @@ class MainActivity : FlutterActivity() {
                     }
                     "getServiceState" -> {
                         result.success(RecorderService.serviceState())
+                    }
+                    "getAudioDurationMillis" -> {
+                        val path = call.argument<String>("path")
+                        if (path == null) {
+                            result.error("ARG", "Missing 'path' argument", null)
+                        } else {
+                            try {
+                                result.success(audioDurationMillis(path))
+                            } catch (e: Exception) {
+                                result.error(
+                                    "DURATION",
+                                    "Could not read audio duration: ${e.message}",
+                                    null
+                                )
+                            }
+                        }
                     }
                     else -> result.notImplemented()
                 }

@@ -8,10 +8,13 @@ import android.content.Context
 import android.content.Intent
 import android.media.MediaRecorder
 import android.os.Build
+import android.os.Handler
 import android.os.IBinder
+import android.os.Looper
 import android.os.PowerManager
 import android.os.SystemClock
 import androidx.core.app.NotificationCompat
+import java.io.File
 
 class RecorderService : Service() {
 
@@ -23,9 +26,17 @@ class RecorderService : Service() {
         private var stateStartedAtMillis: Long = 0L
         private var statePausedAtMillis: Long = 0L
         private var statePausedTotalMillis: Long = 0L
+        private var stateRecorderPresent: Boolean = false
+        private var stateHasStarted: Boolean = false
+        private var stateFileExists: Boolean = false
+        private var stateFileSizeBytes: Long = 0L
+        private var stateLastModifiedMillis: Long = 0L
+        private var stateLastObservedSizeBytes: Long = 0L
+        private var stateLastFileGrowthAtMillis: Long = 0L
 
         fun serviceState(): Map<String, Any?> = synchronized(stateLock) {
             val now = SystemClock.elapsedRealtime()
+            updateFileHealthLocked(now)
             val elapsedMillis = if (!stateIsRecording || stateStartedAtMillis == 0L) {
                 0L
             } else {
@@ -37,61 +48,111 @@ class RecorderService : Service() {
                 (activeUntil - stateStartedAtMillis - statePausedTotalMillis)
                     .coerceAtLeast(0L)
             }
-
-            mapOf(
-                "isRecording" to stateIsRecording,
-                "isPaused" to stateIsPaused,
-                "path" to statePath,
-                "elapsedMillis" to elapsedMillis,
+                "recorderPresent" to stateRecorderPresent,
+                "hasStarted" to stateHasStarted,
+                "fileExists" to stateFileExists,
+                "fileSizeBytes" to stateFileSizeBytes,
+                "lastModifiedMillis" to stateLastModifiedMillis,
+                "fileStaleMillis" to fileStaleMillis,
             )
         }
 
         private fun markStarted(path: String) = synchronized(stateLock) {
+            val now = SystemClock.elapsedRealtime()
             stateIsRecording = true
             stateIsPaused = false
             statePath = path
-            stateStartedAtMillis = SystemClock.elapsedRealtime()
+            stateStartedAtMillis = now
             statePausedAtMillis = 0L
             statePausedTotalMillis = 0L
+            stateRecorderPresent = true
+            stateHasStarted = true
+            stateLastObservedSizeBytes = 0L
+            stateLastFileGrowthAtMillis = now
+            updateFileHealthLocked(now)
         }
 
         private fun markPaused() = synchronized(stateLock) {
             if (stateIsRecording && !stateIsPaused) {
                 stateIsPaused = true
                 statePausedAtMillis = SystemClock.elapsedRealtime()
-            }
-        }
-
-        private fun markResumed() = synchronized(stateLock) {
-            if (stateIsRecording && stateIsPaused) {
+                val now = SystemClock.elapsedRealtime()
                 if (statePausedAtMillis > 0L) {
                     statePausedTotalMillis +=
-                        SystemClock.elapsedRealtime() - statePausedAtMillis
+                        now - statePausedAtMillis
                 }
                 stateIsPaused = false
                 statePausedAtMillis = 0L
+                stateLastFileGrowthAtMillis = now
+                updateFileHealthLocked(now)
             }
         }
 
         private fun markStopped() = synchronized(stateLock) {
-            stateIsRecording = false
-            stateIsPaused = false
-            statePath = null
-            stateStartedAtMillis = 0L
-            statePausedAtMillis = 0L
-            statePausedTotalMillis = 0L
+            stateRecorderPresent = false
+            stateHasStarted = false
+            stateLastObservedSizeBytes = 0L
+            stateLastFileGrowthAtMillis = 0L
+        }
+
+        private fun refreshFileHealth() = synchronized(stateLock) {
+            updateFileHealthLocked(SystemClock.elapsedRealtime())
+        }
+
+        private fun shouldContinueHealthMonitor(): Boolean = synchronized(stateLock) {
+            stateIsRecording
+        }
+
+        private fun updateFileHealthLocked(now: Long = SystemClock.elapsedRealtime()) {
+            val path = statePath
+            if (path.isNullOrEmpty()) {
+                stateFileExists = false
+                stateFileSizeBytes = 0L
+                stateLastModifiedMillis = 0L
+                return
+            }
+
+            val file = File(path)
+            stateFileExists = file.exists()
+            stateFileSizeBytes = if (stateFileExists) file.length() else 0L
+            stateLastModifiedMillis = if (stateFileExists) file.lastModified() else 0L
+
+            if (stateFileSizeBytes > stateLastObservedSizeBytes) {
+                stateLastFileGrowthAtMillis = now
+            }
+            stateLastObservedSizeBytes = stateFileSizeBytes
         }
     }
 
     private var recorder: MediaRecorder? = null
     private var hasStarted: Boolean = false
     private var currentPath: String? = null
+    private val healthHandler = Handler(Looper.getMainLooper())
+    private val healthPollIntervalMillis = 2_000L
+    private val healthPoll = object : Runnable {
+        override fun run() {
+            refreshFileHealth()
+            if (shouldContinueHealthMonitor()) {
+                healthHandler.postDelayed(this, healthPollIntervalMillis)
+            }
+        }
+    }
 
     // Keep CPU on while screen is locked so recording continues reliably
     private var wakeLock: PowerManager.WakeLock? = null
 
     private val channelId = "study_buddy_recorder"
     private val notifId = 1001
+
+    private fun startHealthMonitor() {
+        healthHandler.removeCallbacks(healthPoll)
+        healthHandler.post(healthPoll)
+    }
+
+    private fun stopHealthMonitor() {
+        healthHandler.removeCallbacks(healthPoll)
+        refreshFileHealth()
+    }
 
     override fun onCreate() {
         super.onCreate()
@@ -162,22 +223,7 @@ class RecorderService : Service() {
             r.start()
             hasStarted = true
             markStarted(path)
-
-        } catch (e: Exception) {
-            // If anything fails, make sure we release cleanly so next start works
-            try { r.reset() } catch (_: Exception) {}
-            try { r.release() } catch (_: Exception) {}
-            recorder = null
-            hasStarted = false
-            currentPath = null
-            markStopped()
-            // We stay foreground so Flutter can report/start again; no crash.
-        }
-    }
-
-    private fun stopRecordingInternal() {
-        val r = recorder
-        if (r == null) {
+            stopHealthMonitor()
             markStopped()
             return
         }
@@ -192,6 +238,7 @@ class RecorderService : Service() {
         } finally {
             try { r.reset() } catch (_: Exception) {}
             try { r.release() } catch (_: Exception) {}
+            stopHealthMonitor()
             recorder = null
             hasStarted = false
             currentPath = null
