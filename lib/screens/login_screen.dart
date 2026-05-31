@@ -1,7 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:googleapis/drive/v3.dart' as drive;
 import 'package:google_sign_in/google_sign_in.dart';
 
 import '../l10n/strings.dart';
@@ -24,10 +23,7 @@ class _LoginScreenState extends State<LoginScreen> {
       _error = null;
     });
     try {
-      final gsi = GoogleSignIn(scopes: [
-        drive.DriveApi.driveFileScope,
-        'email',
-      ]);
+      final gsi = GoogleSignIn(scopes: ['email']);
 
       // Prefer silent sign-in first (handles "already signed in" after logout)
       GoogleSignInAccount? acc = await gsi.signInSilently();
