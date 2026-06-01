@@ -48,6 +48,7 @@ class SBStrings {
       // App
       'appTitle': 'Study Buddy Note',
       'library': 'Library',
+      'dashboard': 'Home',
       'record': 'Record',
       'stop': 'Stop',
       'settings': 'Settings',
@@ -115,6 +116,7 @@ class SBStrings {
     'es': {
       'appTitle': 'Study Buddy Note',
       'library': 'Biblioteca',
+      'dashboard': 'Inicio',
       'record': 'Grabar',
       'stop': 'Detener',
       'settings': 'Configuración',
@@ -187,6 +189,7 @@ class SBStrings {
   // --- simple text getters ---
   String get appTitle => _t('appTitle');
   String get library => _t('library');
+  String get dashboard => _t('dashboard');
   String get record => _t('record');
   String get stop => _t('stop');
   String get settings => _t('settings');

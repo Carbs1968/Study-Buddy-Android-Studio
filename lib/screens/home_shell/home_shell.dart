@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../../l10n/strings.dart';
 import '../../main.dart';
+import 'pages/dashboard_page.dart';
 import 'pages/library_page.dart';
 import 'pages/recorder_page.dart';
 import 'pages/settings_page.dart';
@@ -18,6 +19,7 @@ class HomeShell extends StatefulWidget {
 class _HomeShellState extends State<HomeShell> {
   int _tab = 0;
   final List<Widget> _tabs = const [
+    DashboardPage(),
     RecorderPage(),
     LibraryPage(),
     SettingsPage(),
@@ -64,6 +66,10 @@ class _HomeShellState extends State<HomeShell> {
         currentIndex: _tab,
         onTap: _onTabTapped,
         items: [
+          BottomNavigationBarItem(
+            icon: const Icon(Icons.home_outlined),
+            label: strings.dashboard,
+          ),
           BottomNavigationBarItem(
             icon: const Icon(Icons.mic),
             label: strings.record,
