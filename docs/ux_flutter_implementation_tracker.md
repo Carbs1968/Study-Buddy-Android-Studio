@@ -262,3 +262,50 @@ Safety:
 - No Firestore query/write logic intentionally changed.
 - No upload/storage-path logic touched.
 - No AI job or Cloud Function logic touched.
+
+## Completed Topic Metadata Foundation
+
+Commit:
+- `e0c9e73 Add topic metadata for future study guides`
+
+Summary:
+- Added additive topic metadata to new recording session documents.
+- Added class-scope metadata defaults to new class material documents.
+- Preserved existing `topic` field for backward compatibility.
+- Did not add topic-level upload UI yet.
+- Did not change Firestore paths or Firebase Storage paths.
+
+Recording session metadata added:
+- `topicId`
+- `topicName`
+
+Class material metadata added:
+- `materialScope: class`
+- `topicId: null`
+- `topicName: null`
+
+Files changed:
+- `lib/screens/home_shell/pages/recorder_page.dart`
+- `lib/screens/class_materials_screen.dart`
+
+Manual test results:
+- App opened successfully.
+- App functioned correctly after the metadata patch.
+- `flutter analyze` remained at the known existing 21 issues.
+- No new analyzer issues were introduced.
+
+Safety:
+- Existing recording field `topic` preserved.
+- Existing `className` and `classId` fields preserved.
+- No recorder start/pause/resume/stop/timer logic changed.
+- No upload destination behavior changed.
+- No Firestore path changed.
+- No Firebase Storage path changed.
+- No UI changed.
+- No AI job or Cloud Function logic touched.
+
+Future use:
+- Supports future topic-level organization.
+- Supports future Topic Study Guide planning.
+- Supports future Class / Term Study Guide aggregation.
+- Provides a metadata distinction between class-level and future topic-level materials.
