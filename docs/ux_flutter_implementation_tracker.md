@@ -403,3 +403,33 @@ Safe migration path:
 6. Later add counters/lastActivity fields to class docs.
 
 Do not implement this migration until reviewed separately.
+
+## Completed Class Activity Timestamp Foundation
+
+Commit:
+- `27b8720 Track class activity timestamps`
+
+Summary:
+- Added class-level activity timestamps to support future scalable Library behavior.
+- Recording uploads now update the parent class document with `lastActivityAt`, `lastRecordingAt`, and `updatedAt`.
+- Material uploads now update the parent class document with `lastActivityAt`, `lastMaterialAt`, and `updatedAt` after the material document is saved.
+- No counters were added yet to avoid inflated counts from retries or duplicate writes.
+
+Files changed:
+- `lib/screens/home_shell/pages/recorder_page.dart`
+- `lib/screens/class_materials_screen.dart`
+
+Future use:
+- Enables future Library sorting by recent class activity.
+- Helps prepare class documents to become the scalable Library source of truth.
+- Supports the future hybrid migration where class docs are primary and session-derived class rollups remain a legacy fallback.
+
+Safety:
+- No Library query changed.
+- No UI changed.
+- No Firebase Storage path changed.
+- No upload destination behavior changed.
+- No recorder controls/timer behavior changed.
+- No counters added.
+- App smoke test passed.
+- `flutter analyze` remained at the known existing issue baseline.
