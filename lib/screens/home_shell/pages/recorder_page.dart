@@ -521,9 +521,13 @@ class _RecorderPageState extends State<RecorderPage> with WidgetsBindingObserver
       _selectedExistingClass = false;
     }
 
+    final resolvedTopicId = _stableDocumentId(resolvedTopic);
+
     return {
       'className': resolvedClassName,
       'topic': resolvedTopic,
+      'topicName': resolvedTopic,
+      'topicId': resolvedTopicId,
       'classId': resolvedClassId,
     };
   }
