@@ -521,13 +521,13 @@ class _RecorderPageState extends State<RecorderPage> with WidgetsBindingObserver
       _selectedExistingClass = false;
     }
 
-    final resolvedTopicId = _stableDocumentId(resolvedTopic);
+    final resolvedTopicKey = _stableDocumentId(resolvedTopic);
 
     return {
       'className': resolvedClassName,
       'topic': resolvedTopic,
       'topicName': resolvedTopic,
-      'topicId': resolvedTopicId,
+      'topicKey': resolvedTopicKey,
       'classId': resolvedClassId,
     };
   }
@@ -962,6 +962,8 @@ class _RecorderPageState extends State<RecorderPage> with WidgetsBindingObserver
         'classId': classId,
         'className': className,
         'topic': topic,
+        'topicName': topic,
+        'topicKey': _stableDocumentId(topic),
         'filename': filename,
         'audioStoragePath': storagePath,
         'audioMimeType': 'audio/mp4',
