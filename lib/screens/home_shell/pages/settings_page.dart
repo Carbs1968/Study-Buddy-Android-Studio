@@ -21,11 +21,12 @@ class SettingsPage extends StatelessWidget {
     final user = FirebaseAuth.instance.currentUser;
 
     final strings = SBStrings.of(context);
+    final theme = Theme.of(context);
     return Scaffold(
-      backgroundColor: const Color(0xFFF6F8FB),
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         title: Text(strings.settings),
-        backgroundColor: const Color(0xFFF6F8FB),
+        backgroundColor: theme.scaffoldBackgroundColor,
         elevation: 0,
       ),
       body: SafeArea(
@@ -35,7 +36,7 @@ class SettingsPage extends StatelessWidget {
             if (user != null) ...[
               Card(
                 elevation: 0,
-                color: Colors.white,
+                color: theme.cardColor,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(18),
                 ),
@@ -71,7 +72,7 @@ class SettingsPage extends StatelessWidget {
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                    color: Colors.black54,
+                                    color: theme.colorScheme.onSurfaceVariant,
                                   ),
                             ),
                           ],
@@ -85,7 +86,7 @@ class SettingsPage extends StatelessWidget {
             ],
             Card(
               elevation: 0,
-              color: Colors.white,
+              color: theme.cardColor,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(18),
               ),
@@ -131,7 +132,7 @@ class SettingsPage extends StatelessWidget {
             const SizedBox(height: 12),
             Card(
               elevation: 0,
-              color: Colors.white,
+              color: theme.cardColor,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(18),
               ),
@@ -154,7 +155,7 @@ class SettingsPage extends StatelessWidget {
             const SizedBox(height: 12),
             Card(
               elevation: 0,
-              color: Colors.white,
+              color: theme.cardColor,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(18),
               ),

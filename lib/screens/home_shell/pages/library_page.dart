@@ -25,6 +25,7 @@ class _LibraryPageState extends State<LibraryPage> {
   Widget build(BuildContext context) {
     final uid = FirebaseAuth.instance.currentUser?.uid;
     final strings = SBStrings.of(context);
+    final theme = Theme.of(context);
 
     if (uid == null) {
       return Scaffold(
@@ -38,10 +39,10 @@ class _LibraryPageState extends State<LibraryPage> {
         .collection('sessions');
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF6F8FB),
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         title: Text(strings.library),
-        backgroundColor: const Color(0xFFF6F8FB),
+        backgroundColor: theme.scaffoldBackgroundColor,
         elevation: 0,
       ),
       body: Column(
@@ -51,7 +52,7 @@ class _LibraryPageState extends State<LibraryPage> {
             child: TextField(
               decoration: InputDecoration(
                 filled: true,
-                fillColor: Colors.white,
+                fillColor: theme.colorScheme.surface,
                 prefixIcon: const Icon(Icons.search),
                 hintText: strings.selectClass,
                 border: OutlineInputBorder(
@@ -192,7 +193,7 @@ class _LibraryPageState extends State<LibraryPage> {
 
                     return Card(
                       elevation: 0,
-                      color: Colors.white,
+                      color: theme.cardColor,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(18),
                       ),
@@ -260,7 +261,7 @@ class _LibraryEmptyState extends StatelessWidget {
         padding: const EdgeInsets.all(24),
         child: Card(
           elevation: 0,
-          color: Colors.white,
+          color: theme.cardColor,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(18),
           ),

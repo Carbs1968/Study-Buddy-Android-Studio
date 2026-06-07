@@ -307,6 +307,7 @@ class _ClassMaterialsScreenState extends State<ClassMaterialsScreen> {
   @override
   Widget build(BuildContext context) {
     final uid = FirebaseAuth.instance.currentUser?.uid;
+    final theme = Theme.of(context);
 
     if (uid == null) {
       return const Scaffold(
@@ -315,10 +316,10 @@ class _ClassMaterialsScreenState extends State<ClassMaterialsScreen> {
     }
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF6F8FB),
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         title: Text('${widget.className} Materials'),
-        backgroundColor: const Color(0xFFF6F8FB),
+        backgroundColor: theme.scaffoldBackgroundColor,
         elevation: 0,
       ),
       floatingActionButton: FloatingActionButton.extended(
@@ -359,7 +360,7 @@ class _ClassMaterialsScreenState extends State<ClassMaterialsScreen> {
                 padding: const EdgeInsets.all(24),
                 child: Card(
                   elevation: 0,
-                  color: Colors.white,
+                  color: theme.cardColor,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(18),
                   ),
@@ -386,7 +387,7 @@ class _ClassMaterialsScreenState extends State<ClassMaterialsScreen> {
                           'Add images of notes, worksheets, PDFs, or documents here.',
                           textAlign: TextAlign.center,
                           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                color: Colors.black54,
+                                color: theme.colorScheme.onSurfaceVariant,
                               ),
                         ),
                       ],
@@ -420,7 +421,7 @@ class _ClassMaterialsScreenState extends State<ClassMaterialsScreen> {
 
               return Card(
                 elevation: 0,
-                color: Colors.white,
+                color: theme.cardColor,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(18),
                 ),

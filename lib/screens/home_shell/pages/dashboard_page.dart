@@ -11,7 +11,7 @@ class DashboardPage extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF6F8FB),
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: SafeArea(
         child: ListView(
           padding: const EdgeInsets.fromLTRB(20, 20, 20, 96),
@@ -26,7 +26,7 @@ class DashboardPage extends StatelessWidget {
             Text(
               'Your study workspace, organized by class and topic.',
               style: theme.textTheme.bodyLarge?.copyWith(
-                color: Colors.black54,
+                color: theme.colorScheme.onSurfaceVariant,
               ),
             ),
             const SizedBox(height: 20),
@@ -76,7 +76,7 @@ class _AcademicContextCard extends StatelessWidget {
 
     return Card(
       elevation: 0,
-      color: Colors.white,
+      color: theme.cardColor,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
       child: Padding(
         padding: const EdgeInsets.all(18),
@@ -98,7 +98,7 @@ class _AcademicContextCard extends StatelessWidget {
                   Text(
                     'Year → Semester → Class → Topic',
                     style: theme.textTheme.bodyMedium?.copyWith(
-                      color: Colors.black54,
+                      color: theme.colorScheme.onSurfaceVariant,
                     ),
                   ),
                 ],
@@ -130,25 +130,25 @@ class _DashboardActionCard extends StatelessWidget {
 
     return Card(
       elevation: 0,
-      color: isPrimary ? theme.colorScheme.primary : Colors.white,
+      color: isPrimary ? theme.colorScheme.primary : theme.cardColor,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
       child: ListTile(
         minVerticalPadding: 18,
         leading: Icon(
           icon,
-          color: isPrimary ? Colors.white : theme.colorScheme.primary,
+          color: isPrimary ? theme.colorScheme.onPrimary : theme.colorScheme.primary,
         ),
         title: Text(
           title,
           style: theme.textTheme.titleMedium?.copyWith(
-            color: isPrimary ? Colors.white : null,
+            color: isPrimary ? theme.colorScheme.onPrimary : null,
             fontWeight: FontWeight.w800,
           ),
         ),
         subtitle: Text(
           subtitle,
           style: theme.textTheme.bodyMedium?.copyWith(
-            color: isPrimary ? Colors.white70 : Colors.black54,
+            color: isPrimary ? theme.colorScheme.onPrimary.withValues(alpha: 0.8) : theme.colorScheme.onSurfaceVariant,
           ),
         ),
       ),
@@ -165,7 +165,7 @@ class _EmptyStateCard extends StatelessWidget {
 
     return Card(
       elevation: 0,
-      color: Colors.white,
+      color: theme.cardColor,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
       child: Padding(
         padding: const EdgeInsets.all(18),
@@ -188,7 +188,7 @@ class _EmptyStateCard extends StatelessWidget {
             Text(
               'Soon this dashboard will show your classes, topics, recordings, and uploaded materials.',
               style: theme.textTheme.bodyMedium?.copyWith(
-                color: Colors.black54,
+                color: theme.colorScheme.onSurfaceVariant,
               ),
             ),
           ],

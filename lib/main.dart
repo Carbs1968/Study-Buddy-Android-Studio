@@ -166,6 +166,50 @@ class MyApp extends StatelessWidget {
               seedColor: kBrandPrimary,
               brightness: Brightness.dark,
             ),
+            scaffoldBackgroundColor: const Color(0xFF12131A),
+            cardTheme: const CardThemeData(
+              color: Color(0xFF1B1D27),
+              elevation: 0,
+            ),
+            appBarTheme: const AppBarTheme(
+              backgroundColor: Colors.transparent,
+              foregroundColor: Colors.white,
+              elevation: 0,
+              titleTextStyle: TextStyle(
+                fontWeight: FontWeight.w600,
+                fontSize: 22,
+                color: Colors.white,
+              ),
+            ),
+            bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+              selectedItemColor: kBrandAccent,
+              unselectedItemColor: Colors.white70,
+              backgroundColor: Color(0xFF181A22),
+              type: BottomNavigationBarType.fixed,
+            ),
+            inputDecorationTheme: const InputDecorationTheme(
+              filled: true,
+              fillColor: Color(0xFF1B1D27),
+              border: OutlineInputBorder(),
+              focusedBorder: OutlineInputBorder(
+                borderSide: BorderSide(width: 2, color: kBrandAccent),
+              ),
+            ),
+            elevatedButtonTheme: ElevatedButtonThemeData(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: kBrandAccent,
+                foregroundColor: Colors.black87,
+                shape: const StadiumBorder(),
+                padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 20),
+                textStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+              ),
+            ),
+            textButtonTheme: TextButtonThemeData(
+              style: TextButton.styleFrom(
+                foregroundColor: kBrandAccent,
+                textStyle: const TextStyle(fontWeight: FontWeight.w500),
+              ),
+            ),
             textTheme: const TextTheme(
               headlineLarge: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.white),
               headlineMedium: TextStyle(fontSize: 24, fontWeight: FontWeight.w700, color: Colors.white),

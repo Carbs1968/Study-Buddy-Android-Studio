@@ -40,6 +40,7 @@ class _ClassLecturesScreenState extends State<ClassLecturesScreen> {
   Widget build(BuildContext context) {
     final uid = FirebaseAuth.instance.currentUser?.uid;
     final strings = SBStrings.of(context);
+    final theme = Theme.of(context);
 
     if (uid == null) {
       return Scaffold(
@@ -69,10 +70,10 @@ class _ClassLecturesScreenState extends State<ClassLecturesScreen> {
             .where('className', isEqualTo: widget.className);
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF6F8FB),
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         title: Text(widget.className),
-        backgroundColor: const Color(0xFFF6F8FB),
+        backgroundColor: theme.scaffoldBackgroundColor,
         elevation: 0,
         actions: [
           IconButton(
@@ -103,7 +104,7 @@ class _ClassLecturesScreenState extends State<ClassLecturesScreen> {
             child: TextField(
               decoration: InputDecoration(
                 filled: true,
-                fillColor: Colors.white,
+                fillColor: theme.colorScheme.surface,
                 prefixIcon: const Icon(Icons.search),
                 hintText: '${strings.lectureTopic}...',
                 border: OutlineInputBorder(
@@ -170,7 +171,7 @@ class _ClassLecturesScreenState extends State<ClassLecturesScreen> {
                       padding: const EdgeInsets.all(24),
                       child: Card(
                         elevation: 0,
-                        color: Colors.white,
+                        color: theme.cardColor,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(18),
                         ),
@@ -229,7 +230,7 @@ class _ClassLecturesScreenState extends State<ClassLecturesScreen> {
 
                     return Card(
                       elevation: 0,
-                      color: Colors.white,
+                      color: theme.cardColor,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(18),
                       ),
