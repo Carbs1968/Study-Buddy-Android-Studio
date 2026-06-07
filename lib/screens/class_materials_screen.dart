@@ -192,6 +192,12 @@ class _ClassMaterialsScreenState extends State<ClassMaterialsScreen> {
         'updatedAt': timestamp,
       });
 
+      await _materialsRef(uid).parent!.set({
+        'lastActivityAt': FieldValue.serverTimestamp(),
+        'lastMaterialAt': FieldValue.serverTimestamp(),
+        'updatedAt': FieldValue.serverTimestamp(),
+      }, SetOptions(merge: true));
+
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Material uploaded.')),
