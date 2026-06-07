@@ -38,16 +38,37 @@ class _LibraryPageState extends State<LibraryPage> {
         .collection('sessions');
 
     return Scaffold(
-      appBar: AppBar(title: Text(strings.library)),
+      backgroundColor: const Color(0xFFF6F8FB),
+      appBar: AppBar(
+        title: Text(strings.library),
+        backgroundColor: const Color(0xFFF6F8FB),
+        elevation: 0,
+      ),
       body: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.all(12),
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
             child: TextField(
               decoration: InputDecoration(
+                filled: true,
+                fillColor: Colors.white,
                 prefixIcon: const Icon(Icons.search),
                 hintText: strings.selectClass,
-                border: const OutlineInputBorder(),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: BorderSide.none,
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: BorderSide.none,
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: BorderSide(
+                    color: Theme.of(context).colorScheme.primary,
+                    width: 1.5,
+                  ),
+                ),
               ),
               onChanged: (v) => setState(() => _search = v.trim().toLowerCase()),
             ),
@@ -74,7 +95,7 @@ class _LibraryPageState extends State<LibraryPage> {
 
                 final docs = snap.data?.docs ?? [];
                 if (docs.isEmpty) {
-                  return Center(child: Text(strings.noRecordingsYet));
+                  return _LibraryEmptyState(message: strings.noRecordingsYet);
                 }
 
                 final Map<String, _ClassRow> classes = {};
@@ -154,12 +175,13 @@ class _LibraryPageState extends State<LibraryPage> {
                 });
 
                 if (items.isEmpty) {
-                  return Center(child: Text(strings.noClassesMatch));
+                  return _LibraryEmptyState(message: strings.noClassesMatch);
                 }
 
                 return ListView.separated(
+                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 96),
                   itemCount: items.length,
-                  separatorBuilder: (_, __) => const Divider(height: 1),
+                  separatorBuilder: (_, __) => const SizedBox(height: 12),
                   itemBuilder: (ctx, i) {
                     final r = items[i];
 
@@ -168,28 +190,49 @@ class _LibraryPageState extends State<LibraryPage> {
                       strings.lectureCount(r.count),
                     ];
 
-                    return ListTile(
-                      leading: const Icon(Icons.folder),
-                      title: Text(
-                        r.className,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
+                    return Card(
+                      elevation: 0,
+                      color: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(18),
                       ),
-                      subtitle: Text(subtitleParts.join(' • ')),
-                      trailing: const Icon(Icons.chevron_right),
-                      onTap: () {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (_) => ClassLecturesScreen(
-                              className: r.className,
-                              academicYearId: r.academicYearId,
-                              semesterId: r.semesterId,
-                              classId: r.classId,
-                              useStableSessionQuery: r.useStableSessionQuery,
+                      child: ListTile(
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 10,
+                        ),
+                        leading: Icon(
+                          Icons.folder_outlined,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                        title: Text(
+                          r.className,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                fontWeight: FontWeight.w700,
+                              ),
+                        ),
+                        subtitle: Text(
+                          subtitleParts.join(' • '),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        trailing: const Icon(Icons.chevron_right),
+                        onTap: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (_) => ClassLecturesScreen(
+                                className: r.className,
+                                academicYearId: r.academicYearId,
+                                semesterId: r.semesterId,
+                                classId: r.classId,
+                                useStableSessionQuery: r.useStableSessionQuery,
+                              ),
                             ),
-                          ),
-                        );
-                      },
+                          );
+                        },
+                      ),
                     );
                   },
                 );
@@ -197,6 +240,52 @@ class _LibraryPageState extends State<LibraryPage> {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+
+class _LibraryEmptyState extends StatelessWidget {
+  const _LibraryEmptyState({required this.message});
+
+  final String message;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Card(
+          elevation: 0,
+          color: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(18),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.folder_open_outlined,
+                  size: 42,
+                  color: theme.colorScheme.primary,
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  message,
+                  textAlign: TextAlign.center,
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }
