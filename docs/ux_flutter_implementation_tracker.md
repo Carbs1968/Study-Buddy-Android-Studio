@@ -353,3 +353,53 @@ Safety:
 - No recorder controls/timer behavior changed.
 - No upload destination behavior changed.
 - `flutter analyze` remained at the known existing 21 issues.
+
+## Class Management and Library Source-of-Truth Decision
+
+Decision:
+- Keep Academic Settings focused on academic year / semester defaults.
+- Do not turn Settings into a full class/topic manager right now.
+- Library should become the future class management surface.
+- Class Detail remains the place for recordings, materials, and later topics/study guides.
+
+Current Library behavior:
+- Reads `users/{uid}/sessions`.
+- Groups sessions by class metadata.
+- Shows classes discovered from recordings.
+
+Why this is acceptable now:
+- It preserves existing behavior.
+- It keeps legacy sessions visible.
+- It avoids a risky Library rewrite during the current UX/data-model pass.
+
+Why this is not ideal at scale:
+- It requires reading many session documents just to discover classes.
+- It may become slower and more expensive as recordings grow.
+- Classes with no recordings may not appear.
+- Classes with only uploaded materials may not appear.
+- It is not the best foundation for topic-level organization.
+
+Future scalable model:
+- Library should primarily read class documents from:
+  `users/{uid}/academicYears/{yearId}/semesters/{semesterId}/classes/{classId}`
+
+Future class document fields may include:
+- `classId`
+- `className`
+- `academicYearId`
+- `semesterId`
+- `recordingCount`
+- `materialCount`
+- `topicCount`
+- `lastActivityAt`
+- `updatedAt`
+
+Safe migration path:
+1. Keep current session-derived Library behavior.
+2. Add class documents as the primary Library source later.
+3. Merge class docs with session-derived class rollups.
+4. De-duplicate by `academicYearId + semesterId + classId`.
+5. Keep session-derived fallback for legacy records.
+6. Later add counters/lastActivity fields to class docs.
+
+Do not implement this migration until reviewed separately.
