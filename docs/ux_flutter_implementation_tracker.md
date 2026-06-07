@@ -309,3 +309,47 @@ Future use:
 - Supports future Topic Study Guide planning.
 - Supports future Class / Term Study Guide aggregation.
 - Provides a metadata distinction between class-level and future topic-level materials.
+
+## Corrected Topic Grouping Metadata
+
+Commit:
+- `1469c87 Add topic grouping metadata`
+
+Summary:
+- Corrected the topic metadata approach after Firebase testing.
+- New recording sessions now save a normalized `topicKey` instead of a premature `topicId`.
+- `topicId` is reserved for future real Topic documents under the class hierarchy.
+- Existing session field `topic` remains preserved for backward compatibility.
+- `topicName` is added as the readable display name.
+
+Final session metadata model for new recordings:
+- `topic`
+- `topicName`
+- `topicKey`
+
+Final class material metadata model for new class-level materials:
+- `materialScope: class`
+- `topicId: null`
+- `topicName: null`
+
+Reasoning:
+- A Firebase-generated `topicId` should only be used once real topic documents exist.
+- Generating a random topic ID per recording would make grouping lectures by topic unreliable.
+- `topicKey` is a temporary normalized grouping key based on the topic text.
+- Future topic documents can later provide true stable IDs.
+
+Firebase verification:
+- A new test recording was created and uploaded.
+- The newest session document showed:
+  - `topic`
+  - `topicName`
+  - `topicKey`
+- No premature `topicId` was saved on the session.
+
+Safety:
+- No UI changes.
+- No Firestore path changes.
+- No Firebase Storage path changes.
+- No recorder controls/timer behavior changed.
+- No upload destination behavior changed.
+- `flutter analyze` remained at the known existing 21 issues.
