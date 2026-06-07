@@ -69,8 +69,11 @@ class _ClassLecturesScreenState extends State<ClassLecturesScreen> {
             .where('className', isEqualTo: widget.className);
 
     return Scaffold(
+      backgroundColor: const Color(0xFFF6F8FB),
       appBar: AppBar(
         title: Text(widget.className),
+        backgroundColor: const Color(0xFFF6F8FB),
+        elevation: 0,
         actions: [
           IconButton(
             tooltip: 'Materials',
@@ -96,12 +99,28 @@ class _ClassLecturesScreenState extends State<ClassLecturesScreen> {
       body: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.all(12),
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
             child: TextField(
               decoration: InputDecoration(
+                filled: true,
+                fillColor: Colors.white,
                 prefixIcon: const Icon(Icons.search),
                 hintText: '${strings.lectureTopic}...',
-                border: const OutlineInputBorder(),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: BorderSide.none,
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: BorderSide.none,
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: BorderSide(
+                    color: Theme.of(context).colorScheme.primary,
+                    width: 1.5,
+                  ),
+                ),
               ),
               onChanged: (v) => setState(() => _search = v.trim().toLowerCase()),
             ),
@@ -146,12 +165,45 @@ class _ClassLecturesScreenState extends State<ClassLecturesScreen> {
                 });
 
                 if (docs.isEmpty) {
-                  return Center(child: Text(strings.noLecturesYet));
+                  return Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(24),
+                      child: Card(
+                        elevation: 0,
+                        color: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(18),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(24),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.library_music_outlined,
+                                size: 42,
+                                color: Theme.of(context).colorScheme.primary,
+                              ),
+                              const SizedBox(height: 12),
+                              Text(
+                                strings.noLecturesYet,
+                                textAlign: TextAlign.center,
+                                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                      fontWeight: FontWeight.w800,
+                                    ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  );
                 }
 
                 return ListView.separated(
+                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
                   itemCount: docs.length,
-                  separatorBuilder: (_, __) => const Divider(height: 1),
+                  separatorBuilder: (_, __) => const SizedBox(height: 12),
                   itemBuilder: (ctx, i) {
                     final d = docs[i];
                     final m = d.data();
@@ -175,26 +227,43 @@ class _ClassLecturesScreenState extends State<ClassLecturesScreen> {
                     }
                     subtitleParts.add('${strings.transcript}: $status');
 
-                    return ListTile(
-                      leading: const Icon(Icons.library_music),
-                      title: Text(
-                        topic.isEmpty ? strings.lectureTopic : topic,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
+                    return Card(
+                      elevation: 0,
+                      color: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(18),
                       ),
-                      subtitle: Text(
-                        subtitleParts.join(' • '),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
+                      child: ListTile(
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 10,
+                        ),
+                        leading: Icon(
+                          Icons.library_music_outlined,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                        title: Text(
+                          topic.isEmpty ? strings.lectureTopic : topic,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                fontWeight: FontWeight.w700,
+                              ),
+                        ),
+                        subtitle: Text(
+                          subtitleParts.join(' • '),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        trailing: const Icon(Icons.chevron_right),
+                        onTap: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (_) => LectureDetailScreen(sessionId: d.id),
+                            ),
+                          );
+                        },
                       ),
-                      trailing: const Icon(Icons.chevron_right),
-                      onTap: () {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (_) => LectureDetailScreen(sessionId: d.id),
-                          ),
-                        );
-                      },
                     );
                   },
                 );
