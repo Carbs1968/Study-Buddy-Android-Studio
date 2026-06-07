@@ -315,8 +315,11 @@ class _ClassMaterialsScreenState extends State<ClassMaterialsScreen> {
     }
 
     return Scaffold(
+      backgroundColor: const Color(0xFFF6F8FB),
       appBar: AppBar(
         title: Text('${widget.className} Materials'),
+        backgroundColor: const Color(0xFFF6F8FB),
+        elevation: 0,
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _uploading ? null : _showAddMaterialOptions,
@@ -351,21 +354,53 @@ class _ClassMaterialsScreenState extends State<ClassMaterialsScreen> {
           final docs = snapshot.data?.docs ?? [];
 
           if (docs.isEmpty) {
-            return const Center(
+            return Center(
               child: Padding(
-                padding: EdgeInsets.all(24),
-                child: Text(
-                  'No class materials yet. Add images of notes, worksheets, or whiteboards here.',
-                  textAlign: TextAlign.center,
+                padding: const EdgeInsets.all(24),
+                child: Card(
+                  elevation: 0,
+                  color: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(18),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(24),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.upload_file_outlined,
+                          size: 42,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          'No class materials yet',
+                          textAlign: TextAlign.center,
+                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                fontWeight: FontWeight.w800,
+                              ),
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          'Add images of notes, worksheets, PDFs, or documents here.',
+                          textAlign: TextAlign.center,
+                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                color: Colors.black54,
+                              ),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
               ),
             );
           }
 
           return ListView.separated(
-            padding: const EdgeInsets.only(bottom: 96),
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 96),
             itemCount: docs.length,
-            separatorBuilder: (_, __) => const Divider(height: 1),
+            separatorBuilder: (_, __) => const SizedBox(height: 12),
             itemBuilder: (context, index) {
               final data = docs[index].data();
               final title = (data['originalFileName'] ?? data['fileName'] ?? 'Material')
@@ -383,14 +418,38 @@ class _ClassMaterialsScreenState extends State<ClassMaterialsScreen> {
               final mimeType = (data['mimeType'] ?? '').toString();
               final materialRef = docs[index].reference;
 
-              return ListTile(
-                leading: Icon(_iconForMaterialType(type)),
-                title: Text(title),
-                subtitle: Text(subtitleParts.join(' • ')),
-                trailing: const Icon(Icons.chevron_right),
-                onTap: downloadUrl.isEmpty
-                    ? null
-                    : () {
+              return Card(
+                elevation: 0,
+                color: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(18),
+                ),
+                child: ListTile(
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 10,
+                  ),
+                  leading: Icon(
+                    _iconForMaterialType(type),
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                  title: Text(
+                    title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w700,
+                        ),
+                  ),
+                  subtitle: Text(
+                    subtitleParts.join(' • '),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: downloadUrl.isEmpty
+                      ? null
+                      : () {
                         if (type == 'image') {
                           Navigator.push(
                             context,
@@ -456,6 +515,7 @@ class _ClassMaterialsScreenState extends State<ClassMaterialsScreen> {
                           ),
                         );
                       },
+                ),
               );
             },
           );
