@@ -22,85 +22,163 @@ class SettingsPage extends StatelessWidget {
 
     final strings = SBStrings.of(context);
     return Scaffold(
-      appBar: AppBar(title: Text(strings.settings)),
-      body: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
+      backgroundColor: const Color(0xFFF6F8FB),
+      appBar: AppBar(
+        title: Text(strings.settings),
+        backgroundColor: const Color(0xFFF6F8FB),
+        elevation: 0,
+      ),
+      body: SafeArea(
+        child: ListView(
+          padding: const EdgeInsets.fromLTRB(20, 16, 20, 96),
           children: [
             if (user != null) ...[
-              CircleAvatar(
-                radius: 50,
-                backgroundImage:
-                user.photoURL != null ? NetworkImage(user.photoURL!) : null,
-                child: user.photoURL == null
-                    ? const Icon(Icons.person, size: 50)
-                    : null,
-              ),
-              const SizedBox(height: 12),
-              Text(
-                user.displayName ?? strings.unknownUser,
-                style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-              ),
-              Text(
-                user.email ?? '',
-                style: const TextStyle(color: Colors.black54),
-              ),
-              const Divider(height: 40),
-            ],
-            // Language picker
-            Row(
-              children: [
-                Text('${strings.language}:', style: const TextStyle(fontWeight: FontWeight.bold)),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: DropdownButton<Locale>(
-                    value: appLocale.value,
-                    isExpanded: true,
-                    items: SBStrings.supportedLocales
-                        .map((l) => DropdownMenuItem(
-                      value: l,
-                      child: Text(SBStrings.localeNames[l.languageCode] ?? l.languageCode),
-                    ))
-                        .toList(),
-                    onChanged: (val) async {
-                      if (val == null) return;
-                      appLocale.value = val;
-                      final u = FirebaseAuth.instance.currentUser;
-                      if (u != null) {
-                        await FirebaseFirestore.instance.collection('users').doc(u.uid).set(
-                          {'locale': val.languageCode},
-                          SetOptions(merge: true),
-                        );
-                      }
-                    },
+              Card(
+                elevation: 0,
+                color: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(18),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Row(
+                    children: [
+                      CircleAvatar(
+                        radius: 34,
+                        backgroundImage: user.photoURL != null
+                            ? NetworkImage(user.photoURL!)
+                            : null,
+                        child: user.photoURL == null
+                            ? const Icon(Icons.person, size: 34)
+                            : null,
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              user.displayName ?? strings.unknownUser,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                    fontWeight: FontWeight.w800,
+                                  ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              user.email ?? '',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                    color: Colors.black54,
+                                  ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-              ],
+              ),
+              const SizedBox(height: 16),
+            ],
+            Card(
+              elevation: 0,
+              color: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(18),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+                child: Row(
+                  children: [
+                    Text(
+                      '${strings.language}:',
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.w800,
+                          ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: DropdownButton<Locale>(
+                        value: appLocale.value,
+                        isExpanded: true,
+                        underline: const SizedBox.shrink(),
+                        items: SBStrings.supportedLocales
+                            .map((l) => DropdownMenuItem(
+                          value: l,
+                          child: Text(SBStrings.localeNames[l.languageCode] ?? l.languageCode),
+                        ))
+                            .toList(),
+                        onChanged: (val) async {
+                          if (val == null) return;
+                          appLocale.value = val;
+                          final u = FirebaseAuth.instance.currentUser;
+                          if (u != null) {
+                            await FirebaseFirestore.instance.collection('users').doc(u.uid).set(
+                              {'locale': val.languageCode},
+                              SetOptions(merge: true),
+                            );
+                          }
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
-            const SizedBox(height: 16),
-            SwitchListTile(
-              title: Text(strings.autoTranscribeAfterUpload),
-              value: false,
-              onChanged: (v) {},
+            const SizedBox(height: 12),
+            Card(
+              elevation: 0,
+              color: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(18),
+              ),
+              child: Column(
+                children: [
+                  SwitchListTile(
+                    title: Text(strings.autoTranscribeAfterUpload),
+                    value: false,
+                    onChanged: (v) {},
+                  ),
+                  const Divider(height: 1),
+                  SwitchListTile(
+                    title: Text(strings.autoGenerateNotes),
+                    value: false,
+                    onChanged: (v) {},
+                  ),
+                ],
+              ),
             ),
-            SwitchListTile(
-              title: Text(strings.autoGenerateNotes),
-              value: false,
-              onChanged: (v) {},
+            const SizedBox(height: 12),
+            Card(
+              elevation: 0,
+              color: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(18),
+              ),
+              child: ListTile(
+                leading: Icon(
+                  Icons.school_outlined,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+                title: Text(
+                  SBStrings.of(context).academicSettingsTitle,
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
+                ),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const AcademicSettingsScreen()),
+                  );
+                },
+              ),
             ),
-            // Insert Academic Settings button here
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const AcademicSettingsScreen()),
-                );
-              },
-              child: Text(SBStrings.of(context).academicSettingsTitle),
-            ),
-            const Spacer(),
+            const SizedBox(height: 24),
             ElevatedButton.icon(
               onPressed: () async {
                 try {
