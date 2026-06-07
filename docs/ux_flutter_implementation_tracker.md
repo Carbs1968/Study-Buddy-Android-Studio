@@ -227,4 +227,38 @@ Reason:
 - Dark-mode experiment was reverted.
 - Next action after committing this tracker: plan a focused dark-mode fix.
 
- 
+## Completed Dark Mode Fix
+
+Commit:
+- `fc4d8d1 Fix dark mode contrast`
+
+Summary:
+- Added a stronger dark theme foundation in `lib/main.dart`.
+- Converted polished screens from hardcoded light colors to theme-aware colors.
+- Fixed dark-mode bottom navigation visibility.
+- Preserved the light-mode polished UX.
+
+Files changed:
+- `lib/main.dart`
+- `lib/screens/home_shell/pages/dashboard_page.dart`
+- `lib/screens/home_shell/pages/library_page.dart`
+- `lib/screens/class_lectures_screen.dart`
+- `lib/screens/class_materials_screen.dart`
+- `lib/screens/home_shell/pages/settings_page.dart`
+
+Manual test results:
+- Home dark mode looks good.
+- Library dark mode looks good.
+- Class Recordings dark mode looks good.
+- Class Materials dark mode looks good.
+- Settings dark mode looks good.
+- Bottom navigation is visible in dark mode.
+- `flutter analyze` remained at the known existing 21 issues.
+- No new analyzer issues were introduced.
+
+Safety:
+- No recorder files touched.
+- No Firebase/Auth logic touched.
+- No Firestore query/write logic intentionally changed.
+- No upload/storage-path logic touched.
+- No AI job or Cloud Function logic touched.
