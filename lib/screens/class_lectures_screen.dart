@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import '../l10n/strings.dart';
 import '../utils/helper.dart';
 import 'class_materials_screen.dart';
+import 'class_study_guide_screen.dart';
 import 'lecture_detail_screen.dart';
 
 class ClassLecturesScreen extends StatefulWidget {
@@ -35,6 +36,52 @@ class _ClassLecturesScreenState extends State<ClassLecturesScreen> {
     if (v is Timestamp) return v.toDate();
     if (v is String) return DateTime.tryParse(v);
     return null;
+  }
+
+  Future<void> _openOrRequestClassStudyGuide() async {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid == null) return;
+
+    final messenger = ScaffoldMessenger.of(context);
+    final classRef = FirebaseFirestore.instance
+        .collection('users')
+        .doc(uid)
+        .collection('academicYears')
+        .doc(widget.academicYearId)
+        .collection('semesters')
+        .doc(widget.semesterId)
+        .collection('classes')
+        .doc(widget.classId);
+
+    try {
+      final classDoc = await classRef.get();
+      final data = classDoc.data() ?? {};
+      final status = (data['classStudyGuideStatus'] ?? '').toString();
+      final guideId = (data['latestStudyGuideId'] ?? '').toString();
+
+      if (!mounted) return;
+      if (status == 'done' && guideId.isNotEmpty) {
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => ClassStudyGuideScreen(
+              academicYearId: widget.academicYearId,
+              semesterId: widget.semesterId,
+              classId: widget.classId,
+              guideId: guideId,
+              className: widget.className,
+            ),
+          ),
+        );
+        return;
+      }
+
+      await _requestClassStudyGuide();
+    } catch (_) {
+      if (!mounted) return;
+      messenger.showSnackBar(
+        const SnackBar(content: Text('Could not open study guide.')),
+      );
+    }
   }
 
   Future<void> _requestClassStudyGuide() async {
@@ -124,7 +171,7 @@ class _ClassLecturesScreenState extends State<ClassLecturesScreen> {
           IconButton(
             tooltip: 'Generate class study guide',
             icon: const Icon(Icons.auto_awesome_outlined),
-            onPressed: hasStableClassContext ? _requestClassStudyGuide : null,
+            onPressed: hasStableClassContext ? _openOrRequestClassStudyGuide : null,
           ),
           IconButton(
             tooltip: 'Materials',
