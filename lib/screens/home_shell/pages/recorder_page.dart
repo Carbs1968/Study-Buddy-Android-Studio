@@ -916,6 +916,9 @@ class _RecorderPageState extends State<RecorderPage> with WidgetsBindingObserver
         'createdAt': FieldValue.serverTimestamp(),
         'lastActivityAt': FieldValue.serverTimestamp(),
         'lastRecordingAt': FieldValue.serverTimestamp(),
+        'latestSessionId': sessionRef.id,
+        'latestTopicName': topic,
+        'hasRecordings': true,
         'updatedAt': FieldValue.serverTimestamp(),
       }, SetOptions(merge: true));
 

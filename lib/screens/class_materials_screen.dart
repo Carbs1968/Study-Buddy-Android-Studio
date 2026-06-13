@@ -192,9 +192,11 @@ class _ClassMaterialsScreenState extends State<ClassMaterialsScreen> {
         'updatedAt': timestamp,
       });
 
-      await _materialsRef(uid).parent!.set({
+      final classRef = _materialsRef(uid).parent!;
+      await classRef.set({
         'lastActivityAt': FieldValue.serverTimestamp(),
         'lastMaterialAt': FieldValue.serverTimestamp(),
+        'hasMaterials': true,
         'updatedAt': FieldValue.serverTimestamp(),
       }, SetOptions(merge: true));
 
