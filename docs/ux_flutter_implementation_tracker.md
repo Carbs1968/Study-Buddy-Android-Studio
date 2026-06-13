@@ -884,3 +884,134 @@ Existing session AI pipeline remains separate from class guide generation.
 - Later support uploaded materials in class-level guides.
 - Later support topic-level study guides.
 
+
+
+---
+
+## Completed Class Study Guide Viewer
+
+Date: 2026-06-13
+
+### Summary
+
+Completed and tested the first read-only in-app viewer for generated Class Study Guides.
+
+The class Study Guide action now checks the parent class document first:
+
+- If `classStudyGuideStatus == "done"` and `latestStudyGuideId` exists, it opens the viewer.
+- If no completed guide exists yet, it falls back to requesting/generating a guide through `requestClassStudyGuide`.
+
+### Source-of-truth checkpoint
+
+- Branch: `dev`
+- Latest pushed commit after this slice:
+  - `ba41791 Add class study guide viewer`
+- Firestore rules read-access commit:
+  - `e32d08d Allow users to read class study guides`
+- Working tree after push: clean
+- GitHub `origin/dev`: current with local `dev`
+
+### Flutter files changed
+
+Changed:
+
+- `lib/screens/class_lectures_screen.dart`
+
+Added:
+
+- `lib/screens/class_study_guide_screen.dart`
+
+### Viewer behavior
+
+Added `ClassStudyGuideScreen`, a read-only viewer for generated guides stored at:
+
+`users/{uid}/academicYears/{academicYearId}/semesters/{semesterId}/classes/{classId}/studyGuides/{guideId}`
+
+The screen reads the guide document and displays:
+
+- title
+- overview
+- key topics
+- study sections
+- review questions
+
+It handles:
+
+- not signed in
+- loading state
+- read error
+- missing guide document
+
+### Class screen behavior
+
+The class Study Guide AppBar action now:
+
+1. Reads the parent class document.
+2. Checks `classStudyGuideStatus` and `latestStudyGuideId`.
+3. If the guide is ready, opens `ClassStudyGuideScreen`.
+4. Otherwise, calls `requestClassStudyGuide` as before.
+
+Existing Materials button remains unchanged.
+
+### Firebase/security dependency
+
+This viewer depends on the previously deployed Firestore rule that allows owner read/list access for class `studyGuides`.
+
+Client users can read/list their own generated guides.
+
+Client users cannot create, update, or delete guide docs.
+
+Backend Admin SDK remains responsible for writing generated guide documents.
+
+### Manual test results
+
+Tested on physical Samsung device.
+
+Result:
+
+- App opened successfully.
+- Class Study Guide button opened the generated guide.
+- The generated content displayed in-app.
+- Content was readable and useful for the recordings available.
+- No permission-denied error occurred.
+- No new duplicate study guide was generated during this viewer test.
+- `flutter analyze` stayed at the known baseline: 21 issues.
+
+### Safety statement
+
+Touched:
+
+- Class screen navigation/action behavior
+- New read-only Class Study Guide viewer screen
+
+Did not touch:
+
+- Recording flow
+- Upload flow
+- Firebase Storage upload
+- Firestore session save
+- Class guide backend generation
+- Existing `/aiJobs` flow
+- Existing transcript/summary/notes/quiz generation
+- Library loading
+- Academic settings loading
+- Google Drive logic
+- Firestore rules in this viewer commit
+
+### Current status
+
+Class Study Guide v1 now supports:
+
+- request from class screen
+- backend generation from completed transcripts
+- duplicate-generation prevention
+- read-only in-app viewing
+
+### Remaining future work
+
+- Improve the viewer UI toward the Figma design system.
+- Add clearer status UI for generating/error states.
+- Add copy/export/share actions.
+- Add refresh/regenerate behavior when recording content changes.
+- Add topic-level guide viewer later.
+- Add uploaded materials into class guide generation later.
