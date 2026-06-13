@@ -565,3 +565,38 @@ Safety:
 - No counters should be added.
 - No `topicId` should be added until real topic documents exist.
 - No Google Drive logic.
+
+## Completed Class Study Guide Validation Callable
+
+Commit:
+- `944cbe2 Add class study guide validation callable`
+
+Summary:
+- Added backend callable `requestClassStudyGuide` as the first backend-only slice for Class Study Guide v1.
+- This callable validates the authenticated user, class path, and eligible completed transcripts.
+- It returns an eligible transcript/session count but does not create an AI job yet.
+
+Behavior:
+- Requires Firebase Auth.
+- Accepts `academicYearId`, `semesterId`, and `classId`.
+- Confirms the class document exists at:
+  `users/{uid}/academicYears/{academicYearId}/semesters/{semesterId}/classes/{classId}`
+- Queries `users/{uid}/sessions` for matching class sessions where `transcriptStatus == "done"`.
+- Counts only sessions with non-empty `transcriptText`.
+- Returns `ok`, `eligibleSessionCount`, `className`, `academicYearId`, `semesterId`, and `classId`.
+
+Safety:
+- Backend-only validation/count slice.
+- No `/aiJobs` document is created yet.
+- No OpenAI call is made.
+- Existing `onAiJobCreated` behavior is unchanged.
+- Existing transcript, summary, notes, and quiz jobs are unchanged.
+- No Flutter UI change.
+- No Firestore rules change.
+- No Firestore index change.
+- `node --check functions/src/index.js` passed.
+- `npm run lint` was unavailable because no lint script exists; no package/tooling changes were made.
+
+Next future slice:
+- Add a small Flutter/internal test call or backend emulator/callable test to verify the callable returns the expected eligible count for a real class.
+- After validation is proven, a later slice can create a backend-owned `classStudyGuide` AI job.
