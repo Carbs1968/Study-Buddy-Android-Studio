@@ -673,6 +673,64 @@ exports.getTranscriptText = onCall({ region: REGION }, async (request) => {
   };
 });
 
+exports.requestClassStudyGuide = onCall({ region: REGION }, async (request) => {
+  if (!request.auth) {
+    throw new HttpsError("unauthenticated", "Authentication is required.");
+  }
+
+  const academicYearId = trimOrEmpty(request.data && request.data.academicYearId);
+  const semesterId = trimOrEmpty(request.data && request.data.semesterId);
+  const classId = trimOrEmpty(request.data && request.data.classId);
+
+  if (!academicYearId) {
+    throw new HttpsError("invalid-argument", "academicYearId is required.");
+  }
+  if (!semesterId) {
+    throw new HttpsError("invalid-argument", "semesterId is required.");
+  }
+  if (!classId) {
+    throw new HttpsError("invalid-argument", "classId is required.");
+  }
+
+  const uid = request.auth.uid;
+  const classSnapshot = await db
+    .doc(
+      `users/${uid}/academicYears/${academicYearId}` +
+        `/semesters/${semesterId}/classes/${classId}`,
+    )
+    .get();
+
+  if (!classSnapshot.exists) {
+    throw new HttpsError("not-found", "Class not found.");
+  }
+
+  const sessionsSnapshot = await db
+    .collection("users")
+    .doc(uid)
+    .collection("sessions")
+    .where("academicYearId", "==", academicYearId)
+    .where("semesterId", "==", semesterId)
+    .where("classId", "==", classId)
+    .where("transcriptStatus", "==", "done")
+    .get();
+
+  const eligibleSessionCount = sessionsSnapshot.docs.filter((doc) => {
+    const session = doc.data() || {};
+    return Boolean(trimOrEmpty(session.transcriptText));
+  }).length;
+
+  const classData = classSnapshot.data() || {};
+
+  return {
+    ok: true,
+    eligibleSessionCount,
+    className: trimOrEmpty(classData.className),
+    academicYearId,
+    semesterId,
+    classId,
+  };
+});
+
 exports.getAiJobOutput = onCall({ region: REGION }, async (request) => {
   if (!request.auth) {
     throw new HttpsError("unauthenticated", "Authentication is required.");
