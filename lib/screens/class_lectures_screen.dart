@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
@@ -34,6 +35,50 @@ class _ClassLecturesScreenState extends State<ClassLecturesScreen> {
     if (v is Timestamp) return v.toDate();
     if (v is String) return DateTime.tryParse(v);
     return null;
+  }
+
+  Future<void> _requestClassStudyGuide() async {
+    final messenger = ScaffoldMessenger.of(context);
+    try {
+      messenger.showSnackBar(
+        const SnackBar(content: Text('Requesting class study guide...')),
+      );
+
+      final callable =
+          FirebaseFunctions.instance.httpsCallable('requestClassStudyGuide');
+      final result = await callable.call<Map<String, dynamic>>({
+        'academicYearId': widget.academicYearId,
+        'semesterId': widget.semesterId,
+        'classId': widget.classId,
+      });
+
+      final data = result.data;
+      final reused = data['reused'] == true;
+      final status = data['status']?.toString() ?? 'requested';
+
+      if (!mounted) return;
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text(
+            reused
+                ? 'Study guide already requested ($status).'
+                : 'Study guide requested.',
+          ),
+        ),
+      );
+    } on FirebaseFunctionsException catch (e) {
+      if (!mounted) return;
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text(e.message ?? 'Could not request study guide.'),
+        ),
+      );
+    } catch (_) {
+      if (!mounted) return;
+      messenger.showSnackBar(
+        const SnackBar(content: Text('Could not request study guide.')),
+      );
+    }
   }
 
   @override
@@ -76,6 +121,11 @@ class _ClassLecturesScreenState extends State<ClassLecturesScreen> {
         backgroundColor: theme.scaffoldBackgroundColor,
         elevation: 0,
         actions: [
+          IconButton(
+            tooltip: 'Generate class study guide',
+            icon: const Icon(Icons.auto_awesome_outlined),
+            onPressed: hasStableClassContext ? _requestClassStudyGuide : null,
+          ),
           IconButton(
             tooltip: 'Materials',
             icon: const Icon(Icons.folder_copy_outlined),

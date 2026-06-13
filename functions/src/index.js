@@ -13,6 +13,7 @@ const { onSchedule } = require("firebase-functions/v2/scheduler");
 const { onCall, HttpsError } = require("firebase-functions/v2/https");
 const {
   onDocumentCreated,
+  onDocumentWritten,
   onDocumentUpdated,
 } = require("firebase-functions/v2/firestore");
 
@@ -839,13 +840,24 @@ exports.requestClassStudyGuide = onCall({ region: REGION }, async (request) => {
       transactionClassData.classStudyGuideContentSnapshot || {};
 
     if (
-      ["validated", "queued", "running"].includes(existingStatus) &&
+      ["validated", "queued", "running", "done"].includes(existingStatus) &&
       latestStudyGuideRequestId &&
       timestampValuesEqual(
         storedContentSnapshot.recordingsLastChangedAt,
         contentSnapshot.recordingsLastChangedAt,
       )
     ) {
+      if (existingStatus === "validated") {
+        const timestamp = FieldValue.serverTimestamp();
+        const existingRequestRef = db
+          .collection("classStudyGuideRequests")
+          .doc(latestStudyGuideRequestId);
+        transaction.set(existingRequestRef, {
+          generationKickAt: timestamp,
+          updatedAt: timestamp,
+        }, { merge: true });
+      }
+
       return {
         reused: true,
         status: existingStatus,
@@ -899,7 +911,7 @@ exports.requestClassStudyGuide = onCall({ region: REGION }, async (request) => {
   };
 });
 
-exports.onClassStudyGuideRequestCreated = onDocumentCreated(
+exports.onClassStudyGuideRequestWritten = onDocumentWritten(
   {
     document: "classStudyGuideRequests/{requestId}",
     region: REGION,
@@ -908,9 +920,10 @@ exports.onClassStudyGuideRequestCreated = onDocumentCreated(
     memory: "1GiB",
   },
   async (event) => {
-    const snapshot = event.data;
-    if (!snapshot) return;
+    const change = event.data;
+    if (!change || !change.after || !change.after.exists) return;
 
+    const snapshot = change.after;
     const requestRef = snapshot.ref;
     const requestId = event.params.requestId;
     const claimResult = await db.runTransaction(async (transaction) => {
@@ -1061,6 +1074,12 @@ exports.onClassStudyGuideRequestCreated = onDocumentCreated(
         ))
         .join("\n\n---\n\n");
       const output = await generateClassStudyGuideOutput(className, transcriptText);
+      output.sourceSummary = {
+        ...(output.sourceSummary || {}),
+        sessionCount: sessions.length,
+        includedSessionCount: sessions.length,
+        omittedSessionCount: 0,
+      };
       const completedAt = now();
       const guideRef = classRef.collection("studyGuides").doc();
       const guidePath = `${classPath}/studyGuides/${guideRef.id}`;
