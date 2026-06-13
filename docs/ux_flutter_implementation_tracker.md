@@ -461,3 +461,46 @@ Safety:
 - No Firebase Storage path changed.
 - No session document shape changed.
 - `flutter analyze` remained at the known existing issue baseline.
+
+## Future Library Class-Doc Migration Plan
+
+Status:
+- Planning only. No Library query change has been made yet.
+
+Current Library behavior:
+- `library_page.dart` still reads `users/{uid}/sessions`.
+- Sessions are grouped client-side into class rows.
+- Lecture counts are derived from actual session documents.
+- Legacy sessions without stable academic IDs still use slug-derived fallback IDs.
+- `ClassLecturesScreen` remains session-backed.
+
+Current class document foundation:
+- Class docs now contain safe activity/display metadata:
+  - `lastActivityAt`
+  - `lastRecordingAt`
+  - `lastMaterialAt`
+  - `updatedAt`
+  - `latestSessionId`
+  - `latestTopicName`
+  - `hasRecordings`
+  - `hasMaterials`
+
+Migration direction:
+- Do not switch the Library to class-doc primary yet.
+- Keep session-derived Library behavior until class-doc reads are verified.
+- Future migration should preserve session-derived fallback for legacy users.
+- Avoid `lectureCount` or `materialCount` counters until there is a safe server-side/backfill strategy.
+- Avoid `topicId` until real topic documents exist.
+
+Future implementation notes:
+- A future class-doc loader may query nested class documents, likely with a `collectionGroup("classes")` query filtered by `userId`.
+- Collection-group rules and index requirements must be tested before shipping.
+- The first implementation should avoid visible UI behavior changes unless deliberately approved.
+- Material-only classes may appear in class docs, so Library empty-state and row labels must be reconsidered before changing the rendered source.
+
+Safety:
+- No current Library query change.
+- No UI change.
+- No recorder/upload/Storage/session/AI behavior change.
+- No counters.
+- No `topicId`.
