@@ -663,3 +663,44 @@ Safety:
 
 Next future slice:
 - Backend can now safely move from validation/count-only to creating a backend-owned `classStudyGuide` job in a later step.
+
+## Completed Class Study Guide Request Idempotency Test
+
+Commit:
+- `7dde7fe Prevent duplicate class study guide requests`
+
+Deployment:
+- Deployed only `functions:requestClassStudyGuide` after adding transaction-backed idempotency.
+
+Test result:
+- Temporary Flutter science-icon test UI was added and removed after testing.
+- First authenticated tap created a new class study guide request.
+- Repeated taps returned the same `requestId` with `reused: true`.
+- Verified request reuse for unchanged recording content.
+- Verified no duplicate request documents were created for repeated taps.
+- `flutter analyze` returned to the known existing issue baseline: 21 issues.
+- Temporary Flutter test code was removed and `class_lectures_screen.dart` was restored cleanly.
+
+Request collection rationale:
+- `classStudyGuideRequests/{requestId}` is a backend request/history collection.
+- It is separate from `/aiJobs` because the current `/aiJobs` worker is session-based and expects `sessionId` or `recordingId`.
+- It is separate from final user-facing study guide output.
+- Future generated class study guides should be saved under the class document, likely:
+  `users/{uid}/academicYears/{academicYearId}/semesters/{semesterId}/classes/{classId}/studyGuides/{guideId}`
+- The class document remains the fast UI/status pointer via fields such as `classStudyGuideStatus`, `latestStudyGuideRequestId`, `classStudyGuideUpdatedAt`, and `classStudyGuideContentSnapshot`.
+
+Scalability and cost control:
+- The class doc acts as the idempotency lock and current state pointer.
+- Request docs preserve backend history/debuggability.
+- Repeated requests for unchanged recording content reuse the existing request.
+- A new request is allowed when recording content changes.
+- `lastMaterialAt` is preserved in `classStudyGuideContentSnapshot` for future uploaded-material support.
+- For v1, only `lastRecordingAt` controls regeneration because materials are not included in Class Study Guide v1 yet.
+
+Safety:
+- No `/aiJobs` document is created yet.
+- No OpenAI call is made yet.
+- Existing transcript, summary, notes, and quiz jobs remain untouched.
+- No Flutter UI change remains.
+- No Firestore rules or index changes were made.
+- No Google Drive logic.
