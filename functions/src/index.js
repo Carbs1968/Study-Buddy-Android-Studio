@@ -27,6 +27,7 @@ const AUDIO_RETENTION_DAYS_AFTER_TRANSCRIPT = 5;
 const AUDIO_CLEANUP_BATCH_LIMIT = 100;
 const OPENAI_AUDIO_SAFE_LIMIT_BYTES = 20 * 1024 * 1024;
 const AUDIO_CHUNK_SECONDS = 10 * 60;
+const CLASS_STUDY_GUIDE_TRANSCRIPT_CHAR_LIMIT = 60000;
 
 const db = getFirestore();
 const storage = getStorage();
@@ -345,6 +346,80 @@ async function generateOpenAiOutput(type, transcriptText) {
     completion.choices[0].message.content;
 
   return validateGeneratedOutput(type, parseJsonContent(content));
+}
+
+function classStudyGuidePrompt(className, transcriptText) {
+  return {
+    system:
+      "Create a concise but useful study guide for students using only the " +
+      "provided class recording transcripts. Do not invent facts. Return valid " +
+      "JSON only, with exactly this shape: " +
+      "{\"title\":\"<title>\",\"overview\":\"<overview>\"," +
+      "\"keyTopics\":[{\"title\":\"<topic>\",\"summary\":\"<summary>\"}]," +
+      "\"studySections\":[{\"heading\":\"<heading>\",\"bullets\":[\"<bullet>\"]}]," +
+      "\"reviewQuestions\":[{\"question\":\"<question>\",\"answer\":\"<answer>\"}]," +
+      "\"sourceSummary\":{\"sessionCount\":<number>}}.",
+    user: `Class: ${className || "Class"}\n\nTranscripts:\n${transcriptText}`,
+  };
+}
+
+function validateClassStudyGuideOutput(output) {
+  if (!output || typeof output !== "object" || Array.isArray(output)) {
+    throw jsonParseError("OpenAI JSON response must be an object.");
+  }
+
+  if (!trimOrEmpty(output.title)) {
+    throw jsonParseError("Class study guide response is missing title.");
+  }
+  if (!trimOrEmpty(output.overview)) {
+    throw jsonParseError("Class study guide response is missing overview.");
+  }
+  if (!Array.isArray(output.keyTopics)) {
+    throw jsonParseError("Class study guide response is missing keyTopics array.");
+  }
+  if (!Array.isArray(output.studySections)) {
+    throw jsonParseError(
+      "Class study guide response is missing studySections array.",
+    );
+  }
+  if (!Array.isArray(output.reviewQuestions)) {
+    throw jsonParseError(
+      "Class study guide response is missing reviewQuestions array.",
+    );
+  }
+  if (!output.sourceSummary || typeof output.sourceSummary !== "object") {
+    throw jsonParseError("Class study guide response is missing sourceSummary.");
+  }
+
+  return {
+    title: output.title,
+    overview: output.overview,
+    keyTopics: output.keyTopics,
+    studySections: output.studySections,
+    reviewQuestions: output.reviewQuestions,
+    sourceSummary: output.sourceSummary,
+  };
+}
+
+async function generateClassStudyGuideOutput(className, transcriptText) {
+  const prompt = classStudyGuidePrompt(className, transcriptText);
+  const completion = await openAiClient().chat.completions.create({
+    model: CHAT_MODEL,
+    messages: [
+      { role: "system", content: prompt.system },
+      { role: "user", content: prompt.user },
+    ],
+    response_format: { type: "json_object" },
+    temperature: 0.2,
+  });
+
+  const content =
+    completion.choices &&
+    completion.choices[0] &&
+    completion.choices[0].message &&
+    completion.choices[0].message.content;
+
+  return validateClassStudyGuideOutput(parseJsonContent(content));
 }
 
 function errorCodeForGenerationFailure(type, error) {
@@ -823,6 +898,232 @@ exports.requestClassStudyGuide = onCall({ region: REGION }, async (request) => {
     classId,
   };
 });
+
+exports.onClassStudyGuideRequestCreated = onDocumentCreated(
+  {
+    document: "classStudyGuideRequests/{requestId}",
+    region: REGION,
+    secrets: [OPENAI_API_KEY],
+    timeoutSeconds: 540,
+    memory: "1GiB",
+  },
+  async (event) => {
+    const snapshot = event.data;
+    if (!snapshot) return;
+
+    const requestRef = snapshot.ref;
+    const requestId = event.params.requestId;
+    const claimResult = await db.runTransaction(async (transaction) => {
+      const requestSnapshot = await transaction.get(requestRef);
+      if (!requestSnapshot.exists) {
+        return { claimed: false };
+      }
+
+      const currentRequest = requestSnapshot.data() || {};
+      if (currentRequest.status !== "validated") {
+        return { claimed: false };
+      }
+
+      const startedAt = now();
+      transaction.set(requestRef, {
+        status: "running",
+        startedAt,
+        updatedAt: startedAt,
+      }, { merge: true });
+
+      return {
+        claimed: true,
+        request: currentRequest,
+        startedAt,
+      };
+    });
+
+    if (!claimResult.claimed) return;
+
+    const request = claimResult.request || {};
+    const startedAt = claimResult.startedAt;
+
+    const uid = trimOrEmpty(request.uid);
+    const academicYearId = trimOrEmpty(request.academicYearId);
+    const semesterId = trimOrEmpty(request.semesterId);
+    const classId = trimOrEmpty(request.classId);
+    const classPath = trimOrEmpty(request.classPath);
+    const className = trimOrEmpty(request.className);
+    const eligibleSessionCount = request.eligibleSessionCount;
+    const contentSnapshot = request.contentSnapshot || {};
+    let classRef = null;
+
+    try {
+      if (!uid) throw Object.assign(new Error("Request is missing uid."), {
+        code: "missing-uid",
+      });
+      if (!academicYearId) {
+        throw Object.assign(new Error("Request is missing academicYearId."), {
+          code: "missing-academic-year-id",
+        });
+      }
+      if (!semesterId) {
+        throw Object.assign(new Error("Request is missing semesterId."), {
+          code: "missing-semester-id",
+        });
+      }
+      if (!classId) throw Object.assign(new Error("Request is missing classId."), {
+        code: "missing-class-id",
+      });
+      if (!classPath) {
+        throw Object.assign(new Error("Request is missing classPath."), {
+          code: "missing-class-path",
+        });
+      }
+      if (typeof eligibleSessionCount !== "number" || eligibleSessionCount <= 0) {
+        throw Object.assign(
+          new Error("Request has no eligible completed transcript sessions."),
+          { code: "no-completed-transcripts" },
+        );
+      }
+
+      const expectedClassPath =
+        `users/${uid}/academicYears/${academicYearId}` +
+        `/semesters/${semesterId}/classes/${classId}`;
+      if (classPath !== expectedClassPath) {
+        throw Object.assign(new Error("Request classPath does not match class IDs."), {
+          code: "class-path-mismatch",
+        });
+      }
+
+      classRef = db.doc(classPath);
+      await classRef.set({
+        classStudyGuideStatus: "running",
+        classStudyGuideUpdatedAt: startedAt,
+        latestStudyGuideRequestId: requestId,
+      }, { merge: true });
+
+      const sessionsSnapshot = await db
+        .collection("users")
+        .doc(uid)
+        .collection("sessions")
+        .where("academicYearId", "==", academicYearId)
+        .where("semesterId", "==", semesterId)
+        .where("classId", "==", classId)
+        .where("transcriptStatus", "==", "done")
+        .get();
+
+      const sessions = sessionsSnapshot.docs
+        .map((doc) => {
+          const data = doc.data() || {};
+          return {
+            sessionId: doc.id,
+            topicName:
+              trimOrEmpty(data.topicName) ||
+              trimOrEmpty(data.topic) ||
+              "Untitled session",
+            createdAt: data.createdAt || null,
+            transcriptText: trimOrEmpty(data.transcriptText),
+          };
+        })
+        .filter((session) => session.transcriptText)
+        .sort((left, right) => {
+          const createdCmp =
+            timestampMillis(left.createdAt) - timestampMillis(right.createdAt);
+          if (createdCmp !== 0) return createdCmp;
+          return left.sessionId.localeCompare(right.sessionId);
+        });
+
+      if (!sessions.length) {
+        throw Object.assign(
+          new Error("No completed transcripts are available for this class."),
+          { code: "no-completed-transcripts" },
+        );
+      }
+
+      const transcriptCharCount = sessions.reduce(
+        (total, session) => total + session.transcriptText.length,
+        0,
+      );
+      if (transcriptCharCount > CLASS_STUDY_GUIDE_TRANSCRIPT_CHAR_LIMIT) {
+        throw Object.assign(
+          new Error(
+            "Class transcripts are too large to generate a study guide in v1.",
+          ),
+          { code: "too-much-transcript-text" },
+        );
+      }
+
+      const sourceSessions = sessions.map((session) => ({
+        sessionId: session.sessionId,
+        topicName: session.topicName,
+        createdAt: session.createdAt,
+      }));
+      const transcriptText = sessions
+        .map((session, index) => (
+          `Session ${index + 1}: ${session.topicName}\n` +
+          `Transcript:\n${session.transcriptText}`
+        ))
+        .join("\n\n---\n\n");
+      const output = await generateClassStudyGuideOutput(className, transcriptText);
+      const completedAt = now();
+      const guideRef = classRef.collection("studyGuides").doc();
+      const guidePath = `${classPath}/studyGuides/${guideRef.id}`;
+
+      await guideRef.set({
+        uid,
+        type: "classStudyGuide",
+        source: "recordings",
+        academicYearId,
+        semesterId,
+        classId,
+        classPath,
+        requestId,
+        className,
+        status: "done",
+        contentSnapshot,
+        eligibleSessionCount,
+        includedSessionCount: sessions.length,
+        omittedSessionCount: 0,
+        sourceSessions,
+        output,
+        createdAt: completedAt,
+        updatedAt: completedAt,
+        completedAt,
+      });
+      await requestRef.set({
+        status: "done",
+        guideId: guideRef.id,
+        guidePath,
+        completedAt,
+        updatedAt: completedAt,
+      }, { merge: true });
+      await classRef.set({
+        classStudyGuideStatus: "done",
+        latestStudyGuideId: guideRef.id,
+        latestStudyGuideRequestId: requestId,
+        classStudyGuideUpdatedAt: completedAt,
+        classStudyGuideErrorCode: null,
+        classStudyGuideErrorMessage: null,
+      }, { merge: true });
+    } catch (error) {
+      const errorCode =
+        error && error.code ? error.code : "class-study-guide-generation-failed";
+      const errorMessage = error && error.message ? error.message : String(error);
+      const timestamp = now();
+
+      await requestRef.set({
+        status: "error",
+        errorCode,
+        errorMessage,
+        updatedAt: timestamp,
+      }, { merge: true });
+      if (classRef) {
+        await classRef.set({
+          classStudyGuideStatus: "error",
+          classStudyGuideErrorCode: errorCode,
+          classStudyGuideErrorMessage: errorMessage,
+          classStudyGuideUpdatedAt: timestamp,
+        }, { merge: true });
+      }
+    }
+  },
+);
 
 exports.getAiJobOutput = onCall({ region: REGION }, async (request) => {
   if (!request.auth) {
