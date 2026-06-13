@@ -600,3 +600,27 @@ Safety:
 Next future slice:
 - Add a small Flutter/internal test call or backend emulator/callable test to verify the callable returns the expected eligible count for a real class.
 - After validation is proven, a later slice can create a backend-owned `classStudyGuide` AI job.
+
+## Completed requestClassStudyGuide Deployment Smoke Test
+
+Commit deployed:
+- `944cbe2 Add class study guide validation callable`
+
+Deployment:
+- Deployed only `functions:requestClassStudyGuide` to Firebase project `study-buddy-dev-25a7a`.
+- Function was created successfully in `us-central1`.
+
+Smoke test result:
+- Direct HTTPS `curl` request reached the deployed callable.
+- Callable returned the expected unauthenticated response:
+  `UNAUTHENTICATED: Authentication is required.`
+- This confirms the callable is live and the auth guard is working.
+
+Notes:
+- `firebase functions:shell` loaded the callable, but the shell call format produced `Request body is missing data` for the v2 callable.
+- The Firebase CLI warned that `firebase-functions` can be upgraded, but deployment succeeded.
+- No dependency/tooling upgrades were made.
+- No app code changed during this deployment/test.
+
+Next future slice:
+- Add a temporary authenticated Flutter/internal test call or another safe authenticated test path to confirm the callable returns `eligibleSessionCount` for a real class.
