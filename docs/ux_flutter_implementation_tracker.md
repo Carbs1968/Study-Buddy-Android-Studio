@@ -624,3 +624,42 @@ Notes:
 
 Next future slice:
 - Add a temporary authenticated Flutter/internal test call or another safe authenticated test path to confirm the callable returns `eligibleSessionCount` for a real class.
+
+## Completed Authenticated Class Study Guide Callable Test
+
+Status:
+- Temporary Flutter test UI was added, tested, and removed.
+- No temporary test code remains in the app.
+
+Test summary:
+- Added a temporary internal science-icon button on `ClassLecturesScreen`.
+- The button called the deployed `requestClassStudyGuide` callable as the logged-in Firebase user.
+- Tested against class:
+  `prepa → 4to-semestre → June 13th`
+- Callable returned successfully with:
+  `eligibleSessionCount: 4`
+- The count matched the expected number of completed transcript sessions for that class.
+
+Validated path:
+- Flutter authenticated user
+- Cloud Functions callable: `requestClassStudyGuide`
+- Class document validation
+- Session query for matching class transcripts
+- Completed/non-empty transcript count returned to app
+
+Cleanup:
+- Temporary Cloud Functions import was removed from `class_lectures_screen.dart`.
+- Temporary helper method was removed.
+- Temporary science-icon button was removed.
+- `flutter analyze` returned to the known existing issue baseline: 21 issues.
+- `git diff` confirmed no app code changes remained after cleanup.
+
+Safety:
+- No real Flutter UI change was committed.
+- No `/aiJobs` document was created.
+- No OpenAI call was made.
+- Existing transcript, summary, notes, and quiz behavior remained unchanged.
+- Recorder, upload, Storage, Library, and session save behavior were not changed.
+
+Next future slice:
+- Backend can now safely move from validation/count-only to creating a backend-owned `classStudyGuide` job in a later step.
