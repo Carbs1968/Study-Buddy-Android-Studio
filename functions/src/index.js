@@ -693,11 +693,11 @@ exports.requestClassStudyGuide = onCall({ region: REGION }, async (request) => {
   }
 
   const uid = request.auth.uid;
+  const classPath =
+    `users/${uid}/academicYears/${academicYearId}` +
+    `/semesters/${semesterId}/classes/${classId}`;
   const classSnapshot = await db
-    .doc(
-      `users/${uid}/academicYears/${academicYearId}` +
-        `/semesters/${semesterId}/classes/${classId}`,
-    )
+    .doc(classPath)
     .get();
 
   if (!classSnapshot.exists) {
@@ -720,11 +720,38 @@ exports.requestClassStudyGuide = onCall({ region: REGION }, async (request) => {
   }).length;
 
   const classData = classSnapshot.data() || {};
+  const className = trimOrEmpty(classData.className);
+
+  if (eligibleSessionCount === 0) {
+    throw new HttpsError(
+      "failed-precondition",
+      "No completed transcripts are available for this class.",
+    );
+  }
+
+  const timestamp = FieldValue.serverTimestamp();
+  const requestRef = db.collection("classStudyGuideRequests").doc();
+  await requestRef.set({
+    uid,
+    type: "classStudyGuide",
+    source: "recordings",
+    academicYearId,
+    semesterId,
+    classId,
+    classPath,
+    className,
+    status: "validated",
+    eligibleSessionCount,
+    createdAt: timestamp,
+    updatedAt: timestamp,
+  });
 
   return {
     ok: true,
+    status: "validated",
+    requestId: requestRef.id,
     eligibleSessionCount,
-    className: trimOrEmpty(classData.className),
+    className,
     academicYearId,
     semesterId,
     classId,
