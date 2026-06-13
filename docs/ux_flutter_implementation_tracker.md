@@ -704,3 +704,183 @@ Safety:
 - No Flutter UI change remains.
 - No Firestore rules or index changes were made.
 - No Google Drive logic.
+
+---
+
+## Completed Class Study Guide Request Action and Backend Generation Test
+
+Date: 2026-06-13
+
+### Summary
+
+Completed and tested the first end-to-end Class Study Guide request flow.
+
+This slice added a permanent class-level Study Guide action in the Flutter UI and connected it to the deployed backend class guide generation flow.
+
+### Source-of-truth checkpoint
+
+- Branch: `dev`
+- Latest pushed commit after this slice:
+  - `611307a Add class study guide request action`
+- Prior backend generation commit:
+  - `68f792b Generate class study guides from request records`
+- Working tree after push: clean
+- GitHub `origin/dev`: current with local `dev`
+
+### Flutter UI change
+
+File changed:
+
+- `lib/screens/class_lectures_screen.dart`
+
+Added:
+
+- Permanent AppBar action:
+  - tooltip: `Generate class study guide`
+  - icon: `Icons.auto_awesome_outlined`
+- Calls callable:
+  - `requestClassStudyGuide`
+- Sends:
+  - `academicYearId`
+  - `semesterId`
+  - `classId`
+- Shows SnackBars for:
+  - requesting
+  - already requested/reused
+  - errors
+
+Existing Materials button was preserved.
+
+### Backend changes
+
+File changed:
+
+- `functions/src/index.js`
+
+Completed behavior:
+
+- `requestClassStudyGuide` creates or reuses class study guide request records.
+- Completed `done` requests are now reused when recording content has not changed.
+- Reused `validated` requests are kicked with:
+  - `generationKickAt`
+  - `updatedAt`
+- Class guide generation uses the write-based trigger:
+  - `onClassStudyGuideRequestWritten`
+- Old created-only trigger was deleted from Firebase:
+  - `onClassStudyGuideRequestCreated`
+- Backend controls source summary counts for future generated guides:
+  - `output.sourceSummary.sessionCount`
+  - `output.sourceSummary.includedSessionCount`
+  - `output.sourceSummary.omittedSessionCount`
+
+### Firebase test results
+
+Tested on physical Samsung device.
+
+Class tested:
+
+- Academic year: `prepa`
+- Semester: `4to-semestre`
+- Class: `june-13th`
+- Class name: `June 13th`
+
+Request tested:
+
+- Existing request:
+  - `classStudyGuideRequests/JEblK7A5fvcTH58qRQga`
+- Existing reused request was kicked successfully:
+  - `generationKickAt`
+  - `startedAt`
+  - `completedAt`
+  - `status: done`
+- Generated guide:
+  - `studyGuides/lfCdW5dEWfX3xQ5jXU9R`
+
+A later duplicate-generation bug was found because completed `done` requests were not included in the reusable status list. This caused an extra guide to be generated:
+
+- Extra request:
+  - `7rLEePC5CqhnsS5wuHaf`
+- Extra guide:
+  - `426lAYxqhvJ6pPH3MStS`
+
+Fix applied:
+
+- Added `"done"` to reusable request statuses.
+- Deleted the old created-only deployed function.
+- Retested the Study Guide button.
+- Confirmed no new request or guide was created after the final tap.
+
+Final expected behavior confirmed:
+
+- Existing completed guide is reused when recording content has not changed.
+- No duplicate generation occurs on repeated taps.
+- New generation should only occur after relevant recording content changes.
+
+### Manual Firestore cleanup
+
+The extra test guide generated before the backend-controlled count fix had:
+
+- `includedSessionCount: 4`
+- `sourceSessions`: 4 items
+- `output.sourceSummary.sessionCount`: originally `5`
+
+Manually corrected test guide:
+
+- `studyGuides/426lAYxqhvJ6pPH3MStS`
+- Set:
+  - `output.sourceSummary.sessionCount: 4`
+
+Top-level fields already matched:
+
+- `includedSessionCount: 4`
+- `omittedSessionCount: 0`
+- `sourceSessions`: 4 items
+
+Future generated guides should receive backend-controlled source summary counts automatically.
+
+### Validation
+
+Commands/checks completed:
+
+- `node --check functions/src/index.js`
+- `git diff --check -- functions/src/index.js`
+- `flutter analyze`
+  - stayed at known baseline: 21 issues
+- `firebase deploy --only functions:requestClassStudyGuide,functions:onClassStudyGuideRequestWritten`
+- `firebase functions:delete onClassStudyGuideRequestCreated --region us-central1`
+- Physical Samsung test
+
+### Safety statement
+
+Touched:
+
+- Class Study Guide callable/trigger flow
+- Class screen AppBar action
+
+Did not touch:
+
+- Recording flow
+- Upload flow
+- Firebase Storage upload
+- Firestore session save
+- Existing `/aiJobs` flow
+- Existing transcript/summary/notes/quiz generation
+- Library loading
+- Academic settings loading
+- Google Drive logic
+- Firestore rules
+- Firestore indexes
+
+Existing session AI pipeline remains separate from class guide generation.
+
+### Remaining future work
+
+- Add UI to view the generated Class Study Guide in-app.
+- Add readable status display for:
+  - running
+  - done
+  - error
+- Add Firestore rules for reading `studyGuides` from Flutter when the viewer UI is built.
+- Later support uploaded materials in class-level guides.
+- Later support topic-level study guides.
+
