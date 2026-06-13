@@ -433,3 +433,31 @@ Safety:
 - No counters added.
 - App smoke test passed.
 - `flutter analyze` remained at the known existing issue baseline.
+
+## Completed Class Display Metadata Foundation
+
+Commit:
+- `91b51a2 Add class document display metadata`
+
+Summary:
+- Added overwrite-safe class document display metadata to support the future scalable Library migration.
+- Recording uploads now update the parent class document with `latestSessionId`, `latestTopicName`, and `hasRecordings`.
+- Material uploads now update the parent class document with `hasMaterials`.
+
+Files changed:
+- `lib/screens/home_shell/pages/recorder_page.dart`
+- `lib/screens/class_materials_screen.dart`
+
+Future use:
+- Helps class documents become more useful Library row sources later.
+- Allows future UI to know whether a class has recordings or uploaded materials without relying on unsafe counters.
+- Preserves `topicId` for future real topic documents only.
+
+Safety:
+- No Library query changed.
+- No UI changed.
+- No counters added.
+- No `topicId` added.
+- No Firebase Storage path changed.
+- No session document shape changed.
+- `flutter analyze` remained at the known existing issue baseline.
