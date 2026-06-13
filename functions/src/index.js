@@ -49,6 +49,19 @@ function resolveSessionId(job) {
   return trimOrEmpty(job.sessionId) || trimOrEmpty(job.recordingId);
 }
 
+function timestampValuesEqual(left, right) {
+  if (!left && !right) return true;
+  if (!left || !right) return false;
+  if (typeof left.isEqual === "function") return left.isEqual(right);
+  if (
+    typeof left.toMillis === "function" &&
+    typeof right.toMillis === "function"
+  ) {
+    return left.toMillis() === right.toMillis();
+  }
+  return left === right;
+}
+
 function sessionDocumentPath(uid, sessionId) {
   return `users/${uid}/sessions/${sessionId}`;
 }
@@ -696,9 +709,8 @@ exports.requestClassStudyGuide = onCall({ region: REGION }, async (request) => {
   const classPath =
     `users/${uid}/academicYears/${academicYearId}` +
     `/semesters/${semesterId}/classes/${classId}`;
-  const classSnapshot = await db
-    .doc(classPath)
-    .get();
+  const classRef = db.doc(classPath);
+  const classSnapshot = await classRef.get();
 
   if (!classSnapshot.exists) {
     throw new HttpsError("not-found", "Class not found.");
@@ -729,27 +741,81 @@ exports.requestClassStudyGuide = onCall({ region: REGION }, async (request) => {
     );
   }
 
-  const timestamp = FieldValue.serverTimestamp();
-  const requestRef = db.collection("classStudyGuideRequests").doc();
-  await requestRef.set({
-    uid,
-    type: "classStudyGuide",
-    source: "recordings",
-    academicYearId,
-    semesterId,
-    classId,
-    classPath,
-    className,
-    status: "validated",
-    eligibleSessionCount,
-    createdAt: timestamp,
-    updatedAt: timestamp,
+  const requestResult = await db.runTransaction(async (transaction) => {
+    const transactionClassSnapshot = await transaction.get(classRef);
+    if (!transactionClassSnapshot.exists) {
+      throw new HttpsError("not-found", "Class not found.");
+    }
+
+    const transactionClassData = transactionClassSnapshot.data() || {};
+    const contentSnapshot = {
+      recordingsLastChangedAt: transactionClassData.lastRecordingAt || null,
+      materialsLastChangedAt: transactionClassData.lastMaterialAt || null,
+      includedRecordings: true,
+      includedMaterials: false,
+    };
+    const existingStatus = trimOrEmpty(
+      transactionClassData.classStudyGuideStatus,
+    );
+    const latestStudyGuideRequestId = trimOrEmpty(
+      transactionClassData.latestStudyGuideRequestId,
+    );
+    const storedContentSnapshot =
+      transactionClassData.classStudyGuideContentSnapshot || {};
+
+    if (
+      ["validated", "queued", "running"].includes(existingStatus) &&
+      latestStudyGuideRequestId &&
+      timestampValuesEqual(
+        storedContentSnapshot.recordingsLastChangedAt,
+        contentSnapshot.recordingsLastChangedAt,
+      )
+    ) {
+      return {
+        reused: true,
+        status: existingStatus,
+        requestId: latestStudyGuideRequestId,
+      };
+    }
+
+    const timestamp = FieldValue.serverTimestamp();
+    const requestRef = db.collection("classStudyGuideRequests").doc();
+    transaction.set(requestRef, {
+      uid,
+      type: "classStudyGuide",
+      source: "recordings",
+      academicYearId,
+      semesterId,
+      classId,
+      classPath,
+      className,
+      status: "validated",
+      eligibleSessionCount,
+      contentSnapshot,
+      createdAt: timestamp,
+      updatedAt: timestamp,
+    });
+    transaction.set(classRef, {
+      classStudyGuideStatus: "validated",
+      latestStudyGuideRequestId: requestRef.id,
+      classStudyGuideUpdatedAt: timestamp,
+      classStudyGuideSource: "recordings",
+      classStudyGuideEligibleSessionCount: eligibleSessionCount,
+      classStudyGuideContentSnapshot: contentSnapshot,
+    }, { merge: true });
+
+    return {
+      reused: false,
+      status: "validated",
+      requestId: requestRef.id,
+    };
   });
 
   return {
     ok: true,
-    status: "validated",
-    requestId: requestRef.id,
+    status: requestResult.status,
+    reused: requestResult.reused,
+    requestId: requestResult.requestId,
     eligibleSessionCount,
     className,
     academicYearId,
