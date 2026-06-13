@@ -56,6 +56,11 @@ service cloud.firestore {
               allow delete: if isOwner(userId)
                 && resource.data.userId == request.auth.uid;
             }
+
+            match /studyGuides/{guideId} {
+              allow get, list: if isOwner(userId);
+              allow create, update, delete: if false;
+            }
           }
         }
       }
