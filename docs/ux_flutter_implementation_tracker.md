@@ -504,3 +504,64 @@ Safety:
 - No recorder/upload/Storage/session/AI behavior change.
 - No counters.
 - No `topicId`.
+
+## Future Class Study Guide v1 Architecture Plan
+
+Status:
+- Planning only. No class-level AI code has been added yet.
+
+Current AI behavior:
+- Existing AI jobs are session-based.
+- `onAiJobCreated` currently watches `aiJobs/{jobId}`.
+- Existing jobs require `uid` plus `sessionId` or `recordingId`.
+- Existing supported job types are `transcript`, `summary`, `notes`, and `quiz`.
+- Existing `getAiJobOutput` retrieval is session-based.
+- Firestore rules currently allow client-created `/aiJobs` only for `transcript`, `summary`, `notes`, and `quiz`, and require `recordingId`.
+
+Class Study Guide v1 scope:
+- Recordings only.
+- Same class only.
+- Include sessions where:
+  - `userId` matches the authenticated user.
+  - `academicYearId` matches the class.
+  - `semesterId` matches the class.
+  - `classId` matches the class.
+  - `transcriptStatus == "done"`.
+  - `transcriptText` exists and is non-empty.
+- Ignore uploaded materials for v1.
+- Ignore topic-level study guides for v1.
+- Do not change existing per-session transcript, summary, notes, or quiz behavior.
+- Do not change Library query behavior.
+
+Recommended architecture:
+- Flutter should not directly create a `classStudyGuide` `/aiJobs` document.
+- Add a backend callable function such as `requestClassStudyGuide`.
+- The callable should validate auth, class ownership, class IDs, and eligible sessions.
+- The backend should create the `/aiJobs/{jobId}` processing document.
+- Extend the AI worker to support `type: "classStudyGuide"` without requiring a session ID.
+- Generate the guide from eligible completed transcript text.
+
+Recommended output location:
+- Durable result should be saved under the class document:
+  `users/{uid}/academicYears/{academicYearId}/semesters/{semesterId}/classes/{classId}/studyGuides/{guideId}`
+
+Recommended class doc status fields:
+- `classStudyGuideStatus`
+- `latestStudyGuideId`
+- `classStudyGuideUpdatedAt`
+- `classStudyGuideErrorCode`
+- `classStudyGuideErrorMessage`
+
+Likely future files touched:
+- `functions/src/index.js`
+- `firestore.rules`
+- `lib/screens/class_lectures_screen.dart`
+- possibly a new Flutter class study guide detail/view screen
+
+Safety:
+- No recorder/upload/Firebase Storage/session save behavior should change.
+- No material extraction should be added in v1.
+- No topic-level guide generation should be added in v1.
+- No counters should be added.
+- No `topicId` should be added until real topic documents exist.
+- No Google Drive logic.
