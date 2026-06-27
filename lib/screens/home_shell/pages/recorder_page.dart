@@ -74,8 +74,12 @@ class _RecorderPageState extends State<RecorderPage> with WidgetsBindingObserver
     if (_isLoadingAcademicSettings) return 'Loading...';
     if (_isUploading) return strings.uploading;
     if (_recordingComplete) return strings.chooseUploadOrDiscard;
-    if (_isRecording && _isPaused) return strings.recordingPaused;
-    if (_isRecording) return strings.tapRedToStop;
+    if (_isRecording && _isPaused) {
+      return 'Recording paused. Tap Resume to continue. Your recording is still saved.';
+    }
+    if (_isRecording) {
+      return 'Recording continues if your screen locks.';
+    }
     return '';
   }
 
