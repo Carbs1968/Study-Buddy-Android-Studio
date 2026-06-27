@@ -1179,7 +1179,7 @@ class _RecorderPageState extends State<RecorderPage> with WidgetsBindingObserver
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Current academic defaults',
+              'Save destination',
               style: TextStyle(
                 fontWeight: FontWeight.w700,
                 fontSize: 16,
@@ -1188,7 +1188,7 @@ class _RecorderPageState extends State<RecorderPage> with WidgetsBindingObserver
             ),
             const SizedBox(height: 10),
             Text(
-              'Level: ${_levelName!}',
+              'Academic year / level: ${_levelName!}',
               style: TextStyle(
                 color: textColor,
                 fontSize: 15,
@@ -1314,7 +1314,8 @@ class _RecorderPageState extends State<RecorderPage> with WidgetsBindingObserver
                                 DropdownButtonFormField<String>(
                                   initialValue: dropdownValue,
                                   decoration: InputDecoration(
-                                    labelText: strings.selectClass,
+                                    labelText: 'Choose an existing class',
+                                    helperText: 'Recordings are organized by class.',
                                     border: const OutlineInputBorder(),
                                   ),
                                   items: classList
@@ -1348,7 +1349,8 @@ class _RecorderPageState extends State<RecorderPage> with WidgetsBindingObserver
                                         !_isUploading &&
                                         !_recordingComplete,
                                     decoration: InputDecoration(
-                                      labelText: strings.enterNewClass,
+                                      labelText: 'Or enter a new class',
+                                      helperText: 'Use this if the class is not listed yet.',
                                       border: const OutlineInputBorder(),
                                     ),
                                   ),
@@ -1365,7 +1367,8 @@ class _RecorderPageState extends State<RecorderPage> with WidgetsBindingObserver
                           enabled:
                           !_isRecording && !_isUploading && !_recordingComplete,
                           decoration: InputDecoration(
-                            labelText: strings.lectureTopic,
+                            labelText: 'Topic / lecture name',
+                            helperText: 'Example: Photosynthesis review or Chapter 4 notes.',
                             border: const OutlineInputBorder(),
                           ),
                         ),
