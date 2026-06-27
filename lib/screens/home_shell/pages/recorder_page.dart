@@ -1372,56 +1372,67 @@ class _RecorderPageState extends State<RecorderPage> with WidgetsBindingObserver
 
                         const SizedBox(height: 14),
 
-                        SizedBox(
-                          width: big,
-                          height: big,
-                          child: ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              shape: const CircleBorder(),
-                              backgroundColor: (_isRecording || _isReadyToRecord)
-                                  ? (_isRecording
-                                  ? Colors.red
-                                  : Colors.deepPurple.shade600)
-                                  : Colors.grey[400],
-                            ),
-                            onPressed: _isRecording
-                                ? _stopRecording
-                                : (_isReadyToRecord ? _startRecording : null),
-                            child: Text(
-                              _isRecording ? strings.stop : strings.record,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 22,
+                        if (!_isRecording) ...[
+                          SizedBox(
+                            width: big,
+                            height: big,
+                            child: ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                shape: const CircleBorder(),
+                                backgroundColor: _isReadyToRecord
+                                    ? Colors.deepPurple.shade600
+                                    : Colors.grey[400],
+                              ),
+                              onPressed:
+                                  _isReadyToRecord ? _startRecording : null,
+                              child: Text(
+                                strings.record,
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 22,
+                                ),
                               ),
                             ),
                           ),
-                        ),
-
-                        const SizedBox(height: 12),
-
-                        SizedBox(
-                          width: double.infinity,
-                          child: ElevatedButton(
-                            onPressed: _isRecording ? _pauseOrResume : null,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: _isRecording
-                                  ? Colors.grey.shade800
-                                  : Colors.grey.shade300,
-                              padding: const EdgeInsets.symmetric(vertical: 14),
-                            ),
-                            child: Text(
-                              _isRecording
-                                  ? (_isPaused ? strings.resume : strings.pause)
-                                  : strings.pause,
-                              style: TextStyle(
-                                color: _isRecording
-                                    ? Colors.white
-                                    : Colors.grey.shade600,
-                                fontSize: 18,
+                        ] else ...[
+                          SizedBox(
+                            width: double.infinity,
+                            child: ElevatedButton(
+                              onPressed: _pauseOrResume,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.grey.shade800,
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 16),
+                              ),
+                              child: Text(
+                                _isPaused ? strings.resume : strings.pause,
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 18,
+                                ),
                               ),
                             ),
                           ),
-                        ),
+
+                          const SizedBox(height: 10),
+
+                          SizedBox(
+                            width: double.infinity,
+                            child: OutlinedButton(
+                              onPressed: _stopRecording,
+                              style: OutlinedButton.styleFrom(
+                                foregroundColor: Colors.red.shade700,
+                                side: BorderSide(color: Colors.red.shade300),
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 14),
+                              ),
+                              child: Text(
+                                strings.stop,
+                                style: const TextStyle(fontSize: 16),
+                              ),
+                            ),
+                          ),
+                        ],
 
                         const SizedBox(height: 14),
 
