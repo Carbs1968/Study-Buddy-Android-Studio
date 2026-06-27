@@ -312,6 +312,56 @@ Safety rule:
 - Do not combine recorder UI polish with Firestore/session schema changes.
 - Do not change bottom navigation behavior during recording without explicit review and physical Android testing.
 
+## Completed Recorder UX Pass 1
+
+Commit:
+- `62886d9 Clarify recorder status messages`
+
+Summary:
+- Updated recorder helper/status copy during live recording and paused states.
+- Recording state now reassures the student that recording continues if the screen locks.
+- Paused state now tells the student that the recording is still saved and can be resumed.
+- Removed unnecessary extra instruction text after user review.
+
+Final live recording helper:
+- `Recording continues if your screen locks.`
+
+Paused helper:
+- `Recording paused. Tap Resume to continue. Your recording is still saved.`
+
+Manual Android test results:
+- Recording started successfully through the Android foreground service.
+- Foreground service start was verified.
+- Pause worked.
+- Resume worked.
+- Pause/resume worked repeatedly.
+- Stop worked.
+- Discard removed the local recording file.
+- No recorder crash observed.
+
+Safety:
+- Copy-only recorder UX change.
+- No recording engine behavior changed.
+- No pause/resume logic changed.
+- No stop logic changed.
+- No upload logic changed.
+- No Firebase Storage path changed.
+- No Firestore session metadata changed.
+- No local cleanup behavior changed.
+- No filename format changed.
+- No bottom navigation behavior changed.
+- No academic/class selection logic changed.
+
+Recorder UX status:
+- This was a deliberately small first recorder patch.
+- Continue recorder work slowly and one issue at a time.
+- Next likely recorder UX candidates:
+  - paused-state visual clarity
+  - pause/resume/stop hierarchy
+  - post-recording upload/retry messaging
+  - academic context display clarity
+  - future optional recording-status banner across tabs
+
 ## Runtime Warning Watchlist
 
 ### Firestore DNS / App Check Warning
