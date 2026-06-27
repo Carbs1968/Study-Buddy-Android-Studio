@@ -728,10 +728,7 @@ String _extractTextFromDocxBytes(Uint8List bytes) {
     throw Exception('DOCX document body was not found.');
   }
 
-  final content = documentFile.content;
-  final xmlText = content is List<int>
-      ? utf8.decode(content)
-      : utf8.decode(List<int>.from(content as Iterable));
+  final xmlText = utf8.decode(documentFile.content);
 
   final document = XmlDocument.parse(xmlText);
   final paragraphs = document.descendants

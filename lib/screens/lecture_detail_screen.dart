@@ -43,6 +43,8 @@ class LectureDetailScreen extends StatelessWidget {
         'type': type,
       });
 
+      if (!context.mounted) return;
+
       if (Navigator.of(context).canPop()) {
         Navigator.of(context).pop();
       }
@@ -69,7 +71,7 @@ class LectureDetailScreen extends StatelessWidget {
 
       Map<String, dynamic> parsed;
       if (payload is Map) {
-        parsed = Map<String, dynamic>.from(payload as Map);
+        parsed = Map<String, dynamic>.from(payload);
       } else {
         final prettyJson = const JsonEncoder.withIndent('  ').convert(payload);
         parsed = (json.decode(prettyJson) as Map).cast<String, dynamic>();
@@ -110,6 +112,8 @@ class LectureDetailScreen extends StatelessWidget {
         ),
       );
     } catch (e) {
+      if (!context.mounted) return;
+
       if (Navigator.of(context).canPop()) {
         Navigator.of(context).pop();
       }
@@ -403,6 +407,8 @@ class LectureDetailScreen extends StatelessWidget {
 
                       final full = await fetchTranscript(sessionId);
 
+                      if (!context.mounted) return;
+
                       if (Navigator.of(context).canPop()) {
                         Navigator.of(context).pop();
                       }
@@ -431,6 +437,8 @@ class LectureDetailScreen extends StatelessWidget {
                         ),
                       );
                     } catch (e) {
+                      if (!context.mounted) return;
+
                       if (Navigator.of(context).canPop()) {
                         Navigator.of(context).pop();
                       }

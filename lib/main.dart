@@ -47,17 +47,6 @@ final ValueNotifier<Locale> appLocale = ValueNotifier(const Locale('en'));
 // Make SBLocale public so it can be looked up by SBStrings.of() in other files.
 // Removed SBLocale wrapper: localization is now handled via SBStrings.delegate
 
-// Utility: Ensure Firebase is initialized and log if not ready
-Future<void> _ensureFirebaseReady() async {
-  if (Firebase.apps.isEmpty) {
-    await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-    appLogger('Firebase re-initialized by guard.');
-  }
-  if (fb.FirebaseAuth.instance.currentUser == null) {
-    appLogger('FirebaseAuth user missing.');
-  }
-}
-
 // // ✅ Single Functions handle (same app-wide region as your backend)
 // late FirebaseFunctions functions;
 

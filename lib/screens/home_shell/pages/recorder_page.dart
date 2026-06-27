@@ -437,6 +437,8 @@ class _RecorderPageState extends State<RecorderPage> with WidgetsBindingObserver
         _recordingBackend = _RecordingBackend.none;
       });
       await WakelockPlus.disable();
+      if (!mounted) return;
+
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text(
@@ -1275,7 +1277,7 @@ class _RecorderPageState extends State<RecorderPage> with WidgetsBindingObserver
                             _helperText,
                             textAlign: TextAlign.center,
                             style: TextStyle(
-                              color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.7),
+                              color: Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: 0.7),
                               fontSize: 14,
                             ),
                           ),
@@ -1300,7 +1302,7 @@ class _RecorderPageState extends State<RecorderPage> with WidgetsBindingObserver
                                     ConnectionState.waiting)
                                   const LinearProgressIndicator(minHeight: 2),
                                 DropdownButtonFormField<String>(
-                                  value: dropdownValue,
+                                  initialValue: dropdownValue,
                                   decoration: InputDecoration(
                                     labelText: strings.selectClass,
                                     border: const OutlineInputBorder(),
