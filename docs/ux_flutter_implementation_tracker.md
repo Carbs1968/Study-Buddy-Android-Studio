@@ -93,28 +93,25 @@ Status:
 - Settings visually polished.
 - Logout, Google sign-out, Firestore locale save, and Academic Settings navigation preserved.
 
-## Dark Mode Finding
+## Dark Mode Status
 
-Dark mode is currently not acceptable after the light-mode visual polish.
+Status: resolved for current MVP.
 
-Cause:
-- Several screens hardcode light-mode colors:
-  - `Color(0xFFF6F8FB)`
-  - `Colors.white`
-  - `Colors.black54`
-- In dark mode, text comes from the dark theme while cards/backgrounds remain light, causing poor contrast.
-- Bottom navigation also needs proper dark-theme treatment.
+Previous finding:
+- Dark mode was not acceptable after the light-mode visual polish because several polished screens used hardcoded light colors.
 
-Decision:
-- Do not commit partial dark-mode experiments.
-- Fix dark mode as a focused theme/UI task.
-- Prefer replacing hardcoded light colors with theme-aware values:
-  - `Theme.of(context).scaffoldBackgroundColor`
-  - `Theme.of(context).cardColor`
-  - `Theme.of(context).colorScheme.surface`
-  - `Theme.of(context).colorScheme.onSurfaceVariant`
-- Add dark `bottomNavigationBarTheme` in `main.dart` if needed.
-- Convert and test one screen at a time.
+Resolution:
+- Fixed in commit `fc4d8d1 Fix dark mode contrast`.
+- The app follows the Android device theme.
+- If the device is set to light mode, Study Buddy uses light mode.
+- If the device is set to dark mode, Study Buddy uses dark mode.
+- Home, Library, Class Recordings, Class Materials, Settings, and bottom navigation were manually checked in dark mode.
+
+Current rule:
+- Do not treat dark mode as the next UX task unless new testing shows a specific screen-level regression.
+- Continue using theme-aware colors for new UX work.
+- Avoid introducing new hardcoded light-only colors during screen polish.
+- Test newly polished screens in both light and dark device modes.
 
 ## Future Class / Term Study Guide Direction
 
@@ -149,6 +146,55 @@ This requires planning:
 - Cloud Function contract
 - Token/chunking strategy
 - Output storage and status tracking
+
+## Completed Analyzer Cleanup
+
+Commit:
+- `5add349 Clean up Flutter analyzer warnings`
+
+Summary:
+- Resolved the long-standing Flutter analyzer warnings.
+- `flutter analyze` now reports no issues.
+- Reapplied fixes without broad `dart format` churn so the final diff stayed small and reviewable.
+
+Files changed:
+- `lib/main.dart`
+- `lib/screens/class_materials_screen.dart`
+- `lib/screens/home_shell/pages/recorder_page.dart`
+- `lib/screens/lecture_detail_screen.dart`
+- `lib/utils/helper.dart`
+
+Manual test results:
+- `flutter analyze` passed with no issues.
+- Physical Android smoke test passed.
+- Changes were pushed to `origin/dev`.
+
+Safety:
+- No active recording behavior changed.
+- No Firebase Storage upload flow changed.
+- No Firestore metadata/session path changed.
+- No AI job or Cloud Function contract changed.
+- No academic structure changed.
+
+## Runtime Warning Watchlist
+
+### Firestore DNS / App Check Warning
+
+Status: monitor only.
+
+During one physical Android smoke test from a new office/network, logs showed:
+- `Unable to resolve host firestore.googleapis.com`
+- `Error getting App Check token. Too many attempts.`
+
+Current interpretation:
+- Likely caused by the new office network/DNS environment.
+- Not treated as an app-code regression.
+- Do not change Firebase/App Check configuration unless the warning repeats on normal trusted Wi-Fi or mobile data.
+
+If repeated:
+- Test on mobile data.
+- Test on known-good Wi-Fi.
+- Then inspect Firebase App Check configuration and app initialization.
 
 ## Preserved Recorder Stash
 
@@ -221,11 +267,14 @@ Reason:
 
 ## Current Safe Checkpoint
 
-- Real working repo is clean before this tracker file.
-- Latest local `dev` is up to date with `origin/dev`.
+- Latest `dev` has been pushed to `origin/dev`.
 - Low-risk light-mode visual polish is pushed.
-- Dark-mode experiment was reverted.
-- Next action after committing this tracker: plan a focused dark-mode fix.
+- Dark mode fix was completed in `fc4d8d1 Fix dark mode contrast`.
+- App follows the device theme and dark mode is acceptable for the current MVP.
+- Flutter analyzer cleanup was completed in `5add349 Clean up Flutter analyzer warnings`.
+- `flutter analyze` currently reports no issues.
+- Physical Android smoke test passed after analyzer cleanup.
+- Next action: continue UX implementation one screen at a time from a current `dev` source-of-truth check.
 
 ## Completed Dark Mode Fix
 
