@@ -147,6 +147,75 @@ This requires planning:
 - Token/chunking strategy
 - Output storage and status tracking
 
+## Completed Home Dashboard Functionality
+
+### Home Dashboard Actions
+
+Commit:
+- `ec52b61 Wire home dashboard actions`
+
+Summary:
+- Home Record card now opens the existing Record tab.
+- Home Upload Study Material card no longer acts like a dead button.
+- Upload Study Material now shows guidance that users should open a class or topic before uploading material.
+- Removed the always-highlighted Record card styling so the Home quick actions do not look like a selected/active recording state.
+
+Manual test results:
+- Record card opens the Record screen.
+- Upload Study Material card shows the class/topic guidance message.
+- Bottom navigation still works.
+- `flutter analyze` passed with no issues.
+
+Safety:
+- No recorder internals changed.
+- No upload flow changed.
+- No Firebase Storage write path changed.
+- No Firestore metadata/session path changed.
+- No AI job or Cloud Function contract changed.
+
+### Recent Classes on Home
+
+Commit:
+- `f475826 Show recent classes on home dashboard`
+
+Summary:
+- Replaced the static Home placeholder with an activity-based Recent Classes section.
+- Recent Classes reads from `users/{uid}/sessions`.
+- Classes are grouped by stable academic context when available:
+  - `academicYearId`
+  - `semesterId`
+  - `classId`
+- Legacy session data is still supported with generated stable IDs from class/year/semester names.
+- Recent Classes is sorted by latest activity first, with session count as the fallback relevance signal.
+- Home shows up to five recent classes.
+- Tapping a recent class opens `ClassLecturesScreen`.
+
+Product decision:
+- Home is not the full official class directory.
+- Home is a launchpad for recent/relevant activity.
+- The official academic structure remains:
+  - Academic Year → Semester → Class → Topic
+- Recorder class-selection logic remains separate for now because Recorder was built early and still contains legacy-compatible class logic.
+- Do not copy Recorder’s session-derived class dropdown logic into new academic source-of-truth screens.
+
+Manual test results:
+- Recent Classes appears on Home.
+- Tapping a recent class opens the correct `ClassLecturesScreen`.
+- Record card still opens the Record tab.
+- Upload Study Material card still shows class/topic guidance.
+- Bottom navigation still works.
+- `flutter analyze` passed with no issues.
+- Physical Android phone test passed.
+
+Safety:
+- Read-only Home dashboard change.
+- No recording behavior changed.
+- No upload behavior changed.
+- No Firebase Storage behavior changed.
+- No Firestore write paths changed.
+- No AI job or Cloud Function contract changed.
+- No academic hierarchy migration was performed.
+
 ## Completed Analyzer Cleanup
 
 Commit:
@@ -274,6 +343,9 @@ Reason:
 - Flutter analyzer cleanup was completed in `5add349 Clean up Flutter analyzer warnings`.
 - `flutter analyze` currently reports no issues.
 - Physical Android smoke test passed after analyzer cleanup.
+- Home dashboard functionality was completed in:
+  - `ec52b61 Wire home dashboard actions`
+  - `f475826 Show recent classes on home dashboard`
 - Next action: continue UX implementation one screen at a time from a current `dev` source-of-truth check.
 
 ## Completed Dark Mode Fix
