@@ -56,6 +56,8 @@ class _RecorderPageState extends State<RecorderPage> with WidgetsBindingObserver
   double? _uploadProgress;
   String? _uploadPhase;
 
+  late Future<List<String>> _classNamesFuture;
+
   bool _isLoadingAcademicSettings = true;
   String? _levelName;
   String? _semesterName;
@@ -94,6 +96,7 @@ class _RecorderPageState extends State<RecorderPage> with WidgetsBindingObserver
   @override
   void initState() {
     super.initState();
+    _classNamesFuture = _fetchClassNames();
     WidgetsBinding.instance.addObserver(this);
     _classCtl.addListener(_recomputeReady);
     _topicCtl.addListener(_recomputeReady);
@@ -1233,7 +1236,10 @@ class _RecorderPageState extends State<RecorderPage> with WidgetsBindingObserver
           return RefreshIndicator(
             onRefresh: () async {
               await _loadAcademicSettings();
-              await _fetchClassNames();
+              setState(() {
+                _classNamesFuture = _fetchClassNames();
+              });
+              await _classNamesFuture;
             },
             child: SingleChildScrollView(
               padding: EdgeInsets.only(
@@ -1292,7 +1298,7 @@ class _RecorderPageState extends State<RecorderPage> with WidgetsBindingObserver
                         const SizedBox(height: 12),
 
                         FutureBuilder<List<String>>(
-                          future: _fetchClassNames(),
+                          future: _classNamesFuture,
                           builder: (context, snapshot) {
                             final classList = snapshot.data ?? [];
                             final dropdownValue = classList.contains(_classCtl.text)
