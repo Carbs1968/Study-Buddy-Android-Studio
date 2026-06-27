@@ -284,6 +284,8 @@ class _RecorderPageState extends State<RecorderPage> with WidgetsBindingObserver
       final restoredElapsedSeconds =
           elapsedMillis is num ? (elapsedMillis / 1000).floor() : _elapsedSeconds;
 
+      _restoreClassAndTopicFromFilename(restoredPath);
+
       if (!mounted) return false;
       setState(() {
         _filePath = restoredPath;
@@ -482,7 +484,7 @@ class _RecorderPageState extends State<RecorderPage> with WidgetsBindingObserver
   Map<String, String>? _classAndTopicFromFilename(String filePath) {
     final fileName = path.basename(filePath);
     final match = RegExp(
-      r'^(.+) - (.+) - \d{4}-\d{2}-\d{2}_\d{2}-\d{2}\.m4a$',
+      r'^(.+) - (.+) - \d{4}-\d{2}-\d{2}_\d{2}-\d{2}(?:-\d{2})?\.m4a$',
     ).firstMatch(fileName);
     if (match == null) return null;
 
