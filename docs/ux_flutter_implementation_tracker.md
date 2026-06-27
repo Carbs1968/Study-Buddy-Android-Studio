@@ -362,6 +362,56 @@ Recorder UX status:
   - academic context display clarity
   - future optional recording-status banner across tabs
 
+## Completed Recorder UX Pass 3 — Academic Context Label Clarity
+
+Commit:
+- `3aa389d Clarify recorder academic context labels`
+
+Problem:
+- The recorder screen worked technically, but the academic context section was not as clear as it should be.
+- “Current academic defaults” did not clearly tell the user where the recording would be saved.
+- Class and topic labels did not clearly explain what the student needed to complete before recording.
+
+Change:
+- Renamed “Current academic defaults” to “Save destination”.
+- Renamed “Level” to “Academic year / level”.
+- Renamed “Select class” to “Choose an existing class”.
+- Added helper text explaining that recordings are organized by class.
+- Renamed “Enter new class” to “Or enter a new class”.
+- Added helper text for when the class is not listed yet.
+- Renamed “Topic” to “Topic / lecture name”.
+- Added topic example helper text.
+
+Result:
+- `flutter analyze` passed.
+- Patch was small and targeted: `lib/screens/home_shell/pages/recorder_page.dart`, 8 insertions and 5 deletions.
+- Physical Android recording flow was tested afterward.
+- Recording started successfully.
+- Stop worked.
+- Upload/session metadata save worked.
+- Local file cleanup worked.
+- Upload success returned the screen to the ready recording state.
+
+Safety:
+- This was copy/helper text only.
+- This did not change recording start/pause/resume/stop service logic.
+- This did not change Android foreground service behavior.
+- This did not change wakelock behavior.
+- This did not change locked-screen/background recording behavior.
+- This did not change Firebase Storage upload.
+- This did not change Firestore session metadata writes.
+- This did not change filename format.
+- This did not change AI transcript/summary/notes/quiz flow.
+- This did not change bottom navigation behavior.
+- This did not change academic structure requirements.
+
+Runtime notes from physical Android test:
+- Upload completed and verified session metadata.
+- Local file deletion completed.
+- App Check warnings still appeared, including placeholder-token and attestation warnings.
+- Those warnings did not block Storage upload, Firestore metadata verification, or local cleanup in this test.
+- Continue monitoring App Check warnings separately; do not mix App Check work into recorder UX patches.
+
 ## Completed Recorder UX Pass 2 — Pause/Stop Control Hierarchy
 
 Commit:
