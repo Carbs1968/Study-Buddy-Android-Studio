@@ -362,6 +362,62 @@ Recorder UX status:
   - academic context display clarity
   - future optional recording-status banner across tabs
 
+## Completed Recorder UX Pass 5 — Ready-State Guidance and Context Lock
+
+Commit:
+- `420c27d Clarify recorder ready state and lock context`
+
+Problems:
+- The Record screen did not clearly explain why Record was disabled before class/topic were complete.
+- Field-level helper text stayed visible even after it was no longer useful, adding clutter.
+- The topic helper example used “Photosynthesis”, which was too subject-specific.
+- The existing class dropdown stayed accessible during recording, even though the recording context should be locked once recording starts.
+- After stopping a recording, the context should remain locked until the user uploads or discards the local recording.
+
+Change:
+- Added ready-state helper text:
+  - Missing class/topic: choose a class and enter a topic to start recording.
+  - Ready: confirms the lecture will be saved to the selected class and topic.
+- Simplified the topic helper example to “Exam review or Chapter 4 notes.”
+- Hid class/topic helper text once it was no longer useful.
+- Added a shared context-editing gate for the class dropdown area:
+  - editable only when not recording, not uploading, and not in post-recording complete state.
+- Disabled the class dropdown during recording/upload/post-recording state.
+- Kept new-class and topic fields disabled during recording/upload/post-recording state.
+
+Result:
+- Physical Android test passed.
+- Before recording, class/topic fields were editable and guidance appeared correctly.
+- Once class/topic were complete, helper clutter disappeared and ready guidance appeared.
+- During recording, the class dropdown was no longer accessible.
+- During recording, topic/new-class fields remained locked.
+- Pause, resume, and stop still worked.
+- After stop, context stayed locked while Upload/Discard were visible.
+- After Upload or Discard reset, context became editable again.
+- `flutter analyze` passed before commit.
+- Patch was targeted to `lib/screens/home_shell/pages/recorder_page.dart`.
+
+Safety:
+- This changed only recorder ready-state copy, helper visibility, and context-field enabled/disabled behavior.
+- This did not change recording start/pause/resume/stop service logic.
+- This did not change Android foreground service behavior.
+- This did not change wakelock behavior.
+- This did not change locked-screen/background recording behavior.
+- This did not change Firebase Storage upload logic.
+- This did not change Firestore session metadata writes.
+- This did not change filename format.
+- This did not change AI transcript/summary/notes/quiz flow.
+- This did not change bottom navigation behavior.
+- This did not change academic structure requirements.
+- This preserved the class-name future cache fix from `c65c0b6`.
+- This preserved the Pause/Stop hierarchy update from `22e7eca`.
+- This preserved the post-recording Upload/Discard update from `c25df02`.
+
+UX decision:
+- The recording destination/context should be editable only before recording starts.
+- Once recording starts, the selected class and topic become locked for that local recording.
+- A new recording should not start, and the context should not change, until the previous recording is uploaded or discarded.
+
 ## Completed Recorder UX Pass 4 — Post-Recording Upload / Discard Clarity
 
 Commit:
