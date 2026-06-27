@@ -82,7 +82,10 @@ class _RecorderPageState extends State<RecorderPage> with WidgetsBindingObserver
     if (_isRecording) {
       return 'Recording continues if your screen locks.';
     }
-    return '';
+    if (!_isReadyToRecord) {
+      return 'Choose a class and enter a topic to start recording.';
+    }
+    return 'Ready to record. This lecture will be saved to the selected class and topic.';
   }
 
   bool get _isReadyToRecord =>
@@ -1304,6 +1307,9 @@ class _RecorderPageState extends State<RecorderPage> with WidgetsBindingObserver
                             final dropdownValue = classList.contains(_classCtl.text)
                                 ? _classCtl.text
                                 : null;
+                            final canEditRecordingContext = !_isRecording &&
+                                !_isUploading &&
+                                !_recordingComplete;
 
                             return Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -1315,7 +1321,9 @@ class _RecorderPageState extends State<RecorderPage> with WidgetsBindingObserver
                                   initialValue: dropdownValue,
                                   decoration: InputDecoration(
                                     labelText: 'Choose an existing class',
-                                    helperText: 'Recordings are organized by class.',
+                                    helperText: canEditRecordingContext && !_isReadyToRecord
+                                        ? 'Recordings are organized by class.'
+                                        : null,
                                     border: const OutlineInputBorder(),
                                   ),
                                   items: classList
@@ -1326,31 +1334,33 @@ class _RecorderPageState extends State<RecorderPage> with WidgetsBindingObserver
                                     ),
                                   )
                                       .toList(),
-                                  onChanged: (val) {
-                                    setState(() {
-                                      if (val != null) {
-                                        _selectedExistingClass = true;
-                                        _classCtl.text = val;
-                                        FocusScope.of(context)
-                                            .requestFocus(_topicFocus);
-                                      } else {
-                                        _selectedExistingClass = false;
-                                        _classCtl.clear();
-                                      }
-                                    });
-                                  },
+                                  onChanged: canEditRecordingContext
+                                      ? (val) {
+                                          setState(() {
+                                            if (val != null) {
+                                              _selectedExistingClass = true;
+                                              _classCtl.text = val;
+                                              FocusScope.of(context)
+                                                  .requestFocus(_topicFocus);
+                                            } else {
+                                              _selectedExistingClass = false;
+                                              _classCtl.clear();
+                                            }
+                                          });
+                                        }
+                                      : null,
                                   isExpanded: true,
                                 ),
                                 const SizedBox(height: 6),
                                 if (!_selectedExistingClass)
                                   TextField(
                                     controller: _classCtl,
-                                    enabled: !_isRecording &&
-                                        !_isUploading &&
-                                        !_recordingComplete,
+                                    enabled: canEditRecordingContext,
                                     decoration: InputDecoration(
                                       labelText: 'Or enter a new class',
-                                      helperText: 'Use this if the class is not listed yet.',
+                                      helperText: canEditRecordingContext && !_isReadyToRecord
+                                          ? 'Use this if the class is not listed yet.'
+                                          : null,
                                       border: const OutlineInputBorder(),
                                     ),
                                   ),
@@ -1368,7 +1378,12 @@ class _RecorderPageState extends State<RecorderPage> with WidgetsBindingObserver
                           !_isRecording && !_isUploading && !_recordingComplete,
                           decoration: InputDecoration(
                             labelText: 'Topic / lecture name',
-                            helperText: 'Example: Photosynthesis review or Chapter 4 notes.',
+                            helperText: !_isRecording &&
+                                    !_isUploading &&
+                                    !_recordingComplete &&
+                                    _topicCtl.text.trim().isEmpty
+                                ? 'Example: Exam review or Chapter 4 notes.'
+                                : null,
                             border: const OutlineInputBorder(),
                           ),
                         ),
