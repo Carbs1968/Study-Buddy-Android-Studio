@@ -18,11 +18,25 @@ class HomeShell extends StatefulWidget {
 
 class _HomeShellState extends State<HomeShell> {
   int _tab = 0;
-  final List<Widget> _tabs = const [
-    DashboardPage(),
-    RecorderPage(),
-    LibraryPage(),
-    SettingsPage(),
+  late final List<Widget> _tabs = [
+    DashboardPage(
+      onRecordTap: () {
+        setState(() {
+          _tab = 1;
+        });
+      },
+      onUploadMaterialTap: () {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content:
+                Text('Open a class or topic before uploading study material.'),
+          ),
+        );
+      },
+    ),
+    const RecorderPage(),
+    const LibraryPage(),
+    const SettingsPage(),
   ];
 
   @override
@@ -35,8 +49,10 @@ class _HomeShellState extends State<HomeShell> {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return;
     try {
-      final doc =
-      await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
+      final doc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .get();
       final data = doc.data();
       if (data != null && data['locale'] != null) {
         final code = data['locale'] as String;

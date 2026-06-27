@@ -3,7 +3,14 @@ import 'package:flutter/material.dart';
 import '../../../l10n/strings.dart';
 
 class DashboardPage extends StatelessWidget {
-  const DashboardPage({super.key});
+  const DashboardPage({
+    super.key,
+    this.onRecordTap,
+    this.onUploadMaterialTap,
+  });
+
+  final VoidCallback? onRecordTap;
+  final VoidCallback? onUploadMaterialTap;
 
   @override
   Widget build(BuildContext context) {
@@ -43,13 +50,14 @@ class DashboardPage extends StatelessWidget {
               icon: Icons.mic_none,
               title: strings.record,
               subtitle: 'Start a new classroom recording.',
-              isPrimary: true,
+              onTap: onRecordTap,
             ),
             const SizedBox(height: 12),
-            const _DashboardActionCard(
+            _DashboardActionCard(
               icon: Icons.upload_file_outlined,
               title: 'Upload Study Material',
-              subtitle: 'Add PDFs, documents, and class materials.',
+              subtitle: 'Choose a class or topic before uploading.',
+              onTap: onUploadMaterialTap,
             ),
             const SizedBox(height: 24),
             Text(
@@ -116,13 +124,13 @@ class _DashboardActionCard extends StatelessWidget {
     required this.icon,
     required this.title,
     required this.subtitle,
-    this.isPrimary = false,
+    this.onTap,
   });
 
   final IconData icon;
   final String title;
   final String subtitle;
-  final bool isPrimary;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -130,25 +138,26 @@ class _DashboardActionCard extends StatelessWidget {
 
     return Card(
       elevation: 0,
-      color: isPrimary ? theme.colorScheme.primary : theme.cardColor,
+      color: theme.cardColor,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
       child: ListTile(
+        onTap: onTap,
         minVerticalPadding: 18,
         leading: Icon(
           icon,
-          color: isPrimary ? theme.colorScheme.onPrimary : theme.colorScheme.primary,
+          color: theme.colorScheme.primary,
         ),
         title: Text(
           title,
           style: theme.textTheme.titleMedium?.copyWith(
-            color: isPrimary ? theme.colorScheme.onPrimary : null,
+            color: null,
             fontWeight: FontWeight.w800,
           ),
         ),
         subtitle: Text(
           subtitle,
           style: theme.textTheme.bodyMedium?.copyWith(
-            color: isPrimary ? theme.colorScheme.onPrimary.withValues(alpha: 0.8) : theme.colorScheme.onSurfaceVariant,
+            color: theme.colorScheme.onSurfaceVariant,
           ),
         ),
       ),
