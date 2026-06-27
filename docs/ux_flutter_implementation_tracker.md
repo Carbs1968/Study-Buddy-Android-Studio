@@ -362,6 +362,62 @@ Recorder UX status:
   - academic context display clarity
   - future optional recording-status banner across tabs
 
+## Completed Recorder UX Pass 2 — Pause/Stop Control Hierarchy
+
+Commit:
+- `22e7eca Improve recorder pause stop control hierarchy`
+
+Problem:
+- During active recording, the largest control on the screen was a red Stop button.
+- This made the destructive/end-recording action too visually dominant.
+- Figma UX review also flagged the Stop/Pause hierarchy as a concern.
+
+Change:
+- Kept the large circular Record button for the ready state.
+- Removed the large red Stop circle from the active recording state.
+- Made Pause/Resume the primary full-width action while recording or paused.
+- Moved Stop to a smaller secondary outlined button below Pause/Resume.
+
+Result:
+- Physical Android test passed.
+- No recorder flashing occurred after the class-name future cache fix.
+- Start recording worked.
+- Pause worked.
+- Resume worked.
+- Stop worked.
+- Upload/session save worked.
+- Upload success reset was retested with two additional recordings and returned to the ready state.
+- Discard reset worked.
+- Local cleanup still worked.
+- `flutter analyze` passed.
+- Patch was targeted to `lib/screens/home_shell/pages/recorder_page.dart`.
+
+Safety:
+- This only changed recorder control layout.
+- This did not change recording start/pause/resume/stop service logic.
+- This did not change Android foreground service behavior.
+- This did not change wakelock behavior.
+- This did not change locked-screen/background recording behavior.
+- This did not change Firebase Storage upload.
+- This did not change Firestore session metadata writes.
+- This did not change filename format.
+- This did not change AI transcript/summary/notes/quiz flow.
+- This did not change bottom navigation behavior.
+- This did not change academic structure requirements.
+- This preserved the class-name future cache fix from `c65c0b6`.
+
+UX decision:
+- Pause/Resume is now the main action during live recording.
+- Stop remains available but is visually secondary.
+- This better matches safe recorder UX: continue/temporarily pause is primary; ending the session is deliberate.
+
+Future hardening note:
+- Current successful-upload flow resets the recorder UI after `_safeDeleteLocal(fileOnDisk)`.
+- Normal testing shows this works, including two additional successful upload/reset tests.
+- However, this is mildly fragile because a future local cleanup hang or throw could theoretically delay or block the UI reset after verified upload/session save.
+- Future hardening idea: after Storage upload and Firestore session verification succeed, reset the recorder UI before local cleanup, or guard local cleanup so cleanup failure cannot prevent returning to the ready recording state.
+- Do not change this immediately unless the issue becomes reproducible.
+
 ## Completed Recorder Stability Fix — Class Names Future Cache
 
 Commit:
