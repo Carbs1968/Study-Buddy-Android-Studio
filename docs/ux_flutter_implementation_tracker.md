@@ -245,6 +245,73 @@ Safety:
 - No AI job or Cloud Function contract changed.
 - No academic structure changed.
 
+## Recorder UX Review Notes
+
+Source:
+- Figma AI recorder UX review after Home dashboard functionality work.
+
+Key review findings:
+- The recorder UX direction is strong overall.
+- Status badges, reassurance copy, filename preview, upload checklist, and warning copy should be preserved.
+- The Figma/prototype review identified several recorder UX priorities:
+  - paused state clarity
+  - discard safety
+  - pause/resume/stop hierarchy
+  - academic context clarity
+  - upload/retry/error-state clarity
+  - small Android phone and SafeArea testing
+
+Important Flutter reality:
+- The current Flutter recorder already has working production-sensitive behavior:
+  - class selection
+  - topic entry
+  - start / pause / resume / stop
+  - timer
+  - wakelock while recording
+  - Android foreground / locked-screen recording behavior
+  - recording continuity across tab navigation
+  - recording continuity when returning to the Record tab
+  - local temporary audio file
+  - Firebase Storage upload
+  - Firestore session metadata save
+  - local cleanup after upload/discard
+  - file naming format: `ClassName - Topic - yyyy-mm-dd_hh-mm.m4a`
+
+Product decision:
+- Do not hide or disable the bottom navigation during active recording solely because the Figma review suggested it.
+- In the current Flutter app, bottom navigation during recording is intentional and has been tested.
+- Users can navigate away from Record and return to the active recording state.
+- This behavior supports the app’s recording-resilience goal and should be preserved unless a specific regression appears.
+
+Future UX improvement:
+- If users need more reassurance while navigating away from Record, add a persistent recording-status indicator instead of disabling navigation.
+- Preferred future pattern:
+  - a mini recording banner above the bottom nav
+  - example: `Recording Biology • 00:18:42`
+  - tap banner to return to Recorder
+- This should be a separate, deliberate patch because it requires sharing recorder state with `HomeShell`.
+
+Recorder implementation guidance:
+- Do not rewrite `recorder_page.dart` from Figma in one pass.
+- Use the Figma review as a priority guide, not as a direct replacement spec.
+- Make recorder changes in small, isolated patches.
+- Preserve all recording, upload, Firestore, Firebase Storage, wakelock, foreground service, local cleanup, and filename behavior.
+
+Recommended recorder patch order:
+1. Audit current Flutter recorder states against Figma states.
+2. Improve paused-state clarity if current UI is unclear.
+3. Improve discard safety and confirmation.
+4. Improve pause/resume/stop visual hierarchy.
+5. Improve academic context display.
+6. Improve upload/retry/error-state messaging.
+7. Consider persistent recording banner across tabs only after recorder state-sharing design is reviewed.
+
+Safety rule:
+- Do not combine recorder UI polish with academic hierarchy migration.
+- Do not combine recorder UI polish with upload logic changes.
+- Do not combine recorder UI polish with Firestore/session schema changes.
+- Do not change bottom navigation behavior during recording without explicit review and physical Android testing.
+
 ## Runtime Warning Watchlist
 
 ### Firestore DNS / App Check Warning
