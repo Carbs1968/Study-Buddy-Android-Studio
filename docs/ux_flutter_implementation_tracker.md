@@ -362,6 +362,43 @@ Recorder UX status:
   - academic context display clarity
   - future optional recording-status banner across tabs
 
+## Recorder UX Pass 2 Attempt — Reverted
+
+Status:
+- Not committed.
+- Reverted with `git restore lib/screens/home_shell/pages/recorder_page.dart`.
+
+Attempted change:
+- Tested a visual control-hierarchy change in `recorder_page.dart`.
+- Goal was to remove the huge red Stop button during active recording.
+- Proposed layout:
+  - Ready state: keep large Record button.
+  - Recording/paused state: make Pause/Resume primary.
+  - Move Stop Recording to a smaller secondary outlined button.
+
+Result:
+- Physical Android test found a visible UI flashing regression during active recording.
+- The flash occurred every second around the academic defaults / class selector area, likely tied to the timer-driven rebuild.
+- Recording engine still worked, but the visual regression was unacceptable for the recorder screen.
+
+Decision:
+- Do not commit this implementation.
+- Do not repeat the same control-block replacement without a deeper layout/rebuild audit.
+- Keep the current stable recorder controls for now.
+- Preserve the already-committed recorder status-message improvement from `62886d9 Clarify recorder status messages`.
+
+Safety outcome:
+- Reverted before commit.
+- `flutter analyze` passed after revert.
+- Working tree returned to clean state.
+- No recorder behavior, upload flow, Firestore metadata, filename format, wakelock behavior, foreground service behavior, bottom navigation, or class-selection logic was changed.
+
+Future guidance:
+- The Stop button hierarchy issue is still a UX concern, but it needs a safer implementation path.
+- Before changing the recorder control layout again, inspect why the timer rebuild causes visual flashing.
+- Prefer smaller visual adjustments that do not restructure the live recording control block.
+- Test any recorder UI change on a physical Android phone while actively recording for at least 20–30 seconds.
+
 ## Runtime Warning Watchlist
 
 ### Firestore DNS / App Check Warning
