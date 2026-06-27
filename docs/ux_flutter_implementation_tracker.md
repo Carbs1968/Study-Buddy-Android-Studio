@@ -362,6 +362,63 @@ Recorder UX status:
   - academic context display clarity
   - future optional recording-status banner across tabs
 
+## Completed Recorder Stability Fix — Restore Context After App Restart
+
+Commit:
+- `9d31452 Restore recorder context after app restart`
+
+Problem:
+- If the app was fully closed during an active native-service recording, reopening restored the active recording file/state.
+- However, class/topic fields were not restored in the Flutter UI.
+- After stopping the restored recording, Upload could be blocked with “Please enter a class” because the UI fields were blank.
+- Locking the screen did not reproduce this; the issue happened after full app close/reopen.
+
+Cause:
+- Native recording restore already restored `_filePath`, recording state, elapsed time, and backend state.
+- It did not restore `_classCtl.text` or `_topicCtl.text`.
+- Pending-file recovery already had filename-based class/topic restore, but active native recording restore did not.
+- Restored native-service filenames can include seconds, for example:
+  - `Summer - 12 - 2026-06-27_17-41-07.m4a`
+- The filename parser only accepted the older minute-only pattern:
+  - `Class - Topic - yyyy-mm-dd_hh-mm.m4a`
+
+Change:
+- Called `_restoreClassAndTopicFromFilename(restoredPath)` during active native recording restore.
+- Updated the filename parser to accept both:
+  - `Class - Topic - yyyy-mm-dd_hh-mm.m4a`
+  - `Class - Topic - yyyy-mm-dd_hh-mm-ss.m4a`
+
+Result:
+- Physical Android test passed.
+- Started recording with class/topic.
+- Fully closed the app during recording.
+- Reopened the app.
+- Restored recording state appeared.
+- Class/topic were restored from the filename.
+- Stop worked.
+- Upload worked without asking for class/topic again.
+- Firestore session metadata saved the correct class/topic.
+- Local file cleanup completed.
+- `flutter analyze` passed before commit.
+- Patch was targeted to `lib/screens/home_shell/pages/recorder_page.dart`, 3 insertions and 1 deletion.
+
+Safety:
+- This changed only restore/parsing behavior for recovered recorder state.
+- This did not change filename creation.
+- This did not change recording start/pause/resume/stop service logic.
+- This did not change Android foreground service behavior.
+- This did not change wakelock behavior.
+- This did not change locked-screen recording behavior.
+- This did not change Firebase Storage upload logic.
+- This did not change Firestore session metadata writes.
+- This did not change AI transcript/summary/notes/quiz flow.
+- This did not change bottom navigation behavior.
+- This did not change academic structure requirements.
+
+UX decision:
+- If a recording is recoverable after app restart, its academic context should also be recoverable.
+- The restored recording should be uploadable without forcing the student to re-enter class/topic metadata.
+
 ## Completed Recorder UX Pass 5 — Ready-State Guidance and Context Lock
 
 Commit:
