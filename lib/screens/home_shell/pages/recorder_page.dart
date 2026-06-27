@@ -1375,7 +1375,7 @@ class _RecorderPageState extends State<RecorderPage> with WidgetsBindingObserver
 
                         const SizedBox(height: 14),
 
-                        if (!_isRecording) ...[
+                        if (!_isRecording && !_recordingComplete) ...[
                           SizedBox(
                             width: big,
                             height: big,
@@ -1397,7 +1397,7 @@ class _RecorderPageState extends State<RecorderPage> with WidgetsBindingObserver
                               ),
                             ),
                           ),
-                        ] else ...[
+                        ] else if (_isRecording) ...[
                           SizedBox(
                             width: double.infinity,
                             child: ElevatedButton(
@@ -1469,34 +1469,42 @@ class _RecorderPageState extends State<RecorderPage> with WidgetsBindingObserver
 
                         if (_recordingComplete) ...[
                           const SizedBox(height: 8),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: ElevatedButton(
-                                  onPressed: _isUploading ? null : _uploadRecording,
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.deepPurple.shade600,
-                                    padding: const EdgeInsets.symmetric(
-                                      vertical: 14,
-                                    ),
-                                  ),
-                                  child: Text(strings.upload),
+                          Text(
+                            'Recording saved locally. Upload it to Study Buddy, or discard this local copy.',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              color: Colors.grey.shade700,
+                              fontSize: 13,
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+                          SizedBox(
+                            width: double.infinity,
+                            child: ElevatedButton(
+                              onPressed: _isUploading ? null : _uploadRecording,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.deepPurple.shade600,
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 14,
                                 ),
                               ),
-                              const SizedBox(width: 16),
-                              Expanded(
-                                child: ElevatedButton(
-                                  onPressed: _isUploading ? null : _discardRecording,
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.red,
-                                    padding: const EdgeInsets.symmetric(
-                                      vertical: 14,
-                                    ),
-                                  ),
-                                  child: Text(strings.discard),
+                              child: Text(strings.upload),
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+                          SizedBox(
+                            width: double.infinity,
+                            child: OutlinedButton(
+                              onPressed: _isUploading ? null : _discardRecording,
+                              style: OutlinedButton.styleFrom(
+                                foregroundColor: Colors.red.shade700,
+                                side: BorderSide(color: Colors.red.shade300),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 14,
                                 ),
                               ),
-                            ],
+                              child: Text(strings.discard),
+                            ),
                           ),
                         ],
 
