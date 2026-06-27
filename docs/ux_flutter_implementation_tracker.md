@@ -362,6 +362,46 @@ Recorder UX status:
   - academic context display clarity
   - future optional recording-status banner across tabs
 
+## Completed Recorder Stability Fix — Class Names Future Cache
+
+Commit:
+- `c65c0b6 Cache recorder class names future`
+
+Problem:
+- The recorder timer updates state every second during active recording.
+- `recorder_page.dart` had a `FutureBuilder` that called `_fetchClassNames()` directly inside `build()`.
+- That meant every timer tick recreated the class-name future and could trigger repeated Firestore reads.
+- On physical Android, this showed up as visible flashing around the academic defaults / class selector area during recording.
+
+Change:
+- Added a cached `late Future<List<String>> _classNamesFuture`.
+- Initialized it once in `initState()`.
+- Updated the class-name `FutureBuilder` to use `_classNamesFuture`.
+- Updated pull-to-refresh to intentionally refresh `_classNamesFuture`.
+
+Result:
+- Physical Android test confirmed the every-second flashing is gone.
+- `flutter analyze` passed.
+- Patch was small and targeted: `lib/screens/home_shell/pages/recorder_page.dart`, 8 insertions and 2 deletions.
+
+Safety:
+- This did not change recording start/pause/resume/stop behavior.
+- This did not change Android foreground service behavior.
+- This did not change wakelock behavior.
+- This did not change locked-screen/background recording behavior.
+- This did not change Firebase Storage upload.
+- This did not change Firestore session metadata writes.
+- This did not change filename format.
+- This did not change AI transcript/summary/notes/quiz flow.
+- This did not change bottom navigation behavior.
+- This did not change academic structure requirements.
+
+Future guidance:
+- The root page still rebuilds every second for the timer.
+- That is acceptable for now after caching the Firestore-backed class-name future.
+- A future optimization could isolate timer rebuilds to the timer/status widget only.
+- Reattempting the Stop/Pause hierarchy redesign is now safer than before, but still requires physical Android recording QA.
+
 ## Recorder UX Pass 2 Attempt — Reverted
 
 Status:
