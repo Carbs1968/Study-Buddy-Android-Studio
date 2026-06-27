@@ -362,6 +362,64 @@ Recorder UX status:
   - academic context display clarity
   - future optional recording-status banner across tabs
 
+## Completed Recorder UX Pass 4 — Post-Recording Upload / Discard Clarity
+
+Commit:
+- `c25df02 Clarify recorder upload discard actions`
+
+Problem:
+- After stopping a recording, Upload and Discard were shown as equal side-by-side actions.
+- This made Discard too visually equal to Upload.
+- The screen also briefly exposed the Record button at the same time as Upload / Discard after the first layout change, which was not correct.
+- In post-recording state, the user should choose Upload or Discard before starting another recording.
+
+Change:
+- Added explanatory post-recording copy:
+  - Recording is saved locally.
+  - Upload sends it to Study Buddy.
+  - Discard deletes the local copy.
+- Changed Upload to a full-width primary action.
+- Changed Discard to a full-width outlined secondary/destructive action.
+- Updated the Record button visibility condition so Record is hidden while `_recordingComplete` is true.
+- Record returns only after Upload or Discard resets the recorder state.
+
+Result:
+- Physical Android test passed.
+- Record worked.
+- Stop worked.
+- Post-recording message/buttons displayed correctly.
+- Record button stayed hidden while Upload / Discard were visible.
+- Upload worked and reset the screen to ready state.
+- Discard worked and reset the screen to ready state.
+- `flutter analyze` passed before commit.
+- Patch was targeted to `lib/screens/home_shell/pages/recorder_page.dart`.
+
+Safety:
+- This only changed post-recording control layout and Record button visibility in post-recording state.
+- This did not change recording start/pause/resume/stop service logic.
+- This did not change Android foreground service behavior.
+- This did not change wakelock behavior.
+- This did not change locked-screen/background recording behavior.
+- This did not change Firebase Storage upload logic.
+- This did not change Firestore session metadata writes.
+- This did not change filename format.
+- This did not change AI transcript/summary/notes/quiz flow.
+- This did not change bottom navigation behavior.
+- This did not change academic structure requirements.
+- This preserved the class-name future cache fix from `c65c0b6`.
+- This preserved the Pause/Stop hierarchy update from `22e7eca`.
+- This preserved the academic context label update from `3aa389d`.
+
+UX decision:
+- Upload is the primary post-recording action.
+- Discard remains available but is visually secondary and destructive.
+- A new recording should not begin until the previous local recording has either been uploaded or discarded.
+
+Runtime notes:
+- App Check / Google Play Services warnings may still appear in Android logs.
+- These warnings did not block the tested recording, upload/session save, reset, or discard flows.
+- Continue monitoring those warnings separately from recorder UX work.
+
 ## Completed Recorder UX Pass 3 — Academic Context Label Clarity
 
 Commit:
