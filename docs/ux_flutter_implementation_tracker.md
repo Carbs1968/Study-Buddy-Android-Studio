@@ -362,6 +362,64 @@ Recorder UX status:
   - academic context display clarity
   - future optional recording-status banner across tabs
 
+## Completed Login UX Pass 1 — Clean Google Sign-In Screen
+
+Commits:
+- `d055652 Refresh login screen design`
+- `427913b Remove unused login import`
+
+Problem:
+- The original login screen was very plain and did not match the newer Study Buddy UX direction.
+- The first Figma-inspired attempt had too much marketing copy and too many stacked visual elements.
+- The microphone illustration felt crowded and unnecessary.
+- The wrong logo/icon asset was briefly tested and rejected.
+- Terms / Privacy copy needed cleaner placement near the bottom of the login screen.
+
+Change:
+- Refreshed `lib/screens/login_screen.dart` with a cleaner, modern login layout.
+- Kept the real Study Buddy logo visible on the login screen.
+- Reduced copy to a minimal purpose line:
+  - “Record and organize your classes.”
+- Kept one clear primary action:
+  - Google sign-in.
+- Removed extra marketing paragraph and security reassurance line.
+- Moved Terms / Privacy wording toward the bottom using responsive layout.
+- Added `assets/icons/study_buddy_logo.png` as a Flutter asset.
+- Added the logo asset to `pubspec.yaml`.
+- Removed the now-unused constants import after the UI no longer referenced `kBrandPrimary`.
+
+Result:
+- Login screen rendered correctly after fixing the scroll/Spacer layout issue.
+- Real logo appeared on the login screen.
+- Text amount now feels cleaner and less marketing-heavy.
+- Google sign-in button remained visible and primary.
+- `flutter analyze` passed after cleanup.
+- Working tree returned to clean state.
+- Changes were committed and pushed to `origin/dev`.
+
+Safety:
+- This was a login presentation refresh only.
+- This did not change `GoogleSignIn` logic.
+- This did not change `FirebaseAuth.signInWithCredential`.
+- This did not change the `users/{uid}` primary user document structure.
+- This did not change email/emailLower metadata saving.
+- This did not change Firestore rules.
+- This did not add the future provider-neutral email lookup/index yet.
+- This did not add Apple login or email/password login.
+- This did not touch recorder, upload, Firestore session metadata, Firebase Storage, AI flow, academic structure, bottom navigation, or logout logic.
+
+Future auth direction:
+- Keep UID as the primary user document ID.
+- Continue saving email and emailLower on `users/{uid}`.
+- Add a provider-neutral `userEmailLookup/{encodedEmailLower}` index later for troubleshooting by email.
+- Design that lookup to support future Google, Apple, and email/password providers.
+- Do not use Google-specific collection names for provider-neutral user lookup.
+- Apple login may use private relay emails, so future lookup should be treated as “email known to Firebase Auth,” not always a personal email.
+
+Notes:
+- App Check / Google Play Services warnings are still separate monitor-only items unless they begin blocking login, upload, or metadata saves.
+- Package update warnings remain informational and should not be mixed into login UX work.
+
 ## Completed Recorder UX Pass 6 — Compact Start Button and Top-Aligned Layout
 
 Commit:
