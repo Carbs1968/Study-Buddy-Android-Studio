@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:io';
-import 'dart:math';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -1221,8 +1220,6 @@ class _RecorderPageState extends State<RecorderPage> with WidgetsBindingObserver
 
   @override
   Widget build(BuildContext context) {
-    final w = MediaQuery.of(context).size.width;
-    final big = min(w * 0.6, 300.0);
     final strings = SBStrings.of(context);
 
     return Scaffold(
@@ -1256,13 +1253,14 @@ class _RecorderPageState extends State<RecorderPage> with WidgetsBindingObserver
               physics: const AlwaysScrollableScrollPhysics(),
               child: ConstrainedBox(
                 constraints: BoxConstraints(minHeight: constraints.maxHeight),
-                child: Center(
+                child: Align(
+                  alignment: Alignment.topCenter,
                   child: ConstrainedBox(
                     constraints: const BoxConstraints(maxWidth: 680),
                     child: Column(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      mainAxisAlignment: MainAxisAlignment.start,
                       children: [
-                        const SizedBox(height: 8),
+                        const SizedBox(height: 16),
                         Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           crossAxisAlignment: CrossAxisAlignment.center,
@@ -1394,14 +1392,17 @@ class _RecorderPageState extends State<RecorderPage> with WidgetsBindingObserver
 
                         if (!_isRecording && !_recordingComplete) ...[
                           SizedBox(
-                            width: big,
-                            height: big,
+                            width: double.infinity,
                             child: ElevatedButton(
                               style: ElevatedButton.styleFrom(
-                                shape: const CircleBorder(),
                                 backgroundColor: _isReadyToRecord
                                     ? Colors.deepPurple.shade600
                                     : Colors.grey[400],
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 16),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(28),
+                                ),
                               ),
                               onPressed:
                                   _isReadyToRecord ? _startRecording : null,
@@ -1409,7 +1410,8 @@ class _RecorderPageState extends State<RecorderPage> with WidgetsBindingObserver
                                 strings.record,
                                 style: const TextStyle(
                                   color: Colors.white,
-                                  fontSize: 22,
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.w700,
                                 ),
                               ),
                             ),
