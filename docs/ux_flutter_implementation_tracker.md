@@ -362,6 +362,64 @@ Recorder UX status:
   - academic context display clarity
   - future optional recording-status banner across tabs
 
+## Completed Recorder UX Pass 6 — Compact Start Button and Top-Aligned Layout
+
+Commit:
+- `6ff63db Use compact recorder start button`
+
+Problem:
+- The ready-state Record button was still too large after earlier size reductions.
+- On a Samsung S24 Ultra, the circular Record button still crowded the screen and could require scrolling.
+- The recorder content also had wasted vertical space under the app header because the page body was vertically centered.
+- A form-heavy recorder screen needs a compact primary action that fits without fighting the bottom navigation.
+
+Change:
+- Replaced the giant circular ready-state Record button with a compact full-width rounded pill button.
+- Kept Record visually primary with the same purple enabled color.
+- Kept the disabled state grey when class/topic are incomplete.
+- Top-aligned the recorder content instead of vertically centering it.
+- Reduced the top spacer so the content starts closer to the app header.
+- Removed now-unused circular button sizing code.
+
+Result:
+- Physical Android visual test passed.
+- The oval/pill Record button looked better and fit the screen more naturally.
+- Record button worked and started recording through the Android foreground service.
+- Stop worked.
+- Upload/session metadata save worked.
+- Local file cleanup worked.
+- `flutter analyze` passed before commit.
+- Patch was targeted to `lib/screens/home_shell/pages/recorder_page.dart`.
+
+Safety:
+- This changed only ready-state layout and Record button presentation.
+- This did not change recording start/pause/resume/stop service logic.
+- This did not change Android foreground service behavior.
+- This did not change wakelock behavior.
+- This did not change locked-screen/background recording behavior.
+- This did not change app-restart recording restore behavior.
+- This did not change Firebase Storage upload logic.
+- This did not change Firestore session metadata writes.
+- This did not change filename format.
+- This did not change AI transcript/summary/notes/quiz flow.
+- This did not change bottom navigation behavior.
+- This did not change academic structure requirements.
+- This preserved the class-name future cache fix from `c65c0b6`.
+- This preserved the Pause/Stop hierarchy update from `22e7eca`.
+- This preserved the post-recording Upload/Discard update from `c25df02`.
+- This preserved the context-lock update from `420c27d`.
+- This preserved the app-restart context restore fix from `9d31452`.
+
+UX decision:
+- The ready-state Record action should be prominent, but not oversized.
+- A full-width pill button better fits the required academic context fields than a large circular button.
+- The ready screen should not require scrolling just to reach the Record action on large Android phones.
+
+Runtime notes:
+- Physical Android test logs still showed App Check placeholder-token warnings.
+- Those warnings did not block recording, Storage upload, Firestore metadata verification, or local cleanup.
+- Continue monitoring App Check separately; do not mix App Check work into recorder UX patches.
+
 ## Completed Recorder Stability Fix — Restore Context After App Restart
 
 Commit:
