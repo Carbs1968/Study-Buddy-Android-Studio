@@ -63,6 +63,7 @@ flutter:
   generate: true
   assets:
     - assets/icons/app_icon.png
+    - assets/icons/study_buddy_logo.png
 
 # flutter_launcher_icons configuration
 flutter_icons:
