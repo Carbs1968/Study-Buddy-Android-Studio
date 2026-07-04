@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 import '../l10n/strings.dart';
 import '../utils/helper.dart';
@@ -36,6 +37,10 @@ class _ClassLecturesScreenState extends State<ClassLecturesScreen> {
     if (v is Timestamp) return v.toDate();
     if (v is String) return DateTime.tryParse(v);
     return null;
+  }
+
+  String _formatLectureDate(DateTime dt) {
+    return DateFormat('MMM d, yyyy • h:mm a').format(dt.toLocal());
   }
 
   Future<void> _openOrRequestClassStudyGuide() async {
@@ -317,7 +322,7 @@ class _ClassLecturesScreenState extends State<ClassLecturesScreen> {
                     final subtitleParts = <String>[];
                     if (levelName.isNotEmpty) subtitleParts.add(levelName);
                     if (semesterName.isNotEmpty) subtitleParts.add(semesterName);
-                    if (dt != null) subtitleParts.add(dt.toLocal().toString());
+                    if (dt != null) subtitleParts.add(_formatLectureDate(dt));
                     if (durationSeconds is num && durationSeconds > 0) {
                       subtitleParts.add(
                         formatDuration(Duration(seconds: durationSeconds.round())),
