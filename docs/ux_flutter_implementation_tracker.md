@@ -362,6 +362,82 @@ Recorder UX status:
   - academic context display clarity
   - future optional recording-status banner across tabs
 
+## Completed Library UX Pass 2 — Class Lecture Card Metadata
+
+Commits:
+- `e344d89 Improve class lecture card metadata`
+- `80037e0 Add compact AI status to lecture cards`
+
+Problem:
+- Class lecture cards were technically correct but hard to scan.
+- Academic context, date, duration, and transcript status were compressed into one long subtitle.
+- Transcript status values were still too close to backend terminology.
+- The lecture list did not show whether AI outputs existed without opening each lecture detail page.
+
+Changes:
+- Updated `lib/screens/class_lectures_screen.dart`.
+- Split lecture card metadata into intentional lines:
+  - Academic context and lecture date.
+  - Duration and transcript availability.
+  - Compact AI output status.
+- Changed raw transcript display language into student-facing card labels:
+  - `done` → `Ready`
+  - `processing` → `Processing`
+  - `pending` → `Queued`
+  - `error` → `Failed`
+  - `none` / empty → `No transcript`
+- Added compact AI status display based on existing session fields:
+  - `summaryStatus`
+  - `notesStatus`
+  - `quizStatus`
+
+AI card display behavior:
+- No outputs requested:
+  - `AI: Not started`
+- One or more outputs pending/processing:
+  - `AI: Processing`
+- One output ready:
+  - `AI: Summary ready`
+  - `AI: Notes ready`
+  - `AI: Quiz ready`
+- Two outputs ready:
+  - `AI: 2 outputs ready`
+- All three outputs ready:
+  - `AI: 3 outputs ready`
+- One or more errors with nothing processing:
+  - `AI: Failed`
+
+Result:
+- Lecture cards are easier to scan in the Library flow.
+- Students can see transcript and AI readiness without opening every lecture.
+- The page avoids showing separate diagnostic lines for Summary, Notes, and Quiz.
+- `flutter analyze` passed.
+- Phone check passed on the physical Android device.
+- Changes were committed and pushed to `origin/dev`.
+
+Safety:
+- These were display-only Library UX changes.
+- They only read existing session fields.
+- They did not add, remove, or rename Firestore fields.
+- They did not change Firestore queries.
+- They did not change Firestore writes.
+- They did not change Firebase Storage upload.
+- They did not change recording behavior.
+- They did not change Android foreground or locked-screen recording behavior.
+- They did not change wakelock behavior.
+- They did not change AI job creation.
+- They did not change Cloud Function contracts.
+- They did not change transcript generation.
+- They did not change playback.
+- They did not change auth/login/logout behavior.
+- They did not change academic structure requirements.
+
+UX decision:
+- The lecture list should be a scanning surface, not a diagnostic screen.
+- Transcript status belongs on the card because it gates AI usefulness.
+- AI readiness belongs on the card as one compact summary line.
+- Detailed Summary / Notes / Quiz status remains better suited for the lecture detail screen.
+
 ## Completed Library UX Pass 1 — Class Lecture Date Formatting
 
 Commit:
