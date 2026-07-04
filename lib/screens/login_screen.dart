@@ -65,18 +65,22 @@ class _LoginScreenState extends State<LoginScreen> {
     }, SetOptions(merge: true));
 
     if (emailLower != null && emailLower.isNotEmpty) {
-      final lookupId = Uri.encodeComponent(emailLower);
-      await FirebaseFirestore.instance
-          .collection('userEmailLookup')
-          .doc(lookupId)
-          .set({
-        'uid': u.uid,
-        'email': email,
-        'emailLower': emailLower,
-        'displayName': u.displayName,
-        'providers': FieldValue.arrayUnion(['google']),
-        'updatedAt': FieldValue.serverTimestamp(),
-      }, SetOptions(merge: true));
+      try {
+        final lookupId = Uri.encodeComponent(emailLower);
+        await FirebaseFirestore.instance
+            .collection('userEmailLookup')
+            .doc(lookupId)
+            .set({
+          'uid': u.uid,
+          'email': email,
+          'emailLower': emailLower,
+          'displayName': u.displayName,
+          'providers': FieldValue.arrayUnion(['google']),
+          'updatedAt': FieldValue.serverTimestamp(),
+        }, SetOptions(merge: true));
+      } catch (e) {
+        debugPrint('User email lookup write failed: $e');
+      }
     }
   }
 
