@@ -19,6 +19,56 @@ class LectureDetailScreen extends StatelessWidget {
     required this.sessionId,
   });
 
+  String _formatSessionStatus(String status) {
+    switch (status.toLowerCase()) {
+      case 'ready':
+        return 'Ready';
+      case 'processing':
+        return 'Processing';
+      case 'error':
+        return 'Needs attention';
+      case 'unknown':
+      case '':
+        return 'Unknown';
+      default:
+        return status;
+    }
+  }
+
+  String _formatAudioStatus(String status) {
+    switch (status.toLowerCase()) {
+      case 'uploaded':
+        return 'Uploaded';
+      case 'uploading':
+        return 'Uploading';
+      case 'error':
+        return 'Upload failed';
+      case 'unknown':
+      case '':
+        return 'Unknown';
+      default:
+        return status;
+    }
+  }
+
+  String _formatTranscriptStatus(String status) {
+    switch (status.toLowerCase()) {
+      case 'done':
+        return 'Transcript ready';
+      case 'processing':
+        return 'Processing';
+      case 'pending':
+        return 'Queued';
+      case 'error':
+        return 'Failed';
+      case 'none':
+      case '':
+        return 'No transcript';
+      default:
+        return status;
+    }
+  }
+
   Future<void> _viewAiOutput(
       BuildContext context,
       String sessionId,
@@ -342,9 +392,9 @@ class LectureDetailScreen extends StatelessWidget {
                       if (semesterName.isNotEmpty) Text('Semester: $semesterName'),
                       if (filename.isNotEmpty) Text('File: $filename'),
                       Text('Duration: $durationSeconds sec'),
-                      Text('Session status: $sessionStatus'),
-                      Text('Audio status: $audioStatus'),
-                      Text('Transcript status: $transcriptStatus'),
+                      Text('Session status: ${_formatSessionStatus(sessionStatus)}'),
+                      Text('Audio status: ${_formatAudioStatus(audioStatus)}'),
+                      Text('Transcript status: ${_formatTranscriptStatus(transcriptStatus)}'),
                     ],
                   ),
                 ),
@@ -614,6 +664,24 @@ class _AiActionRow extends StatelessWidget {
     this.viewAiOutput,
   });
 
+  String _formatAiOutputStatus(String status) {
+    switch (status.toLowerCase()) {
+      case 'done':
+        return 'Ready';
+      case 'processing':
+        return 'Processing';
+      case 'pending':
+        return 'Queued';
+      case 'error':
+        return 'Failed';
+      case 'none':
+      case '':
+        return 'Not started';
+      default:
+        return status;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final strings = SBStrings.of(context);
@@ -621,7 +689,7 @@ class _AiActionRow extends StatelessWidget {
     return ListTile(
       leading: const Icon(Icons.auto_awesome),
       title: Text(title),
-      subtitle: Text('${strings.status}: $status'),
+      subtitle: Text('${strings.status}: ${_formatAiOutputStatus(status)}'),
       trailing: ElevatedButton(
         onPressed: !transcriptReady
             ? null
