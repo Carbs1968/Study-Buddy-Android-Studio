@@ -362,6 +362,45 @@ Recorder UX status:
   - academic context display clarity
   - future optional recording-status banner across tabs
 
+## Completed Library UX Pass 1 — Class Lecture Date Formatting
+
+Commit:
+- `a43b7aa Format class lecture dates`
+
+Problem:
+- The class lecture list displayed raw Dart `DateTime.toString()` output.
+- That produced developer-style timestamps that were not student-friendly.
+
+Change:
+- Added `intl` date formatting to `lib/screens/class_lectures_screen.dart`.
+- Added `_formatLectureDate(DateTime dt)`.
+- Changed lecture subtitles to show a clean local date/time format:
+  - `MMM d, yyyy • h:mm a`
+
+Result:
+- Lecture dates now display in a readable format such as:
+  - `Jul 4, 2026 • 10:30 AM`
+- `flutter analyze` passed.
+- Patch was small and targeted:
+  - `lib/screens/class_lectures_screen.dart`
+  - 6 insertions, 1 deletion.
+- Change was committed and pushed to `origin/dev`.
+
+Safety:
+- This changed display formatting only.
+- This did not change Firestore queries.
+- This did not change session metadata.
+- This did not change recording behavior.
+- This did not change Firebase Storage upload.
+- This did not change AI transcript/summary/notes/quiz flow.
+- This did not change academic structure requirements.
+- This did not change auth/login behavior.
+- This did not change navigation.
+
+UX decision:
+- Student-facing library/session lists should avoid raw technical timestamps.
+- Date/time should be readable at a glance while preserving useful lecture context.
+
 ## Completed Auth Stability Pass 1 — Provider-Neutral Email Lookup Index
 
 Commits:
