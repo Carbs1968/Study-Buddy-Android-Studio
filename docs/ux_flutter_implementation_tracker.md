@@ -362,6 +362,78 @@ Recorder UX status:
   - academic context display clarity
   - future optional recording-status banner across tabs
 
+## Completed Auth Stability Pass 1 — Provider-Neutral Email Lookup Index
+
+Commits:
+- `d0996f4 Add user email lookup index`
+- `6ed1481 Prevent email lookup failure from blocking login`
+
+Problem:
+- Google login already saved `email` and `emailLower` on `users/{uid}`, but troubleshooting by email still required querying the `users` collection.
+- There was no direct support/admin lookup from email to Firebase Auth UID.
+- Future auth providers are expected, including Apple login and email/password login, so the lookup must not be Google-specific.
+- The first lookup write test failed with `PERMISSION_DENIED` until Firestore rules were deployed.
+- The lookup write should not be allowed to block login because it is support metadata, not the primary auth/profile write.
+
+Change:
+- Added provider-neutral lookup documents at:
+  - `userEmailLookup/{encodedEmailLower}`
+- Added lookup fields:
+  - `uid`
+  - `email`
+  - `emailLower`
+  - `displayName`
+  - `providers`
+  - `updatedAt`
+- Kept `users/{uid}` as the primary user profile document.
+- Added `providers: FieldValue.arrayUnion(['google'])` to the primary user profile write.
+- Added Firestore rules for `userEmailLookup`.
+- Deployed Firestore rules with:
+  - `firebase deploy --only firestore:rules`
+- Hardened the login flow so `userEmailLookup` write failures are logged with `debugPrint` but do not block login.
+- Kept the primary `users/{uid}` profile write required.
+
+Result:
+- Firestore rules deployed successfully.
+- Google login completed successfully.
+- `userEmailLookup/carbs1968mx%40gmail.com` was created and verified in Firestore.
+- The lookup document correctly mapped email to UID.
+- The lookup provides the troubleshooting bridge:
+  - email → UID → `users/{uid}` → sessions/library/recordings/AI jobs.
+- `flutter analyze` passed before commits.
+- Working tree returned to clean state.
+- Changes were pushed to `origin/dev`.
+
+Safety:
+- This did not change Google credential sign-in behavior.
+- This did not change Firebase Auth UID as the primary identity.
+- This did not rename existing collections or fields.
+- This did not change existing `users/{uid}` document loading.
+- This did not change recorder behavior.
+- This did not change Firebase Storage upload.
+- This did not change Firestore session metadata writes.
+- This did not change AI transcript/summary/notes/quiz flow.
+- This did not change academic structure requirements.
+- This did not change login UI.
+- This did not add Apple login yet.
+- This did not add email/password login yet.
+
+Future auth direction:
+- Keep `users/{uid}` as the source of truth.
+- Keep `userEmailLookup/{encodedEmailLower}` as support/admin lookup metadata.
+- Keep provider naming neutral for future providers:
+  - `google`
+  - `apple`
+  - `password`
+- Apple login may provide a private relay email, so the lookup should be understood as “email known to Firebase Auth,” not always the user’s personal email.
+- Future support tooling can use:
+  - email → lookup doc → UID → user profile/sessions/recordings/AI jobs.
+
+Runtime notes:
+- App Check / Google Play Services warnings still appeared in Android logs.
+- Those warnings did not block Google sign-in after this hardening pass.
+- Continue monitoring App Check separately; do not mix App Check remediation into auth lookup or login UI work unless it starts blocking core flows.
+
 ## Completed Login UX Pass 1 — Clean Google Sign-In Screen
 
 Commits:
