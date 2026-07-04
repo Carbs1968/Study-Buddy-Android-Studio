@@ -362,6 +362,51 @@ Recorder UX status:
   - academic context display clarity
   - future optional recording-status banner across tabs
 
+## Completed Library UX Pass 6 — Search Empty State Copy
+
+Commit:
+- `1a33cf6 Clarify library search empty state`
+
+Problem:
+- The main Library page search no-results state only showed a short message:
+  - `No classes match`
+- It did not guide the student toward the next useful action.
+
+Change:
+- Updated `lib/screens/home_shell/pages/library_page.dart`.
+- Reused the existing optional helper copy support in `_LibraryEmptyState`.
+- Added helper copy only for the search no-results state.
+
+Result:
+- Search no-results state now shows:
+  - `No classes match`
+  - `Try a different class name or clear the search.`
+- `flutter analyze` passed.
+- Change was committed and pushed to `origin/dev`.
+
+Safety:
+- This was a display-only Library UX change.
+- It did not change Firestore queries.
+- It did not change Firestore writes.
+- It did not add, remove, or rename Firestore fields.
+- It did not change session metadata.
+- It did not change Firebase Storage upload.
+- It did not change recording behavior.
+- It did not change Android foreground or locked-screen recording behavior.
+- It did not change wakelock behavior.
+- It did not change AI job creation.
+- It did not change Cloud Function contracts.
+- It did not change transcript generation.
+- It did not change playback.
+- It did not change auth/login/logout behavior.
+- It did not change navigation.
+- It did not change academic structure requirements.
+- It did not affect the true empty Library state behavior.
+
+UX decision:
+- Search-empty states should be concise but actionable.
+- Since the user has already entered a query, the next useful actions are to try another class name or clear the search.
+
 ## Completed Library UX Pass 5 — Empty Library State Copy
 
 Commit:
