@@ -120,6 +120,45 @@ class _ClassMaterialsScreenState extends State<ClassMaterialsScreen> {
     }
   }
 
+  String _formatMaterialTypeLabel(String type) {
+    switch (type.toLowerCase()) {
+      case 'image':
+        return 'Image';
+      case 'pdf':
+        return 'PDF';
+      case 'spreadsheet':
+        return 'Spreadsheet';
+      case 'presentation':
+        return 'Presentation';
+      case 'document':
+        return 'Document';
+      case 'text':
+        return 'Text';
+      default:
+        return 'File';
+    }
+  }
+
+  String _formatMaterialDate(DateTime date) {
+    const months = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+    ];
+
+    final local = date.toLocal();
+    return 'Added ${months[local.month - 1]} ${local.day}, ${local.year}';
+  }
+
   IconData _iconForMaterialType(String type) {
     switch (type) {
       case 'image':
@@ -420,9 +459,8 @@ class _ClassMaterialsScreenState extends State<ClassMaterialsScreen> {
               final type = (data['materialType'] ?? 'image').toString();
               final createdAt = _toDateTime(data['createdAt']);
               final subtitleParts = <String>[
-                type,
-                if (createdAt != null)
-                  '${createdAt.year.toString().padLeft(4, '0')}-${createdAt.month.toString().padLeft(2, '0')}-${createdAt.day.toString().padLeft(2, '0')}',
+                _formatMaterialTypeLabel(type),
+                if (createdAt != null) _formatMaterialDate(createdAt),
               ];
 
               final downloadUrl = (data['downloadUrl'] ?? '').toString();
