@@ -362,6 +362,53 @@ Recorder UX status:
   - academic context display clarity
   - future optional recording-status banner across tabs
 
+## Completed Library UX Pass 5 — Empty Library State Copy
+
+Commit:
+- `dfc8414 Clarify empty library state`
+
+Problem:
+- The main Library page empty state only showed a generic message:
+  - `No recordings yet`
+- For a new student, that did not explain what action to take next.
+
+Change:
+- Updated `lib/screens/home_shell/pages/library_page.dart`.
+- Added optional helper copy support to `_LibraryEmptyState`.
+- Used the helper copy only for the true empty Library state.
+- Left the search-empty state unchanged.
+
+Result:
+- Empty Library state now shows:
+  - `No recordings yet`
+  - `Record a lecture from the Recorder tab to build your Library.`
+- `flutter analyze` passed.
+- Change was committed and pushed to `origin/dev`.
+
+Safety:
+- This was a display-only Library UX change.
+- It did not change Firestore queries.
+- It did not change Firestore writes.
+- It did not add, remove, or rename Firestore fields.
+- It did not change session metadata.
+- It did not change Firebase Storage upload.
+- It did not change recording behavior.
+- It did not change Android foreground or locked-screen recording behavior.
+- It did not change wakelock behavior.
+- It did not change AI job creation.
+- It did not change Cloud Function contracts.
+- It did not change transcript generation.
+- It did not change playback.
+- It did not change auth/login/logout behavior.
+- It did not change navigation.
+- It did not change academic structure requirements.
+- It did not affect the no-search-results empty state.
+
+UX decision:
+- A true empty state should help the student understand the next useful action.
+- The Library should guide new users toward recording their first lecture.
+- Search-empty states should remain concise because the user already has Library content.
+
 ## Completed Library UX Pass 4 — Main Library Class Latest Date
 
 Commit:
