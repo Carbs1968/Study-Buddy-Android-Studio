@@ -910,6 +910,25 @@ class _MaterialFileDetailsScreen extends StatelessWidget {
     required this.storagePath,
   });
 
+  String _formatMaterialDetailsTypeLabel(String type) {
+    switch (type.toLowerCase()) {
+      case 'image':
+        return 'Image';
+      case 'pdf':
+        return 'PDF';
+      case 'spreadsheet':
+        return 'Spreadsheet';
+      case 'presentation':
+        return 'Presentation';
+      case 'document':
+        return 'Document';
+      case 'text':
+        return 'Text';
+      default:
+        return 'File';
+    }
+  }
+
   String _formatSize(dynamic value) {
     final bytes = value is int ? value : int.tryParse(value.toString());
     if (bytes == null) return 'Unknown size';
@@ -949,17 +968,11 @@ class _MaterialFileDetailsScreen extends StatelessWidget {
             style: Theme.of(context).textTheme.titleLarge,
           ),
           const SizedBox(height: 12),
-          Text('Type: $materialType'),
-          Text('MIME type: ${mimeType.isEmpty ? 'Unknown' : mimeType}'),
+          Text('Type: ${_formatMaterialDetailsTypeLabel(materialType)}'),
           Text('Size: ${_formatSize(sizeBytes)}'),
           const SizedBox(height: 24),
           const Text(
-            'This file is uploaded and saved as class material. File preview and AI text extraction will be added in a later step.',
-          ),
-          const SizedBox(height: 16),
-          SelectableText(
-            downloadUrl,
-            style: Theme.of(context).textTheme.bodySmall,
+            'This file is saved as class material. Preview is not available for this file type yet.',
           ),
         ],
       ),
