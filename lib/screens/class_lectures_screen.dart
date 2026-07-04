@@ -43,6 +43,24 @@ class _ClassLecturesScreenState extends State<ClassLecturesScreen> {
     return DateFormat('MMM d, yyyy • h:mm a').format(dt.toLocal());
   }
 
+  String _formatTranscriptStatus(String status) {
+    switch (status.toLowerCase()) {
+      case 'done':
+        return 'Ready';
+      case 'processing':
+        return 'Processing';
+      case 'pending':
+        return 'Queued';
+      case 'error':
+        return 'Failed';
+      case 'none':
+      case '':
+        return 'Not requested';
+      default:
+        return status;
+    }
+  }
+
   Future<void> _openOrRequestClassStudyGuide() async {
     final uid = FirebaseAuth.instance.currentUser?.uid;
     if (uid == null) return;
@@ -319,16 +337,18 @@ class _ClassLecturesScreenState extends State<ClassLecturesScreen> {
 
                     final dt = _toDt(m['createdAt']);
 
-                    final subtitleParts = <String>[];
-                    if (levelName.isNotEmpty) subtitleParts.add(levelName);
-                    if (semesterName.isNotEmpty) subtitleParts.add(semesterName);
-                    if (dt != null) subtitleParts.add(_formatLectureDate(dt));
+                    final contextParts = <String>[];
+                    if (levelName.isNotEmpty) contextParts.add(levelName);
+                    if (semesterName.isNotEmpty) contextParts.add(semesterName);
+                    if (dt != null) contextParts.add(_formatLectureDate(dt));
+
+                    final detailParts = <String>[];
                     if (durationSeconds is num && durationSeconds > 0) {
-                      subtitleParts.add(
-                        formatDuration(Duration(seconds: durationSeconds.round())),
+                      detailParts.add(
+                        'Duration: ${formatDuration(Duration(seconds: durationSeconds.round()))}',
                       );
                     }
-                    subtitleParts.add('${strings.transcript}: $status');
+                    detailParts.add('${strings.transcript}: ${_formatTranscriptStatus(status)}');
 
                     return Card(
                       elevation: 0,
@@ -353,10 +373,21 @@ class _ClassLecturesScreenState extends State<ClassLecturesScreen> {
                                 fontWeight: FontWeight.w700,
                               ),
                         ),
-                        subtitle: Text(
-                          subtitleParts.join(' • '),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
+                        subtitle: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            if (contextParts.isNotEmpty)
+                              Text(
+                                contextParts.join(' • '),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            Text(
+                              detailParts.join(' • '),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
                         ),
                         trailing: const Icon(Icons.chevron_right),
                         onTap: () {
