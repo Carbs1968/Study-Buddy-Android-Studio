@@ -241,12 +241,12 @@ class _ClassMaterialsScreenState extends State<ClassMaterialsScreen> {
 
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Material uploaded.')),
+        const SnackBar(content: Text('Material uploaded to this class.')),
       );
     } catch (error) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Upload failed: $error')),
+        const SnackBar(content: Text('Upload failed. Please try again.')),
       );
     } finally {
       if (mounted) {
@@ -632,7 +632,7 @@ Future<void> _deleteMaterial(
     if (!context.mounted) return;
 
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Delete failed: $error')),
+      const SnackBar(content: Text('Delete failed. Please try again.')),
     );
   }
 }
