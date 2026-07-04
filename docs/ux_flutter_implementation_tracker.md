@@ -362,6 +362,68 @@ Recorder UX status:
   - academic context display clarity
   - future optional recording-status banner across tabs
 
+## Completed Materials UX Pass 2 — Material Fallback Details
+
+Commit:
+- `4902191 Clarify material fallback details`
+
+Problem:
+- The material fallback/details screen for files without in-app preview showed technical or stale information.
+- Example issues:
+  - Raw material type labels such as `spreadsheet`.
+  - MIME type shown to students.
+  - Raw Firebase download URL shown to students.
+  - Stale copy mentioning future file preview and AI text extraction.
+
+Change:
+- Updated `lib/screens/class_materials_screen.dart`.
+- Added display-only formatting for fallback material type labels.
+- Removed MIME type from the student-facing fallback/details screen.
+- Removed the raw Firebase download URL from the student-facing fallback/details screen.
+- Replaced stale preview/AI extraction copy with clear preview-unavailable copy.
+
+Display behavior:
+- `spreadsheet` now displays as `Spreadsheet`.
+- Other fallback type labels use student-facing names:
+  - `image` → `Image`
+  - `pdf` → `PDF`
+  - `spreadsheet` → `Spreadsheet`
+  - `presentation` → `Presentation`
+  - `document` → `Document`
+  - `text` → `Text`
+  - unknown/other → `File`
+
+Result:
+- Fallback/details screen now shows clean student-facing information, for example:
+  - `Type: Spreadsheet`
+  - `Size: 29.7 KB`
+  - `This file is saved as class material. Preview is not available for this file type yet.`
+- Raw MIME type and Firebase URL are no longer shown to students.
+- `flutter analyze` passed.
+- Phone check passed on the physical Android device with an uploaded `.xlsx`.
+- Change was committed and pushed to `origin/dev`.
+
+Safety:
+- This was a display-only Materials UX change.
+- It did not change upload behavior.
+- It did not change delete behavior.
+- It did not change Firebase Storage paths.
+- It did not change Firestore queries.
+- It did not change Firestore writes.
+- It did not add, remove, or rename Firestore fields.
+- It did not change file opening logic.
+- It did not change AI job creation.
+- It did not change Cloud Function contracts.
+- It did not change recording behavior.
+- It did not change auth/login/logout behavior.
+- It did not change navigation.
+- It did not change academic structure requirements.
+
+UX decision:
+- Unsupported-preview material details should reassure the student that the file is saved.
+- Technical debugging details like MIME type and Firebase URL should not be shown in the student UI.
+- Preview availability should be explained clearly without overpromising AI behavior.
+
 ## Completed Materials UX Pass 1 — Material Card Metadata
 
 Commit:
