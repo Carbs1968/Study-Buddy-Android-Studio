@@ -362,6 +362,53 @@ Recorder UX status:
   - academic context display clarity
   - future optional recording-status banner across tabs
 
+## Completed Library UX Pass 4 — Main Library Class Latest Date
+
+Commit:
+- `34f0274 Format library class latest dates`
+
+Problem:
+- The main Library page class cards still showed raw Dart timestamp output.
+- Example:
+  - `2026-06-27 20:20:20.366`
+- That was too technical for the class-selection screen.
+
+Change:
+- Updated `lib/screens/home_shell/pages/library_page.dart`.
+- Replaced the raw latest lecture timestamp with a date-only student-facing label.
+- Kept exact lecture time out of the main Library page because this page is for class selection, not lecture-level detail.
+
+Result:
+- Library class cards now show:
+  - `Latest: Jun 27, 2026`
+  - followed by the existing lecture count, such as `Lectures: 21`.
+- Phone check passed on the physical Android device.
+- `flutter analyze` passed.
+- Change was committed and pushed to `origin/dev`.
+
+Safety:
+- This was a display-only Library UX change.
+- It did not change Firestore queries.
+- It did not change Firestore writes.
+- It did not add, remove, or rename Firestore fields.
+- It did not change session metadata.
+- It did not change Firebase Storage upload.
+- It did not change recording behavior.
+- It did not change Android foreground or locked-screen recording behavior.
+- It did not change wakelock behavior.
+- It did not change AI job creation.
+- It did not change Cloud Function contracts.
+- It did not change transcript generation.
+- It did not change playback.
+- It did not change auth/login/logout behavior.
+- It did not change navigation.
+- It did not change academic structure requirements.
+
+UX decision:
+- The main Library page should help students choose a class quickly.
+- Date-only latest activity is enough at this level.
+- Exact lecture date/time remains better suited for the class lecture list.
+
 ## Completed Library UX Pass 3 — Lecture Detail Status Labels
 
 Commit:
