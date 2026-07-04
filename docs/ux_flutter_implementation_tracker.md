@@ -362,6 +362,62 @@ Recorder UX status:
   - academic context display clarity
   - future optional recording-status banner across tabs
 
+## Completed Materials UX Pass 3 — Upload Feedback Copy
+
+Commit:
+- `3c786a7 Clarify material upload feedback`
+
+Problem:
+- Materials upload/delete feedback was technically accurate but not ideal for students.
+- Success feedback was generic:
+  - `Material uploaded.`
+- Failure feedback exposed raw exception text:
+  - `Upload failed: $error`
+  - `Delete failed: $error`
+
+Change:
+- Updated `lib/screens/class_materials_screen.dart`.
+- Clarified the upload success SnackBar.
+- Replaced raw exception-based failure SnackBars with student-facing retry guidance.
+
+Display behavior:
+- Upload success:
+  - `Material uploaded.`
+  - became `Material uploaded to this class.`
+- Upload failure:
+  - `Upload failed: $error`
+  - became `Upload failed. Please try again.`
+- Delete failure:
+  - `Delete failed: $error`
+  - became `Delete failed. Please try again.`
+
+Result:
+- Materials feedback is clearer and less technical.
+- Raw exception text is no longer shown to students in these SnackBars.
+- `flutter analyze` passed.
+- Change was committed and pushed to `origin/dev`.
+
+Safety:
+- This was a display-only Materials UX copy change.
+- It did not change upload logic.
+- It did not change delete logic.
+- It did not change Firebase Storage paths.
+- It did not change Firestore queries.
+- It did not change Firestore writes.
+- It did not add, remove, or rename Firestore fields.
+- It did not change file opening logic.
+- It did not change AI job creation.
+- It did not change Cloud Function contracts.
+- It did not change recording behavior.
+- It did not change auth/login/logout behavior.
+- It did not change navigation.
+- It did not change academic structure requirements.
+
+UX decision:
+- Student-facing SnackBars should be short, actionable, and non-technical.
+- Raw exception details are useful for logs/debugging, not for the primary student UI.
+- The upload success message should reinforce that the material was saved to the current class.
+
 ## Completed Materials UX Pass 2 — Material Fallback Details
 
 Commit:
