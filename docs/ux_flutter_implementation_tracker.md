@@ -362,6 +362,87 @@ Recorder UX status:
   - academic context display clarity
   - future optional recording-status banner across tabs
 
+## Completed Library UX Pass 3 — Lecture Detail Status Labels
+
+Commit:
+- `b352db8 Format lecture detail status labels`
+
+Problem:
+- The lecture detail screen was still showing raw backend status values to students.
+- Examples included:
+  - `Session status: ready`
+  - `Audio status: uploaded`
+  - `Transcript status: done`
+  - `Status: done` in the AI Outputs section.
+
+Changes:
+- Updated `lib/screens/lecture_detail_screen.dart`.
+- Added display-only formatter helpers for:
+  - Session status.
+  - Audio status.
+  - Transcript status.
+  - AI output status.
+- Converted raw backend values into student-facing labels.
+
+Status display behavior:
+- Session:
+  - `ready` → `Ready`
+  - `processing` → `Processing`
+  - `error` → `Needs attention`
+  - `unknown` / empty → `Unknown`
+- Audio:
+  - `uploaded` → `Uploaded`
+  - `uploading` → `Uploading`
+  - `error` → `Upload failed`
+  - `unknown` / empty → `Unknown`
+- Transcript:
+  - `done` → `Transcript ready`
+  - `processing` → `Processing`
+  - `pending` → `Queued`
+  - `error` → `Failed`
+  - `none` / empty → `No transcript`
+- AI Outputs:
+  - `done` → `Ready`
+  - `processing` → `Processing`
+  - `pending` → `Queued`
+  - `error` → `Failed`
+  - `none` / empty → `Not started`
+
+Result:
+- Lecture detail screen now presents status values in student-facing language.
+- The top detail card now reads cleanly, for example:
+  - `Session status: Ready`
+  - `Audio status: Uploaded`
+  - `Transcript status: Transcript ready`
+- The AI Outputs section now reads cleanly, for example:
+  - `Status: Ready`
+- `flutter analyze` passed.
+- Phone check passed on the physical Android device.
+- Change was committed and pushed to `origin/dev`.
+
+Safety:
+- This was a display-only UX change.
+- It did not change backend status values.
+- It did not add, remove, or rename Firestore fields.
+- It did not change Firestore queries.
+- It did not change Firestore writes.
+- It did not change Firebase Storage upload.
+- It did not change recording behavior.
+- It did not change Android foreground or locked-screen recording behavior.
+- It did not change wakelock behavior.
+- It did not change AI job creation.
+- It did not change Cloud Function contracts.
+- It did not change transcript generation.
+- It did not change playback.
+- It did not change auth/login/logout behavior.
+- It did not change navigation.
+- It did not change academic structure requirements.
+
+UX decision:
+- The lecture detail screen can show more status detail than the lecture list, but it should not expose raw backend terminology.
+- Backend values remain useful for code and debugging.
+- Student-facing labels should describe what the user can understand or act on.
+
 ## Completed Library UX Pass 2 — Class Lecture Card Metadata
 
 Commits:
