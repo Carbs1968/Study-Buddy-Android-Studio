@@ -362,6 +362,67 @@ Recorder UX status:
   - academic context display clarity
   - future optional recording-status banner across tabs
 
+## Completed Materials UX Pass 1 — Material Card Metadata
+
+Commit:
+- `299a71d Format material card metadata`
+
+Problem:
+- Class material cards showed technical metadata.
+- Examples:
+  - `pdf`
+  - `image`
+  - `2026-07-04`
+- This was accurate but not polished for a student-facing Materials screen.
+
+Change:
+- Updated `lib/screens/class_materials_screen.dart`.
+- Added display-only formatter helpers for:
+  - Material type labels.
+  - Material added date.
+- Replaced raw material type/date subtitle parts with student-facing labels.
+
+Display behavior:
+- Material type labels:
+  - `image` → `Image`
+  - `pdf` → `PDF`
+  - `spreadsheet` → `Spreadsheet`
+  - `presentation` → `Presentation`
+  - `document` → `Document`
+  - `text` → `Text`
+  - unknown/other → `File`
+- Material date:
+  - `2026-07-04` → `Added Jul 4, 2026`
+
+Result:
+- Material cards now show clean metadata, for example:
+  - `PDF • Added Jul 4, 2026`
+  - `Image • Added Jul 4, 2026`
+- `flutter analyze` passed.
+- Phone check passed on the physical Android device.
+- Change was committed and pushed to `origin/dev`.
+
+Safety:
+- This was a display-only Materials UX change.
+- It did not change upload behavior.
+- It did not change delete behavior.
+- It did not change Firebase Storage paths.
+- It did not change Firestore queries.
+- It did not change Firestore writes.
+- It did not add, remove, or rename Firestore fields.
+- It did not change file opening or playback behavior.
+- It did not change recording behavior.
+- It did not change AI job creation.
+- It did not change Cloud Function contracts.
+- It did not change auth/login/logout behavior.
+- It did not change navigation.
+- It did not change academic structure requirements.
+
+UX decision:
+- The Materials screen should present files as study resources, not raw backend objects.
+- Material type and added date are useful card metadata.
+- Exact upload time is not needed on this screen.
+
 ## Completed Library UX Pass 6 — Search Empty State Copy
 
 Commit:
