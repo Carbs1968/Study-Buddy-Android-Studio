@@ -58,10 +58,26 @@ class _LoginScreenState extends State<LoginScreen> {
       'displayName': u.displayName,
       'photoURL': u.photoURL,
       'provider': 'google',
+      'providers': FieldValue.arrayUnion(['google']),
       'locale': appLocale.value.languageCode, // Save user's language
       'updatedAt': FieldValue.serverTimestamp(),
       'lastLoginAt': FieldValue.serverTimestamp(),
     }, SetOptions(merge: true));
+
+    if (emailLower != null && emailLower.isNotEmpty) {
+      final lookupId = Uri.encodeComponent(emailLower);
+      await FirebaseFirestore.instance
+          .collection('userEmailLookup')
+          .doc(lookupId)
+          .set({
+        'uid': u.uid,
+        'email': email,
+        'emailLower': emailLower,
+        'displayName': u.displayName,
+        'providers': FieldValue.arrayUnion(['google']),
+        'updatedAt': FieldValue.serverTimestamp(),
+      }, SetOptions(merge: true));
+    }
   }
 
   @override

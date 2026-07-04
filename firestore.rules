@@ -85,6 +85,19 @@ service cloud.firestore {
       }
     }
 
+    // ✅ Provider-neutral email lookup for support/troubleshooting
+    match /userEmailLookup/{emailKey} {
+      allow get: if isSignedIn()
+        && resource.data.uid == request.auth.uid;
+
+      allow create, update: if isSignedIn()
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.email is string
+        && request.resource.data.emailLower is string;
+
+      allow list, delete: if false;
+    }
+
     // ✅ Legacy Users (uppercase)
     match /Users/{userId} {
       allow read, write: if isOwner(userId);
