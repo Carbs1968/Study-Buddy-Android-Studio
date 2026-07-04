@@ -180,7 +180,10 @@ class _LibraryPageState extends State<LibraryPage> {
                 });
 
                 if (items.isEmpty) {
-                  return _LibraryEmptyState(message: strings.noClassesMatch);
+                  return _LibraryEmptyState(
+                    message: strings.noClassesMatch,
+                    helper: 'Try a different class name or clear the search.',
+                  );
                 }
 
                 return ListView.separated(
