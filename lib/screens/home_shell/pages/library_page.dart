@@ -96,7 +96,11 @@ class _LibraryPageState extends State<LibraryPage> {
 
                 final docs = snap.data?.docs ?? [];
                 if (docs.isEmpty) {
-                  return _LibraryEmptyState(message: strings.noRecordingsYet);
+                  return _LibraryEmptyState(
+                    message: strings.noRecordingsYet,
+                    helper:
+                        'Record a lecture from the Recorder tab to build your Library.',
+                  );
                 }
 
                 final Map<String, _ClassRow> classes = {};
@@ -266,9 +270,13 @@ class _LibraryPageState extends State<LibraryPage> {
 
 
 class _LibraryEmptyState extends StatelessWidget {
-  const _LibraryEmptyState({required this.message});
+  const _LibraryEmptyState({
+    required this.message,
+    this.helper,
+  });
 
   final String message;
+  final String? helper;
 
   @override
   Widget build(BuildContext context) {
@@ -301,6 +309,16 @@ class _LibraryEmptyState extends StatelessWidget {
                     fontWeight: FontWeight.w800,
                   ),
                 ),
+                if (helper != null) ...[
+                  const SizedBox(height: 8),
+                  Text(
+                    helper!,
+                    textAlign: TextAlign.center,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ],
               ],
             ),
           ),
