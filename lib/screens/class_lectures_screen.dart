@@ -55,10 +55,41 @@ class _ClassLecturesScreenState extends State<ClassLecturesScreen> {
         return 'Failed';
       case 'none':
       case '':
-        return 'Not requested';
+        return 'No transcript';
       default:
         return status;
     }
+  }
+
+  String _formatAiStatus({
+    required String summaryStatus,
+    required String notesStatus,
+    required String quizStatus,
+  }) {
+    final statuses = [
+      summaryStatus.toLowerCase(),
+      notesStatus.toLowerCase(),
+      quizStatus.toLowerCase(),
+    ];
+
+    if (statuses.any((status) => status == 'pending' || status == 'processing')) {
+      return 'AI: Processing';
+    }
+
+    final readyCount = statuses.where((status) => status == 'done').length;
+    if (readyCount == 3) return 'AI: 3 outputs ready';
+    if (readyCount == 2) return 'AI: 2 outputs ready';
+    if (readyCount == 1) {
+      if (summaryStatus.toLowerCase() == 'done') return 'AI: Summary ready';
+      if (notesStatus.toLowerCase() == 'done') return 'AI: Notes ready';
+      if (quizStatus.toLowerCase() == 'done') return 'AI: Quiz ready';
+    }
+
+    if (statuses.any((status) => status == 'error')) {
+      return 'AI: Failed';
+    }
+
+    return 'AI: Not started';
   }
 
   Future<void> _openOrRequestClassStudyGuide() async {
@@ -333,6 +364,9 @@ class _ClassLecturesScreenState extends State<ClassLecturesScreen> {
                     final levelName = (m['levelName'] ?? '').toString();
                     final semesterName = (m['semesterName'] ?? '').toString();
                     final status = (m['transcriptStatus'] ?? 'none').toString();
+                    final summaryStatus = (m['summaryStatus'] ?? 'none').toString();
+                    final notesStatus = (m['notesStatus'] ?? 'none').toString();
+                    final quizStatus = (m['quizStatus'] ?? 'none').toString();
                     final durationSeconds = m['durationSeconds'];
 
                     final dt = _toDt(m['createdAt']);
@@ -348,7 +382,13 @@ class _ClassLecturesScreenState extends State<ClassLecturesScreen> {
                         'Duration: ${formatDuration(Duration(seconds: durationSeconds.round()))}',
                       );
                     }
-                    detailParts.add('${strings.transcript}: ${_formatTranscriptStatus(status)}');
+                    detailParts.add(_formatTranscriptStatus(status));
+
+                    final aiStatus = _formatAiStatus(
+                      summaryStatus: summaryStatus,
+                      notesStatus: notesStatus,
+                      quizStatus: quizStatus,
+                    );
 
                     return Card(
                       elevation: 0,
@@ -384,6 +424,11 @@ class _ClassLecturesScreenState extends State<ClassLecturesScreen> {
                               ),
                             Text(
                               detailParts.join(' • '),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            Text(
+                              aiStatus,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ),
