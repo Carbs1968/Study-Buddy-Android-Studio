@@ -186,8 +186,26 @@ class _LibraryPageState extends State<LibraryPage> {
                   itemBuilder: (ctx, i) {
                     final r = items[i];
 
+                    final latest = r.latest?.toLocal();
+                    final latestLabel = latest == null
+                        ? null
+                        : 'Latest: ${const [
+                            'Jan',
+                            'Feb',
+                            'Mar',
+                            'Apr',
+                            'May',
+                            'Jun',
+                            'Jul',
+                            'Aug',
+                            'Sep',
+                            'Oct',
+                            'Nov',
+                            'Dec',
+                          ][latest.month - 1]} ${latest.day}, ${latest.year}';
+
                     final subtitleParts = <String>[
-                      if (r.latest != null) r.latest!.toLocal().toString(),
+                      if (latestLabel != null) latestLabel,
                       strings.lectureCount(r.count),
                     ];
 
