@@ -2795,3 +2795,276 @@ Class Study Guide v1 now supports:
 - Add copy/export/share actions.
 - Add topic-level Study Guides later.
 - Later evaluate support for more material types beyond TXT/CSV extraction.
+
+
+---
+
+## Completed V1 Release-Readiness Codex Review Fixes
+
+Date: 2026-07-05
+
+### Summary
+
+Completed the release-readiness fixes identified by the focused Codex review of current `origin/dev`.
+
+Codex was used for review only. All code changes were inspected, patched, tested, committed, and pushed manually through the normal Study Buddy workflow.
+
+### Source-of-truth checkpoint
+
+- Branch: `dev`
+- GitHub source of truth: latest `origin/dev`
+- Working tree after final push: clean
+- Review target commit before fixes:
+  - `e69d7f0 Improve class study guide prompt quality`
+
+### Completed fixes
+
+#### Critical #1 — Native recorder fallback cleanup
+
+Commit:
+
+- `756c7a7 Clean up native recorder fallback`
+
+Files changed:
+
+- `android/app/src/main/kotlin/com/carbs/studybuddy/study_buddy/RecorderService.kt`
+- `lib/screens/home_shell/pages/recorder_page.dart`
+
+Fixed risk:
+
+- Native recorder fallback could leave the Android foreground service and wakelock alive if native recording failed or verification failed before plugin fallback.
+
+Result:
+
+- Flutter now stops the native recorder service before plugin fallback when native verification fails.
+- Android `RecorderService` now tears down foreground service/wakelock state if native `MediaRecorder` start fails.
+
+Validation:
+
+- `flutter analyze` passed.
+- `flutter build apk --debug` passed.
+- Physical Android phone recording test passed:
+  - start worked
+  - pause/resume worked
+  - stop worked
+  - upload completed
+  - Firestore session metadata saved
+  - local file deleted
+  - no stuck recording notification observed
+
+#### Critical #2 — Release signing safety
+
+Commit:
+
+- `363d713 Prevent debug signing for release builds`
+
+File changed:
+
+- `android/app/build.gradle.kts`
+
+Fixed risk:
+
+- Release builds could silently fall back to debug signing if `android/key.properties` was missing.
+
+Result:
+
+- Debug builds still work without `android/key.properties`.
+- Release tasks now fail clearly if release signing config is missing.
+
+Validation:
+
+- `flutter analyze` passed.
+- `flutter build apk --debug` passed.
+
+#### High #3 — Orphaned material upload cleanup
+
+Commit:
+
+- `a504348 Clean up orphaned material uploads`
+
+File changed:
+
+- `lib/screens/class_materials_screen.dart`
+
+Fixed risk:
+
+- Material file upload could succeed in Firebase Storage but fail before Firestore material metadata was saved, leaving a private orphaned Storage file with no visible app delete path.
+
+Result:
+
+- Upload flow now tracks the uploaded Storage path.
+- If material metadata is not saved, the app attempts to delete the uploaded Storage object.
+- If material metadata is saved but class summary metadata update fails, the material remains visible/deletable and the class metadata error is logged.
+
+Validation:
+
+- `flutter analyze` passed.
+- `flutter build apk --debug` passed.
+- Physical Android phone test passed:
+  - material upload worked
+  - material appeared in app
+  - delete worked
+  - Firestore material document was deleted
+
+#### High #4 — User email lookup rule hardening
+
+Commit:
+
+- `cbf0534 Harden user email lookup rules`
+
+Files changed:
+
+- `firestore.rules`
+- `lib/screens/login_screen.dart`
+
+Fixed risk:
+
+- Any signed-in user could write `userEmailLookup` metadata for another email address while using their own UID.
+
+Result:
+
+- App now writes the lookup document using the normalized email as the document ID.
+- Firestore rules now require:
+  - lookup document key matches authenticated email
+  - `emailLower` matches authenticated email
+  - `email` matches authenticated email
+  - `uid` matches authenticated UID
+
+Validation:
+
+- `flutter analyze` passed.
+- `flutter build apk --debug` passed.
+- Firestore rules deployed.
+- Physical Android phone Google logout/login test passed.
+- New plain-email lookup document confirmed in Firestore.
+
+#### High #5 — V1 material extraction expectation clarity
+
+Commit:
+
+- `590920b Clarify material extraction support`
+
+File changed:
+
+- `lib/screens/class_materials_screen.dart`
+
+Fixed risk:
+
+- The app accepts PDF, Word, PowerPoint, Excel, TXT, and CSV uploads, but v1 AI extraction/Study Guide inclusion currently supports TXT/CSV-like text extraction. Users could assume all uploaded files contribute to Study Guides.
+
+Result:
+
+- Add-file bottom sheet now clearly says:
+  - `PDF, Word, PowerPoint, Excel, TXT, or CSV. TXT/CSV can be extracted for Study Guides in v1.`
+
+Validation:
+
+- `flutter analyze` passed.
+- Physical Android phone UI check passed.
+- Copy wrapped cleanly and remained readable.
+
+#### Medium #7 — Audio cleanup Firestore index
+
+Commit:
+
+- `e823bd5 Add audio cleanup Firestore index`
+
+File changed:
+
+- `firestore.indexes.json`
+
+Fixed risk:
+
+- Scheduled audio cleanup uses a `collectionGroup("sessions")` query with equality filters and a range filter. Without the composite collection-group index, cleanup could fail and audio could be retained longer than intended.
+
+Result:
+
+- Added collection-group index for `sessions`:
+  - `transcriptStatus ASCENDING`
+  - `audioDeletionStatus ASCENDING`
+  - `audioDeleteAfter ASCENDING`
+
+Validation:
+
+- Firestore indexes deployed successfully with:
+  - `firebase deploy --only firestore:indexes`
+
+#### Medium #6 — Recording class summary update order
+
+Commit:
+
+- `3c37ccb Update class recording summary after session save`
+
+File changed:
+
+- `lib/screens/home_shell/pages/recorder_page.dart`
+
+Fixed risk:
+
+- Class recording summary fields were written before Storage upload and session metadata verification. A failed upload/session save could leave class metadata pointing to a nonexistent latest recording.
+
+Result:
+
+- Basic academic hierarchy writes remain early:
+  - Academic Year
+  - Semester
+  - Class identity
+- Recording-specific class summary fields now update only after session metadata is saved and verified:
+  - `lastRecordingAt`
+  - `latestSessionId`
+  - `latestTopicName`
+  - `hasRecordings`
+
+Validation:
+
+- `flutter analyze` passed.
+- `flutter build apk --debug` passed.
+- Physical Android phone recording test passed:
+  - native foreground service started
+  - stop worked
+  - audio finalized
+  - Storage upload completed
+  - session metadata verified
+  - local file deleted
+  - Firestore session exists
+
+### Completed release-readiness review list
+
+- Critical #1: complete
+- Critical #2: complete
+- High #3: complete
+- High #4: complete
+- High #5: complete
+- Medium #7: complete
+- Medium #6: complete
+
+### Safety statement
+
+These fixes did not reintroduce Google Drive logic.
+
+Academic structure remains:
+
+`Academic Year → Semester → Class → Topic`
+
+No intentional changes were made to:
+
+- Firebase Auth baseline behavior
+- Firebase Storage upload contracts
+- Firestore session document structure
+- transcript request flow
+- summary/notes/quiz AI job flow
+- class Study Guide document contract
+- material extraction backend behavior
+- library/session loading
+- recording UI layout
+
+### Current status
+
+The focused Codex release-readiness review has been fully addressed.
+
+Next recommended work:
+
+- Run a full v1 physical Android regression checklist.
+- Prepare Play Store release/build signing assets.
+- Prepare Play Store listing, screenshots, privacy policy, and Data Safety answers.
+- Run serious QA on Study Guide prompt quality before broader launch.
