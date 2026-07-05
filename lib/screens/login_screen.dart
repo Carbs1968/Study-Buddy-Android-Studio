@@ -66,10 +66,9 @@ class _LoginScreenState extends State<LoginScreen> {
 
     if (emailLower != null && emailLower.isNotEmpty) {
       try {
-        final lookupId = Uri.encodeComponent(emailLower);
         await FirebaseFirestore.instance
             .collection('userEmailLookup')
-            .doc(lookupId)
+            .doc(emailLower)
             .set({
           'uid': u.uid,
           'email': email,

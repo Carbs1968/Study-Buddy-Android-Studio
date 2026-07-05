@@ -91,9 +91,13 @@ service cloud.firestore {
         && resource.data.uid == request.auth.uid;
 
       allow create, update: if isSignedIn()
+        && request.auth.token.email is string
         && request.resource.data.uid == request.auth.uid
         && request.resource.data.email is string
-        && request.resource.data.emailLower is string;
+        && request.resource.data.emailLower is string
+        && request.resource.data.emailLower == request.auth.token.email.lower()
+        && request.resource.data.email.lower() == request.auth.token.email.lower()
+        && emailKey == request.auth.token.email.lower();
 
       allow list, delete: if false;
     }
