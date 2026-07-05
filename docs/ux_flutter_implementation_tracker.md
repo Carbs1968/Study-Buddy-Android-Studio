@@ -362,6 +362,106 @@ Recorder UX status:
   - academic context display clarity
   - future optional recording-status banner across tabs
 
+## Completed Material Text Extraction Pass 1 — TXT and CSV Extraction Trigger
+
+Commit:
+- `b632f89 Add material text extraction trigger`
+
+Problem:
+- Uploaded class materials were saved with metadata only.
+- Material documents included:
+  - `storagePath`
+  - `downloadUrl`
+  - `materialType`
+  - `mimeType`
+  - `sizeBytes`
+  - `extractionStatus: not_started`
+- No extracted material text was being saved.
+- Because of that, class Study Guide generation could not safely include uploaded materials yet.
+- Study Guide generation currently remains transcript/recording-only.
+
+Change:
+- Updated `functions/src/index.js`.
+- Added Material Text Extraction v1 Cloud Function:
+  - `onMaterialExtractionRequested`
+- Added constants:
+  - `MATERIAL_TEXT_CHAR_LIMIT`
+  - `MATERIAL_EXTRACTION_DOC`
+- Added helper logic to identify text-extractable materials.
+- Added helper logic to normalize extracted text.
+
+Extraction behavior:
+- Watches material docs at:
+  - `users/{uid}/academicYears/{academicYearId}/semesters/{semesterId}/classes/{classId}/materials/{materialId}`
+- Processes only docs with:
+  - `extractionStatus: not_started`
+- Claims work safely with a transaction:
+  - `not_started` → `processing`
+- TXT and CSV files:
+  - downloads from Firebase Storage using `storagePath`
+  - normalizes text
+  - stores `extractedText`
+  - stores `extractedTextCharCount`
+  - sets `extractionSource: storage`
+  - sets `extractionStatus: done`
+- Unsupported files:
+  - sets `extractionStatus: unsupported`
+  - clears `extractedText`
+  - sets `extractedTextCharCount: 0`
+- Failed extraction:
+  - sets `extractionStatus: error`
+  - stores student-safe/admin-safe `extractionError`
+
+Result:
+- Material extraction pipeline has a safe first backend pass.
+- TXT and CSV can now become usable source text after Firebase Functions deployment.
+- PDF, DOC, DOCX, XLS, XLSX, PPT, PPTX, and images are intentionally not parsed in this first pass.
+- Study Guide generation was not changed yet.
+- Flutter UI was not changed.
+- `node -c functions/src/index.js` passed.
+- Change was committed and pushed to `origin/dev`.
+
+Safety:
+- This was a backend-only extraction foundation.
+- It did not change Study Guide generation.
+- It did not change Cloud Function request/response contracts used by Flutter.
+- It did not change Firestore rules.
+- It did not change Firestore collection names.
+- It did not change existing material upload behavior.
+- It did not change Firebase Storage upload paths.
+- It did not change recording behavior.
+- It did not change transcript generation.
+- It did not change AI job creation.
+- It did not change auth/login/logout behavior.
+- It did not change navigation.
+- It did not change academic structure requirements.
+- It has not been deployed yet.
+
+Deployment note:
+- This commit is pushed to GitHub `dev`.
+- Firebase Functions deployment is still required before the trigger runs in production.
+- Do not assume extraction is active until deployment is completed and tested.
+
+Near-term follow-up:
+- Deploy only the new extraction function when ready.
+- Upload a TXT test material and confirm:
+  - `extractionStatus: processing`
+  - then `extractionStatus: done`
+  - `extractedText` exists
+  - `extractedTextCharCount` is populated
+- Upload a CSV test material and confirm the same behavior.
+- Upload an unsupported material such as XLSX/PPTX and confirm:
+  - `extractionStatus: unsupported`
+- Only after extraction is tested should Study Guide generation be updated to include relevant extracted material text.
+
+Product/AI quality decision:
+- Uploaded materials should not be blindly trusted.
+- Students may upload unrelated, duplicate, low-quality, or wrong-class files.
+- Future Study Guide generation should keep completed transcripts as the primary source of truth.
+- Extracted materials should supplement the guide only when relevant to the selected class context.
+- The generation prompt should ignore or down-rank unrelated, corrupted, sparse, duplicate, or conflicting uploads.
+- The model should not infer facts from filenames alone.
+
 ## Completed Study Guide UX Pass 1 — Transcript Source Clarity
 
 Commits:
