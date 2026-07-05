@@ -1253,9 +1253,9 @@ exports.onMaterialExtractionRequested = onDocumentWritten(
 
       transaction.update(materialRef, {
         extractionStatus: "processing",
-        extractionStartedAt: admin.firestore.FieldValue.serverTimestamp(),
-        extractionError: admin.firestore.FieldValue.delete(),
-        updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+        extractionStartedAt: FieldValue.serverTimestamp(),
+        extractionError: FieldValue.delete(),
+        updatedAt: FieldValue.serverTimestamp(),
       });
 
       return true;
@@ -1269,10 +1269,10 @@ exports.onMaterialExtractionRequested = onDocumentWritten(
     if (!materialLooksTextExtractable(latestMaterial)) {
       await materialRef.update({
         extractionStatus: "unsupported",
-        extractedText: admin.firestore.FieldValue.delete(),
+        extractedText: FieldValue.delete(),
         extractedTextCharCount: 0,
-        extractionCompletedAt: admin.firestore.FieldValue.serverTimestamp(),
-        updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+        extractionCompletedAt: FieldValue.serverTimestamp(),
+        updatedAt: FieldValue.serverTimestamp(),
       });
       return;
     }
@@ -1282,8 +1282,8 @@ exports.onMaterialExtractionRequested = onDocumentWritten(
       await materialRef.update({
         extractionStatus: "error",
         extractionError: "Missing storage path.",
-        extractionCompletedAt: admin.firestore.FieldValue.serverTimestamp(),
-        updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+        extractionCompletedAt: FieldValue.serverTimestamp(),
+        updatedAt: FieldValue.serverTimestamp(),
       });
       return;
     }
@@ -1297,8 +1297,8 @@ exports.onMaterialExtractionRequested = onDocumentWritten(
         extractedText,
         extractedTextCharCount: extractedText.length,
         extractionSource: "storage",
-        extractionCompletedAt: admin.firestore.FieldValue.serverTimestamp(),
-        updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+        extractionCompletedAt: FieldValue.serverTimestamp(),
+        updatedAt: FieldValue.serverTimestamp(),
       });
     } catch (error) {
       console.error("Material text extraction failed", {
@@ -1310,8 +1310,8 @@ exports.onMaterialExtractionRequested = onDocumentWritten(
       await materialRef.update({
         extractionStatus: "error",
         extractionError: "Could not extract text from this material.",
-        extractionCompletedAt: admin.firestore.FieldValue.serverTimestamp(),
-        updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+        extractionCompletedAt: FieldValue.serverTimestamp(),
+        updatedAt: FieldValue.serverTimestamp(),
       });
     }
   },
