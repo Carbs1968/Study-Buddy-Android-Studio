@@ -353,18 +353,37 @@ async function generateOpenAiOutput(type, transcriptText) {
   return validateGeneratedOutput(type, parseJsonContent(content));
 }
 
-function classStudyGuidePrompt(className, transcriptText) {
+function classStudyGuidePrompt(className, transcriptText, materialText = "") {
+  const userParts = [
+    `Class: ${className || "Class"}`,
+    "",
+    "Primary source — completed class transcripts:",
+    transcriptText,
+  ];
+
+  if (materialText) {
+    userParts.push(
+      "",
+      "Supplemental uploaded class materials:",
+      materialText,
+    );
+  }
+
   return {
     system:
-      "Create a concise but useful study guide for students using only the " +
-      "provided class recording transcripts. Do not invent facts. Return valid " +
-      "JSON only, with exactly this shape: " +
+      "Create a concise but useful study guide for students. " +
+      "Use completed class transcripts as the primary source of truth. " +
+      "Uploaded class materials are supplemental context only. " +
+      "Use uploaded materials only when they appear relevant to the selected class " +
+      "and consistent with the transcripts. Ignore or down-rank unrelated, duplicate, " +
+      "sparse, corrupted, or conflicting uploaded materials. Do not infer facts from " +
+      "filenames alone. Do not invent facts. Return valid JSON only, with exactly this shape: " +
       "{\"title\":\"<title>\",\"overview\":\"<overview>\"," +
       "\"keyTopics\":[{\"title\":\"<topic>\",\"summary\":\"<summary>\"}]," +
       "\"studySections\":[{\"heading\":\"<heading>\",\"bullets\":[\"<bullet>\"]}]," +
       "\"reviewQuestions\":[{\"question\":\"<question>\",\"answer\":\"<answer>\"}]," +
       "\"sourceSummary\":{\"sessionCount\":<number>}}.",
-    user: `Class: ${className || "Class"}\n\nTranscripts:\n${transcriptText}`,
+    user: userParts.join("\n"),
   };
 }
 
@@ -406,8 +425,12 @@ function validateClassStudyGuideOutput(output) {
   };
 }
 
-async function generateClassStudyGuideOutput(className, transcriptText) {
-  const prompt = classStudyGuidePrompt(className, transcriptText);
+async function generateClassStudyGuideOutput(
+  className,
+  transcriptText,
+  materialText = "",
+) {
+  const prompt = classStudyGuidePrompt(className, transcriptText, materialText);
   const completion = await openAiClient().chat.completions.create({
     model: CHAT_MODEL,
     messages: [
