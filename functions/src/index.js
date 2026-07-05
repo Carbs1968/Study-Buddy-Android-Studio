@@ -1289,7 +1289,7 @@ exports.onMaterialExtractionRequested = onDocumentWritten(
     }
 
     try {
-      const [buffer] = await admin.storage().bucket().file(storagePath).download();
+      const [buffer] = await storage.bucket().file(storagePath).download();
       const extractedText = normalizeExtractedMaterialText(buffer);
 
       await materialRef.update({
