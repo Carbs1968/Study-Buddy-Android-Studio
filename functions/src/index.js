@@ -29,6 +29,10 @@ const AUDIO_CLEANUP_BATCH_LIMIT = 100;
 const OPENAI_AUDIO_SAFE_LIMIT_BYTES = 20 * 1024 * 1024;
 const AUDIO_CHUNK_SECONDS = 10 * 60;
 const CLASS_STUDY_GUIDE_TRANSCRIPT_CHAR_LIMIT = 60000;
+const MATERIAL_TEXT_CHAR_LIMIT = 30000;
+const MATERIAL_EXTRACTION_DOC =
+  "users/{uid}/academicYears/{academicYearId}/semesters/{semesterId}/classes/{classId}/materials/{materialId}";
+
 
 const db = getFirestore();
 const storage = getStorage();
@@ -1194,6 +1198,124 @@ exports.getAiJobOutput = onCall({ region: REGION }, async (request) => {
     type: requestedType,
   };
 });
+
+
+function materialLooksTextExtractable(material) {
+  const materialType = String(material.materialType || "").toLowerCase();
+  const mimeType = String(material.mimeType || "").toLowerCase();
+  const fileName = String(
+    material.originalFileName || material.fileName || "",
+  ).toLowerCase();
+
+  return (
+    materialType === "text" ||
+    (materialType === "spreadsheet" && fileName.endsWith(".csv")) ||
+    mimeType.startsWith("text/") ||
+    mimeType.includes("csv") ||
+    fileName.endsWith(".txt") ||
+    fileName.endsWith(".csv")
+  );
+}
+
+function normalizeExtractedMaterialText(buffer) {
+  return buffer
+    .toString("utf8")
+    .replace(/\u0000/g, "")
+    .replace(/\r\n/g, "\n")
+    .replace(/\r/g, "\n")
+    .replace(/[ \t]+\n/g, "\n")
+    .replace(/\n{4,}/g, "\n\n\n")
+    .trim()
+    .slice(0, MATERIAL_TEXT_CHAR_LIMIT);
+}
+
+exports.onMaterialExtractionRequested = onDocumentWritten(
+  {
+    document: MATERIAL_EXTRACTION_DOC,
+    region: REGION,
+    timeoutSeconds: 120,
+    memory: "512MiB",
+  },
+  async (event) => {
+    const after = event.data?.after;
+    if (!after?.exists) return;
+
+    const materialRef = after.ref;
+    const material = after.data() || {};
+    if (material.extractionStatus !== "not_started") return;
+
+    const claimed = await db.runTransaction(async (transaction) => {
+      const snap = await transaction.get(materialRef);
+      if (!snap.exists) return false;
+
+      const current = snap.data() || {};
+      if (current.extractionStatus !== "not_started") return false;
+
+      transaction.update(materialRef, {
+        extractionStatus: "processing",
+        extractionStartedAt: admin.firestore.FieldValue.serverTimestamp(),
+        extractionError: admin.firestore.FieldValue.delete(),
+        updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+      });
+
+      return true;
+    });
+
+    if (!claimed) return;
+
+    const latestSnap = await materialRef.get();
+    const latestMaterial = latestSnap.data() || {};
+
+    if (!materialLooksTextExtractable(latestMaterial)) {
+      await materialRef.update({
+        extractionStatus: "unsupported",
+        extractedText: admin.firestore.FieldValue.delete(),
+        extractedTextCharCount: 0,
+        extractionCompletedAt: admin.firestore.FieldValue.serverTimestamp(),
+        updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+      });
+      return;
+    }
+
+    const storagePath = String(latestMaterial.storagePath || "").trim();
+    if (!storagePath) {
+      await materialRef.update({
+        extractionStatus: "error",
+        extractionError: "Missing storage path.",
+        extractionCompletedAt: admin.firestore.FieldValue.serverTimestamp(),
+        updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+      });
+      return;
+    }
+
+    try {
+      const [buffer] = await admin.storage().bucket().file(storagePath).download();
+      const extractedText = normalizeExtractedMaterialText(buffer);
+
+      await materialRef.update({
+        extractionStatus: "done",
+        extractedText,
+        extractedTextCharCount: extractedText.length,
+        extractionSource: "storage",
+        extractionCompletedAt: admin.firestore.FieldValue.serverTimestamp(),
+        updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+      });
+    } catch (error) {
+      console.error("Material text extraction failed", {
+        materialPath: materialRef.path,
+        storagePath,
+        error,
+      });
+
+      await materialRef.update({
+        extractionStatus: "error",
+        extractionError: "Could not extract text from this material.",
+        extractionCompletedAt: admin.firestore.FieldValue.serverTimestamp(),
+        updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+      });
+    }
+  },
+);
 
 exports.cleanupTranscribedAudio = onSchedule(
   {
