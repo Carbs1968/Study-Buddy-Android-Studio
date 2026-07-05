@@ -548,7 +548,7 @@ class LectureDetailScreen extends StatelessWidget {
                     } catch (e) {
                       if (context.mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('${strings.failed}: $e')),
+                          const SnackBar(content: Text('Could not request transcription. Please try again.')),
                         );
                       }
                     }
