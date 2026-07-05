@@ -361,7 +361,7 @@ class _ClassMaterialsScreenState extends State<ClassMaterialsScreen> {
               ListTile(
                 leading: const Icon(Icons.upload_file_outlined),
                 title: const Text('Add file'),
-                subtitle: const Text('PDF, Word, PowerPoint, text, CSV, or Excel.'),
+                subtitle: const Text('PDF, Word, PowerPoint, Excel, TXT, or CSV. TXT/CSV can be extracted for Study Guides in v1.'),
                 onTap: () {
                   Navigator.pop(context);
                   _addAcademicFile();
