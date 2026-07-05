@@ -29,6 +29,8 @@ const AUDIO_CLEANUP_BATCH_LIMIT = 100;
 const OPENAI_AUDIO_SAFE_LIMIT_BYTES = 20 * 1024 * 1024;
 const AUDIO_CHUNK_SECONDS = 10 * 60;
 const CLASS_STUDY_GUIDE_TRANSCRIPT_CHAR_LIMIT = 60000;
+const CLASS_STUDY_GUIDE_MATERIAL_CHAR_LIMIT = 30000;
+const CLASS_STUDY_GUIDE_SINGLE_MATERIAL_CHAR_LIMIT = 8000;
 const MATERIAL_TEXT_CHAR_LIMIT = 30000;
 const MATERIAL_EXTRACTION_DOC =
   "users/{uid}/academicYears/{academicYearId}/semesters/{semesterId}/classes/{classId}/materials/{materialId}";
@@ -855,7 +857,7 @@ exports.requestClassStudyGuide = onCall({ region: REGION }, async (request) => {
       recordingsLastChangedAt: transactionClassData.lastRecordingAt || null,
       materialsLastChangedAt: transactionClassData.lastMaterialAt || null,
       includedRecordings: true,
-      includedMaterials: false,
+      includedMaterials: true,
     };
     const existingStatus = trimOrEmpty(
       transactionClassData.classStudyGuideStatus,
@@ -872,6 +874,10 @@ exports.requestClassStudyGuide = onCall({ region: REGION }, async (request) => {
       timestampValuesEqual(
         storedContentSnapshot.recordingsLastChangedAt,
         contentSnapshot.recordingsLastChangedAt,
+      ) &&
+      timestampValuesEqual(
+        storedContentSnapshot.materialsLastChangedAt,
+        contentSnapshot.materialsLastChangedAt,
       )
     ) {
       if (existingStatus === "validated") {
@@ -897,7 +903,7 @@ exports.requestClassStudyGuide = onCall({ region: REGION }, async (request) => {
     transaction.set(requestRef, {
       uid,
       type: "classStudyGuide",
-      source: "recordings",
+      source: "recordings_with_materials_if_available",
       academicYearId,
       semesterId,
       classId,
@@ -913,7 +919,7 @@ exports.requestClassStudyGuide = onCall({ region: REGION }, async (request) => {
       classStudyGuideStatus: "validated",
       latestStudyGuideRequestId: requestRef.id,
       classStudyGuideUpdatedAt: timestamp,
-      classStudyGuideSource: "recordings",
+      classStudyGuideSource: "recordings_with_materials_if_available",
       classStudyGuideEligibleSessionCount: eligibleSessionCount,
       classStudyGuideContentSnapshot: contentSnapshot,
     }, { merge: true });
@@ -1100,12 +1106,71 @@ exports.onClassStudyGuideRequestWritten = onDocumentWritten(
           `Transcript:\n${session.transcriptText}`
         ))
         .join("\n\n---\n\n");
-      const output = await generateClassStudyGuideOutput(className, transcriptText);
+
+      const materialsSnapshot = await classRef
+        .collection("materials")
+        .where("extractionStatus", "==", "done")
+        .get();
+
+      const materialBlocks = [];
+      let materialCharCount = 0;
+
+      materialsSnapshot.forEach((doc) => {
+        const material = doc.data() || {};
+        const extractedText = trimOrEmpty(material.extractedText);
+        if (!extractedText) return;
+
+        const remaining =
+          CLASS_STUDY_GUIDE_MATERIAL_CHAR_LIMIT - materialCharCount;
+        if (remaining <= 0) return;
+
+        const clippedText = extractedText.slice(
+          0,
+          Math.min(remaining, CLASS_STUDY_GUIDE_SINGLE_MATERIAL_CHAR_LIMIT),
+        );
+        if (!clippedText) return;
+
+        materialCharCount += clippedText.length;
+        materialBlocks.push({
+          materialId: doc.id,
+          originalFileName: trimOrEmpty(material.originalFileName),
+          materialType: trimOrEmpty(material.materialType),
+          createdAt: material.createdAt || null,
+          text: clippedText,
+        });
+      });
+
+      const supplementalMaterialText = materialBlocks
+        .map((material, index) => (
+          `Material ${index + 1}: ${material.originalFileName || "Uploaded material"}\n` +
+          `Type: ${material.materialType || "unknown"}\n` +
+          `Extracted text:\n${material.text}`
+        ))
+        .join("\n\n---\n\n");
+
+      const sourceMaterials = materialBlocks.map((material) => ({
+        materialId: material.materialId,
+        originalFileName: material.originalFileName,
+        materialType: material.materialType,
+        createdAt: material.createdAt,
+      }));
+
+      const includedMaterials = sourceMaterials.length > 0;
+      const source = includedMaterials ? "recordings_and_materials" : "recordings";
+
+      contentSnapshot.includedMaterials = includedMaterials;
+
+      const output = await generateClassStudyGuideOutput(
+        className,
+        transcriptText,
+        supplementalMaterialText,
+      );
       output.sourceSummary = {
         ...(output.sourceSummary || {}),
         sessionCount: sessions.length,
         includedSessionCount: sessions.length,
         omittedSessionCount: 0,
+        includedMaterialCount: sourceMaterials.length,
       };
       const completedAt = now();
       const guideRef = classRef.collection("studyGuides").doc();
@@ -1114,7 +1179,7 @@ exports.onClassStudyGuideRequestWritten = onDocumentWritten(
       await guideRef.set({
         uid,
         type: "classStudyGuide",
-        source: "recordings",
+        source,
         academicYearId,
         semesterId,
         classId,
@@ -1127,6 +1192,8 @@ exports.onClassStudyGuideRequestWritten = onDocumentWritten(
         includedSessionCount: sessions.length,
         omittedSessionCount: 0,
         sourceSessions,
+        sourceMaterials,
+        includedMaterialCount: sourceMaterials.length,
         output,
         createdAt: completedAt,
         updatedAt: completedAt,
@@ -1144,6 +1211,9 @@ exports.onClassStudyGuideRequestWritten = onDocumentWritten(
         latestStudyGuideId: guideRef.id,
         latestStudyGuideRequestId: requestId,
         classStudyGuideUpdatedAt: completedAt,
+        classStudyGuideSource: source,
+        classStudyGuideIncludedMaterialCount: sourceMaterials.length,
+        classStudyGuideContentSnapshot: contentSnapshot,
         classStudyGuideErrorCode: null,
         classStudyGuideErrorMessage: null,
       }, { merge: true });
