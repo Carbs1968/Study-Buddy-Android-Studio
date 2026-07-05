@@ -19,37 +19,7 @@ class LectureDetailScreen extends StatelessWidget {
     required this.sessionId,
   });
 
-  String _formatSessionStatus(String status) {
-    switch (status.toLowerCase()) {
-      case 'ready':
-        return 'Ready';
-      case 'processing':
-        return 'Processing';
-      case 'error':
-        return 'Needs attention';
-      case 'unknown':
-      case '':
-        return 'Unknown';
-      default:
-        return status;
-    }
-  }
 
-  String _formatAudioStatus(String status) {
-    switch (status.toLowerCase()) {
-      case 'uploaded':
-        return 'Uploaded';
-      case 'uploading':
-        return 'Uploading';
-      case 'error':
-        return 'Upload failed';
-      case 'unknown':
-      case '':
-        return 'Unknown';
-      default:
-        return status;
-    }
-  }
 
   String _formatTranscriptStatus(String status) {
     switch (status.toLowerCase()) {
@@ -364,9 +334,6 @@ class LectureDetailScreen extends StatelessWidget {
         final topic = (m['topic'] ?? '').toString();
         final levelName = (m['levelName'] ?? '').toString();
         final semesterName = (m['semesterName'] ?? '').toString();
-
-        final sessionStatus = (m['sessionStatus'] ?? 'unknown').toString();
-        final audioStatus = (m['audioStatus'] ?? 'unknown').toString();
         final transcriptStatus = (m['transcriptStatus'] ?? 'none').toString();
 
         final summaryStatus = (m['summaryStatus'] ?? 'none').toString();
@@ -392,8 +359,6 @@ class LectureDetailScreen extends StatelessWidget {
                       if (semesterName.isNotEmpty) Text('Semester: $semesterName'),
                       if (filename.isNotEmpty) Text('File: $filename'),
                       Text('Duration: $durationSeconds sec'),
-                      Text('Session status: ${_formatSessionStatus(sessionStatus)}'),
-                      Text('Audio status: ${_formatAudioStatus(audioStatus)}'),
                       Text('Transcript status: ${_formatTranscriptStatus(transcriptStatus)}'),
                     ],
                   ),
