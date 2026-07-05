@@ -562,6 +562,15 @@ class LectureDetailScreen extends StatelessWidget {
                 strings.aiOutputs,
                 style: const TextStyle(fontWeight: FontWeight.bold),
               ),
+              if (transcriptStatus != 'done') ...[
+                const SizedBox(height: 8),
+                Text(
+                  'Transcription must be ready before generating summary, notes, or practice test.',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                ),
+              ],
               const SizedBox(height: 8),
 
               _AiActionRow(
