@@ -362,6 +362,76 @@ Recorder UX status:
   - academic context display clarity
   - future optional recording-status banner across tabs
 
+## Completed Lecture Detail / AI UX Pass 1 — AI Output Guidance and Status Simplification
+
+Commits:
+- `9835235 Clarify transcription request failure`
+- `1ccbff4 Explain transcript requirement for AI outputs`
+- `386f172 Simplify lecture detail status card`
+
+Problems:
+- A failed transcription request could show raw exception text to the student.
+- AI output buttons were disabled when the transcript was not ready, but the screen did not clearly explain why.
+- The lecture detail card showed technical/redundant status lines:
+  - `Session status`
+  - `Audio status`
+- These backend statuses were useful for development but cluttered the student-facing detail screen.
+
+Changes:
+- Updated `lib/screens/lecture_detail_screen.dart`.
+- Replaced raw transcription request failure feedback with student-facing retry copy.
+- Added helper text under AI Outputs when the transcript is not ready.
+- Removed `Session status` and `Audio status` from the student-facing lecture detail card.
+- Removed unused formatter helpers and unused local variables after simplifying the status card.
+
+Display behavior:
+- Transcription request failure:
+  - `Failed: <raw exception>`
+  - became `Could not request transcription. Please try again.`
+- AI Outputs helper when transcript is not ready:
+  - `Transcription must be ready before generating summary, notes, or practice test.`
+- Lecture detail card now keeps the useful student-facing transcript line:
+  - `Transcript status: No transcript`
+  - `Transcript status: Transcript ready`
+  - `Transcript status: Processing`
+  - `Transcript status: Queued`
+  - `Transcript status: Failed`
+- Lecture detail card no longer shows:
+  - `Session status`
+  - `Audio status`
+
+Result:
+- Lecture detail screen is clearer for students.
+- AI output generation requirements are explained before the student can request Summary, Notes, or Practice Test.
+- Redundant backend-oriented status labels were removed from the student UI.
+- `flutter analyze` passed.
+- Phone check passed on the physical Android device.
+- Changes were committed and pushed to `origin/dev`.
+
+Safety:
+- These were display-only Lecture Detail / AI UX changes.
+- They did not change transcription request logic.
+- They did not change transcript generation.
+- They did not change AI job creation.
+- They did not change Cloud Function contracts.
+- They did not change Firestore queries.
+- They did not change Firestore writes.
+- They did not add, remove, or rename Firestore fields.
+- They did not change Firebase Storage upload.
+- They did not change recording behavior.
+- They did not change Android foreground or locked-screen recording behavior.
+- They did not change wakelock behavior.
+- They did not change file opening or playback behavior.
+- They did not change auth/login/logout behavior.
+- They did not change navigation.
+- They did not change academic structure requirements.
+
+UX decision:
+- The lecture detail screen should show statuses that help the student understand what they can do next.
+- Transcript readiness is important because it gates Summary, Notes, and Practice Test generation.
+- `sessionStatus` and `audioStatus` remain useful backend/debug fields, but they should not clutter the student-facing detail card.
+- Raw exception text should not appear in primary student feedback.
+
 ## Completed Materials UX Pass 3 — Upload Feedback Copy
 
 Commit:
