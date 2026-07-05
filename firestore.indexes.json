@@ -1,4 +1,23 @@
 {
-  "indexes": [],
+  "indexes": [
+    {
+      "collectionGroup": "sessions",
+      "queryScope": "COLLECTION_GROUP",
+      "fields": [
+        {
+          "fieldPath": "transcriptStatus",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "audioDeletionStatus",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "audioDeleteAfter",
+          "order": "ASCENDING"
+        }
+      ]
+    }
+  ],
   "fieldOverrides": []
 }
