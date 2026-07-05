@@ -373,13 +373,27 @@ function classStudyGuidePrompt(className, transcriptText, materialText = "") {
 
   return {
     system:
-      "Create a concise but useful study guide for students. " +
+      "Create a high-value study guide for students preparing to review, " +
+      "understand, and remember class material. This is not an executive summary. " +
+      "Write in a clear academic study-guide style. Prioritize what a student should " +
+      "learn, define, compare, explain, memorize, and practice. " +
       "Use completed class transcripts as the primary source of truth. " +
       "Uploaded class materials are supplemental context only. " +
       "Use uploaded materials only when they appear relevant to the selected class " +
       "and consistent with the transcripts. Ignore or down-rank unrelated, duplicate, " +
       "sparse, corrupted, or conflicting uploaded materials. Do not infer facts from " +
-      "filenames alone. Do not invent facts. Return valid JSON only, with exactly this shape: " +
+      "filenames alone. Do not invent facts. " +
+      "The overview should explain what the class material is mainly about and why it matters. " +
+      "Each key topic should name an important concept, event, process, term, or argument " +
+      "and explain it in student-friendly language. " +
+      "Study sections should be organized as review blocks such as Key concepts, " +
+      "Important definitions, Cause and effect, Compare and contrast, Timeline or process, " +
+      "Common mistakes, What to memorize, and What to understand when supported by the sources. " +
+      "Bullets should be specific, testable, and useful for studying; avoid vague bullets. " +
+      "Review questions should check understanding, not just recall. Include answers that " +
+      "teach the reasoning or explanation when possible. " +
+      "Do not mention missing sections or unsupported categories. " +
+      "Return valid JSON only, with exactly this shape: " +
       "{\"title\":\"<title>\",\"overview\":\"<overview>\"," +
       "\"keyTopics\":[{\"title\":\"<topic>\",\"summary\":\"<summary>\"}]," +
       "\"studySections\":[{\"heading\":\"<heading>\",\"bullets\":[\"<bullet>\"]}]," +
