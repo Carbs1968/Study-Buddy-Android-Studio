@@ -362,6 +362,109 @@ Recorder UX status:
   - academic context display clarity
   - future optional recording-status banner across tabs
 
+## Completed Material Text Extraction Pass 1B — Deployment Fixes and Validation
+
+Commits:
+- `881d483 Fix material extraction FieldValue usage`
+- `91092b2 Fix material extraction storage download`
+
+Deployment:
+- Deployed Firebase Function:
+  - `onMaterialExtractionRequested`
+- Firebase confirmed active function:
+  - v2
+  - `google.cloud.firestore.document.v1.written`
+  - `us-central1`
+  - `nodejs22`
+
+Problems found during deployment/testing:
+- First deployed trigger fired but crashed because the new code referenced:
+  - `admin.firestore.FieldValue`
+- The project already imports and uses:
+  - `FieldValue`
+- After fixing FieldValue usage, TXT extraction still failed because the new code referenced:
+  - `admin.storage().bucket()`
+- The project already initializes Firebase Storage with:
+  - `getStorage()`
+  - `storage.bucket()`
+
+Fixes:
+- Replaced invalid FieldValue references:
+  - `admin.firestore.FieldValue.serverTimestamp()`
+  - became `FieldValue.serverTimestamp()`
+  - `admin.firestore.FieldValue.delete()`
+  - became `FieldValue.delete()`
+- Replaced invalid Storage download reference:
+  - `admin.storage().bucket().file(storagePath).download()`
+  - became `storage.bucket().file(storagePath).download()`
+
+Validation results:
+- TXT upload:
+  - extraction completed successfully
+  - `extractionStatus: done`
+  - `extractedText` present
+  - `extractedTextCharCount` populated
+  - `extractionSource: storage`
+- CSV upload:
+  - extraction completed successfully
+  - `extractionStatus: done`
+  - `extractedText` present
+  - `extractedTextCharCount` populated
+  - `extractionSource: storage`
+- XLSX upload:
+  - correctly marked unsupported
+  - `extractionStatus: unsupported`
+  - `extractedTextCharCount: 0`
+- PPTX upload:
+  - correctly marked unsupported
+  - `extractionStatus: unsupported`
+  - `extractedTextCharCount: 0`
+
+Result:
+- Material Text Extraction v1 is deployed and validated end-to-end.
+- TXT and CSV materials can now produce extracted text.
+- XLSX and PPTX are safely marked unsupported in this first pass.
+- Study Guide generation has not been changed yet.
+- Flutter UI has not been changed for this extraction pass.
+
+Safety:
+- These were backend-only fixes to the new extraction trigger.
+- They did not change material upload behavior.
+- They did not change Firebase Storage upload paths.
+- They did not change Firestore rules.
+- They did not change Firestore collection names.
+- They did not change Study Guide generation.
+- They did not change AI job creation.
+- They did not change transcript generation.
+- They did not change recording behavior.
+- They did not change auth/login/logout behavior.
+- They did not change navigation.
+- They did not change academic structure requirements.
+
+Current extraction behavior:
+- TXT / CSV:
+  - `not_started` → `processing` → `done`
+  - stores `extractedText`
+  - stores `extractedTextCharCount`
+  - stores `extractionSource: storage`
+- Unsupported files:
+  - `not_started` → `processing` → `unsupported`
+  - stores `extractedTextCharCount: 0`
+- Failed extraction:
+  - `not_started` → `processing` → `error`
+  - stores student-safe/admin-safe `extractionError`
+
+Near-term follow-up:
+- Update class Study Guide generation to include extracted material text.
+- Only include material docs where:
+  - `extractionStatus: done`
+  - `extractedText` is non-empty
+- Keep completed transcripts as the primary source of truth.
+- Use uploaded materials as supplemental context only when relevant.
+- Ignore or down-rank unrelated, duplicate, sparse, corrupted, or conflicting uploads.
+- Do not infer facts from filenames alone.
+- Update Study Guide UI copy only after materials are truly included in generation.
+
 ## Completed Material Text Extraction Pass 1 — TXT and CSV Extraction Trigger
 
 Commit:
