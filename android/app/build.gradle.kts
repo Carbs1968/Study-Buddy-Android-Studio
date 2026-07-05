@@ -80,9 +80,6 @@ android {
             if (keystorePropertiesFile.exists()) {
                 signingConfig = signingConfigs.getByName("release")
             }
-            else {
-                signingConfig = signingConfigs.getByName("debug")
-            }
             isMinifyEnabled = false
             isShrinkResources = false
             proguardFiles(
@@ -142,5 +139,17 @@ gradle.projectsEvaluated {
                 aabFile.copyTo(file("$flutterAabDir/app-release.aab"), overwrite = true)
             }
         }
+    }
+}
+
+gradle.taskGraph.whenReady {
+    val releaseTaskRequested = allTasks.any {
+        it.name.contains("Release", ignoreCase = false)
+    }
+
+    if (releaseTaskRequested && !keystorePropertiesFile.exists()) {
+        throw GradleException(
+            "Missing android/key.properties. Release builds must be signed with a release keystore."
+        )
     }
 }
