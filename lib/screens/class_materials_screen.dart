@@ -189,6 +189,9 @@ class _ClassMaterialsScreenState extends State<ClassMaterialsScreen> {
 
     setState(() => _uploading = true);
 
+    String? uploadedStoragePath;
+    var materialMetadataSaved = false;
+
     try {
       final sizeBytes = await file.length();
       final materialRef = _materialsRef(uid).doc();
@@ -196,6 +199,7 @@ class _ClassMaterialsScreenState extends State<ClassMaterialsScreen> {
 
       final storagePath =
           'classMaterials/$uid/${widget.academicYearId}/${widget.semesterId}/${widget.classId}/${materialRef.id}/$safeFileName';
+      uploadedStoragePath = storagePath;
 
       final storageRef = FirebaseStorage.instance.ref().child(storagePath);
 
@@ -230,20 +234,36 @@ class _ClassMaterialsScreenState extends State<ClassMaterialsScreen> {
         'createdAt': timestamp,
         'updatedAt': timestamp,
       });
+      materialMetadataSaved = true;
 
       final classRef = _materialsRef(uid).parent!;
-      await classRef.set({
-        'lastActivityAt': FieldValue.serverTimestamp(),
-        'lastMaterialAt': FieldValue.serverTimestamp(),
-        'hasMaterials': true,
-        'updatedAt': FieldValue.serverTimestamp(),
-      }, SetOptions(merge: true));
+      try {
+        await classRef.set({
+          'lastActivityAt': FieldValue.serverTimestamp(),
+          'lastMaterialAt': FieldValue.serverTimestamp(),
+          'hasMaterials': true,
+          'updatedAt': FieldValue.serverTimestamp(),
+        }, SetOptions(merge: true));
+      } catch (metadataError, stackTrace) {
+        debugPrint('Failed to update class material metadata: $metadataError');
+        debugPrintStack(stackTrace: stackTrace);
+      }
 
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Material uploaded to this class.')),
       );
     } catch (error) {
+      final orphanedStoragePath = uploadedStoragePath;
+      if (orphanedStoragePath != null && !materialMetadataSaved) {
+        try {
+          await FirebaseStorage.instance.ref().child(orphanedStoragePath).delete();
+        } catch (cleanupError, stackTrace) {
+          debugPrint('Failed to delete orphaned material upload: $cleanupError');
+          debugPrintStack(stackTrace: stackTrace);
+        }
+      }
+
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Upload failed. Please try again.')),
