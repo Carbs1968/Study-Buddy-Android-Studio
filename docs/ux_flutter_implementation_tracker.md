@@ -2654,3 +2654,144 @@ Class Study Guide v1 now supports:
 - Add refresh/regenerate behavior when recording content changes.
 - Add topic-level guide viewer later.
 - Add uploaded materials into class guide generation later.
+
+
+---
+
+## Completed Material-Aware Class Study Guides
+
+Date: 2026-07-05
+
+### Summary
+
+Completed and verified the next Class Study Guide backend/UI pass: generated class Study Guides can now include extracted class-level uploaded materials in addition to completed class transcripts.
+
+Completed transcripts remain the primary source. Extracted materials are supplemental and are only included when usable extracted text exists.
+
+### Source-of-truth checkpoint
+
+- Branch: `dev`
+- Backend material-aware Study Guide commit:
+  - `3dcebcc Include extracted materials in class study guides`
+- UI source-copy commit:
+  - `72261d6 Clarify study guide material sources`
+- Working tree after push: clean
+- GitHub `origin/dev`: current with local `dev`
+
+### Backend behavior
+
+Updated class Study Guide generation so the backend now:
+
+- keeps completed class transcripts as the primary Study Guide source
+- queries class-level materials with `extractionStatus == "done"`
+- includes non-empty `extractedText` as supplemental Study Guide context
+- limits supplemental material text passed to the model
+- saves `sourceMaterials`
+- saves `includedMaterialCount`
+- saves `contentSnapshot.includedMaterials`
+- sets final `source` dynamically:
+  - `recordings_and_materials` when extracted materials were included
+  - `recordings` when no usable extracted materials were included
+
+Queued/request metadata uses:
+
+- `recordings_with_materials_if_available`
+
+Final generated guide metadata uses the actual resolved source.
+
+### Firebase deployment
+
+Deployed only the touched Study Guide functions:
+
+- `requestClassStudyGuide`
+- `onClassStudyGuideRequestWritten`
+
+No broad Firebase deployment was performed.
+
+### Firestore validation
+
+Validated a generated class Study Guide for:
+
+- Academic year: `prepa`
+- Semester: `4to-semestre`
+- Class: `summer`
+
+Verified final guide fields:
+
+- `source: recordings_and_materials`
+- `includedMaterialCount: 1`
+- `contentSnapshot.includedMaterials: true`
+- `output.sourceSummary.includedMaterialCount: 1`
+- `sourceMaterials[0].originalFileName: Candu intros and demo - March 20.txt`
+- `sourceMaterials[0].materialType: text`
+
+This confirms class-level extracted material was included in Study Guide generation.
+
+### UI behavior
+
+Updated the Class Study Guide viewer source description.
+
+When extracted materials were included, the viewer now displays:
+
+`Generated from completed class transcripts and extracted class materials.`
+
+When no extracted materials were included, the viewer keeps the previous copy:
+
+`Generated from completed class transcripts.`
+
+### Manual test results
+
+Tested on physical Android phone.
+
+Result:
+
+- App opened successfully.
+- Existing generated Study Guide opened in-app.
+- Firestore confirmed the guide included extracted material.
+- UI displayed the corrected source description.
+- No recording, upload, transcript, AI job, or library behavior regressed during this pass.
+- `flutter analyze` passed with no issues for the UI copy change.
+
+### Safety statement
+
+Touched:
+
+- `functions/src/index.js`
+- `lib/screens/class_study_guide_screen.dart`
+
+Did not touch:
+
+- Recording flow
+- Upload flow
+- Firebase Storage upload
+- Firestore session save
+- Material upload UI
+- Material extraction trigger
+- Existing `/aiJobs` transcript/summary/notes/quiz flow
+- Firebase Auth
+- Academic settings loading
+- Library/session loading
+- Firestore rules
+- Firestore indexes
+- Google Drive logic
+
+### Current status
+
+Class Study Guide v1 now supports:
+
+- request from class screen
+- backend generation from completed transcripts
+- supplemental inclusion of extracted class-level materials
+- duplicate-generation/content snapshot awareness for recordings and materials
+- read-only in-app viewing
+- accurate UI source description
+
+### Remaining future work
+
+- Improve the Study Guide output format for stronger student value.
+- Consider showing source material names in the Study Guide viewer.
+- Add clearer generating/error status UI.
+- Add refresh/regenerate UX when recordings or materials change.
+- Add copy/export/share actions.
+- Add topic-level Study Guides later.
+- Later evaluate support for more material types beyond TXT/CSV extraction.
