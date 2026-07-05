@@ -260,8 +260,7 @@ class RecorderService : Service() {
             recorder = null
             hasStarted = false
             currentPath = null
-            markStopped()
-            // We stay foreground so Flutter can report/start again; no crash.
+            shutdownAfterStartFailure()
         }
     }
 
@@ -350,6 +349,21 @@ class RecorderService : Service() {
     private fun releaseWakeLock() {
         try { wakeLock?.let { if (it.isHeld) it.release() } } catch (_: Exception) {}
         wakeLock = null
+    }
+
+    private fun shutdownAfterStartFailure() {
+        stopHealthMonitor()
+        markStopped()
+        releaseWakeLock()
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                stopForeground(STOP_FOREGROUND_REMOVE)
+            } else {
+                @Suppress("DEPRECATION")
+                stopForeground(true)
+            }
+        } catch (_: Exception) {}
+        stopSelf()
     }
 
     override fun onBind(intent: Intent?): IBinder? = null

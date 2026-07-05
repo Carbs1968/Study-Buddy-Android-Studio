@@ -599,6 +599,18 @@ class _RecorderPageState extends State<RecorderPage> with WidgetsBindingObserver
       appLogger('Bypassing Android service (debug flag ON) → using plugin');
     }
 
+    if (!started && usedService) {
+      appLogger(
+        'Native service verification failed; stopping service before plugin fallback',
+      );
+      try {
+        await _recSvc.invokeMethod('stopService');
+      } catch (e) {
+        appLogger('Native service cleanup before plugin fallback failed: $e');
+      }
+      usedService = false;
+    }
+
     if (!started) {
       appLogger('Falling back to record plugin start');
       try {
