@@ -940,10 +940,6 @@ class _RecorderPageState extends State<RecorderPage> with WidgetsBindingObserver
         'className': className,
         'createdAt': FieldValue.serverTimestamp(),
         'lastActivityAt': FieldValue.serverTimestamp(),
-        'lastRecordingAt': FieldValue.serverTimestamp(),
-        'latestSessionId': sessionRef.id,
-        'latestTopicName': topic,
-        'hasRecordings': true,
         'updatedAt': FieldValue.serverTimestamp(),
       }, SetOptions(merge: true));
 
@@ -1030,6 +1026,15 @@ class _RecorderPageState extends State<RecorderPage> with WidgetsBindingObserver
         'className=${savedData['className']} '
         'topic=${savedData['topic']}',
       );
+
+      await classRef.set({
+        'lastActivityAt': FieldValue.serverTimestamp(),
+        'lastRecordingAt': FieldValue.serverTimestamp(),
+        'latestSessionId': sessionRef.id,
+        'latestTopicName': topic,
+        'hasRecordings': true,
+        'updatedAt': FieldValue.serverTimestamp(),
+      }, SetOptions(merge: true));
 
       if (mounted) {
         setState(() {
