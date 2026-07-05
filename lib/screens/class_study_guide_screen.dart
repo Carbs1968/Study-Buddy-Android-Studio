@@ -66,6 +66,16 @@ class ClassStudyGuideScreen extends StatelessWidget {
 
           final data = doc.data() ?? {};
           final output = (data['output'] as Map?)?.cast<String, dynamic>() ?? {};
+          final contentSnapshot =
+              (data['contentSnapshot'] as Map?)?.cast<String, dynamic>() ?? {};
+          final includedMaterialCount = data['includedMaterialCount'];
+          final usedMaterials =
+              data['source'] == 'recordings_and_materials' ||
+              contentSnapshot['includedMaterials'] == true ||
+              (includedMaterialCount is num && includedMaterialCount > 0);
+          final sourceDescription = usedMaterials
+              ? 'Generated from completed class transcripts and extracted class materials.'
+              : 'Generated from completed class transcripts.';
           final title = (output['title'] ?? 'Class Study Guide').toString();
           final overview = (output['overview'] ?? '').toString();
           final keyTopics =
@@ -95,7 +105,7 @@ class ClassStudyGuideScreen extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               Text(
-                'Generated from completed class transcripts.',
+                sourceDescription,
                 style: theme.textTheme.bodyMedium?.copyWith(
                   color: theme.colorScheme.onSurfaceVariant,
                   fontWeight: FontWeight.w600,
