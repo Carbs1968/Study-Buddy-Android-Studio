@@ -362,6 +362,78 @@ Recorder UX status:
   - academic context display clarity
   - future optional recording-status banner across tabs
 
+## Completed Study Guide UX Pass 1 — Transcript Source Clarity
+
+Commits:
+- `a3f54a6 Clarify class study guide source`
+- `c09a4f1 Clarify study guide transcript source`
+
+Problem:
+- The class Study Guide request UI used broad wording that could imply uploaded materials were included.
+- The Study Guide viewer did not explain what source content was used.
+- Current backend generation uses completed class transcripts/recordings only:
+  - `includedRecordings: true`
+  - `includedMaterials: false`
+  - `source: recordings`
+- Uploaded materials should be included in Study Guide generation later, but that is a separate feature pass.
+
+Changes:
+- Updated `lib/screens/class_lectures_screen.dart`.
+- Updated `lib/screens/class_study_guide_screen.dart`.
+- Clarified class Study Guide request copy to say it uses completed transcripts.
+- Clarified the Study Guide viewer source near the top of the screen.
+
+Display behavior:
+- Requesting copy:
+  - `Requesting class study guide...`
+  - became `Requesting study guide from completed transcripts...`
+- Success copy:
+  - `Study guide requested.`
+  - became `Study guide requested from completed transcripts.`
+- Existing-request copy:
+  - `Study guide already requested ($status).`
+  - became `Study guide already requested from completed transcripts ($status).`
+- Tooltip:
+  - `Generate class study guide`
+  - became `Generate study guide from recordings`
+- Study Guide viewer now shows:
+  - `Generated from completed class transcripts.`
+
+Result:
+- The Study Guide UI now honestly matches current backend behavior.
+- Students are less likely to assume uploaded materials are included before that feature is implemented.
+- `flutter analyze` passed.
+- Changes were committed and pushed to `origin/dev`.
+
+Safety:
+- These were display-only Study Guide UX changes.
+- They did not change Study Guide generation logic.
+- They did not change Cloud Function contracts.
+- They did not change AI job creation.
+- They did not change Firestore queries.
+- They did not change Firestore writes.
+- They did not add, remove, or rename Firestore fields.
+- They did not change material upload behavior.
+- They did not change recording behavior.
+- They did not change transcript generation.
+- They did not change auth/login/logout behavior.
+- They did not change navigation.
+- They did not change academic structure requirements.
+
+Near-term follow-up:
+- Add uploaded materials to Study Guide generation as a separate feature pass.
+- That future pass should inspect and update:
+  - material text extraction behavior
+  - class/topic source selection
+  - Firestore source metadata
+  - Cloud Function generation contract
+  - UI copy after materials are truly included
+
+UX decision:
+- Current UI should not overpromise materials-based generation.
+- Transcript-source clarity is preferable until the backend includes uploaded materials.
+- Uploaded materials are important to include soon, but that should be handled as a dedicated implementation pass, not a copy-only patch.
+
 ## Completed Lecture Detail / AI UX Pass 1 — AI Output Guidance and Status Simplification
 
 Commits:
