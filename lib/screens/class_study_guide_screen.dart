@@ -93,6 +93,14 @@ class ClassStudyGuideScreen extends StatelessWidget {
                   fontWeight: FontWeight.w800,
                 ),
               ),
+              const SizedBox(height: 8),
+              Text(
+                'Generated from completed class transcripts.',
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
               if (overview.isNotEmpty) ...[
                 const SizedBox(height: 12),
                 Text(overview, style: theme.textTheme.bodyLarge),
