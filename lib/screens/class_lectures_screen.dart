@@ -142,7 +142,7 @@ class _ClassLecturesScreenState extends State<ClassLecturesScreen> {
     final messenger = ScaffoldMessenger.of(context);
     try {
       messenger.showSnackBar(
-        const SnackBar(content: Text('Requesting class study guide...')),
+        const SnackBar(content: Text('Requesting study guide from completed transcripts...')),
       );
 
       final callable =
@@ -162,8 +162,8 @@ class _ClassLecturesScreenState extends State<ClassLecturesScreen> {
         SnackBar(
           content: Text(
             reused
-                ? 'Study guide already requested ($status).'
-                : 'Study guide requested.',
+                ? 'Study guide already requested from completed transcripts ($status).'
+                : 'Study guide requested from completed transcripts.',
           ),
         ),
       );
@@ -223,7 +223,7 @@ class _ClassLecturesScreenState extends State<ClassLecturesScreen> {
         elevation: 0,
         actions: [
           IconButton(
-            tooltip: 'Generate class study guide',
+            tooltip: 'Generate study guide from recordings',
             icon: const Icon(Icons.auto_awesome_outlined),
             onPressed: hasStableClassContext ? _openOrRequestClassStudyGuide : null,
           ),
