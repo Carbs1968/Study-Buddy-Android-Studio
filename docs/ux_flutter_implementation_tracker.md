@@ -3205,3 +3205,24 @@ Settings is now closer to the Figma v1 direction while staying within the curren
 Legal/account links are available in-app and tested.
 
 The account deletion process is documented and ready for either manual/admin tooling or a future authenticated in-app deletion flow.
+
+## 2026-07-11 — Manual Account Deletion Script Tested
+
+Summary:
+- Tested the manual account deletion script end-to-end on disposable burner account `studybuddynote.1@gmail.com`.
+- Added explicit Firebase Storage bucket support to the script because local Firebase Admin SDK did not auto-detect the bucket.
+- Confirmed dry-run mode listed only the burner account data before destructive deletion.
+- Confirmed delete mode removed the burner account from Firebase Auth, Firestore, email lookup metadata, and Firebase Storage.
+
+Verification:
+- `users/0tP5l2ltqxULwwjPqqpXUQEMqgr1` no longer exists.
+- `userEmailLookup/studybuddynote.1@gmail.com` no longer exists.
+- `recordings/0tP5l2ltqxULwwjPqqpXUQEMqgr1/` file count is `0`.
+- Firebase Auth lookup returns `auth/user-not-found`.
+- Firestore console visual check also confirmed the user and lookup documents are gone.
+
+Safety:
+- Tested on disposable burner account only.
+- Required UID/email match before deletion.
+- Required explicit `--confirm-delete` for destructive mode.
+- No production/student account deletion was performed.
