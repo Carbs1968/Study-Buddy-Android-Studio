@@ -87,6 +87,27 @@ After Firestore and Storage cleanup, delete the Firebase Auth user for the confi
 
 For manual deletion, this should be done with trusted admin credentials, not client-side code.
 
+## Re-created accounts after deletion
+
+If a user deletes their Study Buddy account and later signs in again with the same Google email, the app should allow the sign-in.
+
+Expected behavior:
+
+- Firebase Auth may create a new UID for the same Google email.
+- Study Buddy should treat the sign-in as a new account.
+- A new `users/{uid}` document may be created.
+- A new `userEmailLookup/{emailLower}` document may be created for the new UID.
+- No deleted recordings, uploaded materials, transcripts, summaries, notes, quizzes, Study Guides, or academic settings should be restored.
+- The user should complete academic setup again if required.
+
+User-facing expectation:
+
+> If you delete your Study Buddy account and later sign in again, you will start with a new empty account. Deleted account data cannot be recovered.
+
+Operational note:
+
+If a manual deletion request is received after the user has already deleted and re-created an account with the same email, verify the currently active UID through `userEmailLookup/{emailLower}` before deleting anything. Do not assume an old UID and a new UID are the same account.
+
 ## Already-deleted accounts
 
 If a deletion request is received for an account that appears already deleted:
