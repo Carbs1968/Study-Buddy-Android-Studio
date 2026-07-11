@@ -3068,3 +3068,140 @@ Next recommended work:
 - Prepare Play Store release/build signing assets.
 - Prepare Play Store listing, screenshots, privacy policy, and Data Safety answers.
 - Run serious QA on Study Guide prompt quality before broader launch.
+
+
+---
+
+## Completed Settings Legal Links and Account Deletion Planning
+
+Date: 2026-07-10
+
+### Summary
+
+Completed a v1 Settings and account-deletion readiness pass.
+
+This pass focused on improving the Settings screen for the current single academic period model, adding required legal/account links, and documenting the Study Buddy account deletion process for Play Store readiness.
+
+### Source-of-truth checkpoint
+
+- Branch: `dev`
+- GitHub source of truth: latest `origin/dev`
+- Working tree after final push: clean
+
+Completed commits:
+
+- `80cd337 Improve settings academic period card`
+- `309ae32 Polish settings language card`
+- `23290e1 Add settings legal account links`
+- `297ac50 Document account deletion process`
+
+### Settings UI updates
+
+Updated the Settings screen while keeping the current v1 single academic period model.
+
+Completed:
+
+- Removed inactive/nonfunctional Settings switches.
+- Added a Current Academic Period card.
+- Current Academic Period reads from:
+  - `users/{uid}/academicSettings/current`
+- Displays saved academic year and semester.
+- Keeps the existing Manage Academic Settings route unchanged.
+- Polished the Language card layout.
+- Preserved existing language behavior:
+  - updates `appLocale.value`
+  - saves `users/{uid}.locale`
+- Verified the Settings screen on a physical Android phone.
+
+Not implemented in this pass:
+
+- Multiple academic periods.
+- Switch academic period flow.
+- Add/delete academic period flow.
+- Any change to recorder/upload/study-guide routing based on academic periods.
+
+Multiple academic periods remain a future dedicated data-model and UX pass.
+
+### Legal and account links
+
+Added a Legal & Account section to Settings with links to the published Study Buddy website pages:
+
+- Privacy Policy:
+  - `https://studybuddynote.com/privacy`
+- Terms and Conditions:
+  - `https://studybuddynote.com/terms`
+- Request Account Deletion:
+  - `https://studybuddynote.com/delete-account`
+
+Implemented with `url_launcher`.
+
+Validation:
+
+- Ran `flutter analyze`.
+- Tested all three links on a physical Android phone.
+- Confirmed each link opened successfully.
+- Confirmed returning to the app did not crash.
+
+### Account deletion process documentation
+
+Created:
+
+- `docs/account_deletion_process.md`
+
+The document covers:
+
+- in-app deletion verification expectations
+- website/manual deletion request verification
+- already-deleted account handling
+- user-owned Firestore paths to delete
+- user-owned Firebase Storage prefixes to delete
+- top-level `aiJobs` cleanup
+- Firebase Auth user deletion
+- minimal internal deletion log
+- manual deletion checklist
+- planned authenticated in-app deletion flow
+- website delete-account page copy requirements
+
+### Account deletion v1 direction
+
+Current v1 state:
+
+- The app links to the public account deletion request page.
+- Website/manual deletion requires verification through the user's Google sign-in email.
+- Account deletion implementation is documented but not yet automated inside the app.
+
+Recommended next implementation steps:
+
+1. Create a trusted admin/manual deletion script.
+2. Test deletion only on a test account.
+3. Build authenticated in-app deletion later if it can be implemented and tested safely before public launch.
+
+### Safety statement
+
+Touched:
+
+- `lib/screens/home_shell/pages/settings_page.dart`
+- `docs/account_deletion_process.md`
+
+Did not touch:
+
+- Firebase Auth login/logout behavior
+- recorder controls
+- Android foreground recording service
+- wakelock behavior
+- Firebase Storage upload logic
+- Firestore session save logic
+- material extraction backend
+- transcript/summary/notes/quiz AI flow
+- class Study Guide generation
+- academic settings save logic
+- academic routing/data model
+- Google Drive logic
+
+### Current status
+
+Settings is now closer to the Figma v1 direction while staying within the current single academic period model.
+
+Legal/account links are available in-app and tested.
+
+The account deletion process is documented and ready for either manual/admin tooling or a future authenticated in-app deletion flow.
