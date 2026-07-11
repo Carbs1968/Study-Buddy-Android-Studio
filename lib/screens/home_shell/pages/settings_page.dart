@@ -130,29 +130,85 @@ class SettingsPage extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 12),
-            Card(
-              elevation: 0,
-              color: theme.cardColor,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(18),
+            if (user != null) ...[
+              StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+                stream: FirebaseFirestore.instance
+                    .collection('users')
+                    .doc(user.uid)
+                    .collection('academicSettings')
+                    .doc('current')
+                    .snapshots(),
+                builder: (context, snapshot) {
+                  final data = snapshot.data?.data();
+                  final academicYear =
+                      (data?['levelName'] ?? 'Not set').toString();
+                  final semester =
+                      (data?['semesterName'] ?? 'Not set').toString();
+
+                  return Card(
+                    elevation: 0,
+                    color: theme.cardColor,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(18),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.school_outlined,
+                                color: theme.colorScheme.primary,
+                              ),
+                              const SizedBox(width: 12),
+                              Text(
+                                'Current Academic Period',
+                                style: theme.textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.w800,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 14),
+                          Text(
+                            'Academic year',
+                            style: theme.textTheme.labelMedium?.copyWith(
+                              color: theme.colorScheme.onSurfaceVariant,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            academicYear,
+                            style: theme.textTheme.bodyLarge?.copyWith(
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          Text(
+                            'Semester',
+                            style: theme.textTheme.labelMedium?.copyWith(
+                              color: theme.colorScheme.onSurfaceVariant,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            semester,
+                            style: theme.textTheme.bodyLarge?.copyWith(
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
               ),
-              child: Column(
-                children: [
-                  SwitchListTile(
-                    title: Text(strings.autoTranscribeAfterUpload),
-                    value: false,
-                    onChanged: (v) {},
-                  ),
-                  const Divider(height: 1),
-                  SwitchListTile(
-                    title: Text(strings.autoGenerateNotes),
-                    value: false,
-                    onChanged: (v) {},
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 12),
+              const SizedBox(height: 12),
+            ],
             Card(
               elevation: 0,
               color: theme.cardColor,
@@ -161,14 +217,17 @@ class SettingsPage extends StatelessWidget {
               ),
               child: ListTile(
                 leading: Icon(
-                  Icons.school_outlined,
+                  Icons.edit_calendar_outlined,
                   color: Theme.of(context).colorScheme.primary,
                 ),
                 title: Text(
-                  SBStrings.of(context).academicSettingsTitle,
+                  'Manage Academic Settings',
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.w700,
                       ),
+                ),
+                subtitle: const Text(
+                  'Update the academic year and semester used for new recordings.',
                 ),
                 trailing: const Icon(Icons.chevron_right),
                 onTap: () {
