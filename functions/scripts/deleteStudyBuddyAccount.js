@@ -29,6 +29,7 @@ const storage = getStorage();
 
 function parseArgs(argv) {
   const args = {
+    bucket: process.env.FIREBASE_STORAGE_BUCKET || "",
     confirmDelete: false,
   };
 
@@ -52,6 +53,12 @@ function parseArgs(argv) {
       continue;
     }
 
+    if (value === "--bucket") {
+      args.bucket = argv[index + 1];
+      index += 1;
+      continue;
+    }
+
     throw new Error(`Unknown argument: ${value}`);
   }
 
@@ -65,7 +72,7 @@ function normalizeEmail(email) {
 function requireArgs(args) {
   if (!args.uid || !args.email) {
     throw new Error(
-      "Missing required args. Usage: node scripts/deleteStudyBuddyAccount.js --uid UID --email user@example.com [--confirm-delete]"
+      "Missing required args. Usage: node scripts/deleteStudyBuddyAccount.js --uid UID --email user@example.com [--bucket bucket-name] [--confirm-delete]"
     );
   }
 }
@@ -114,6 +121,7 @@ async function main() {
   console.log(`UID: ${uid}`);
   console.log(`Email: ${emailLower}`);
   console.log(`Mode: ${dryRun ? "DRY RUN" : "CONFIRMED DELETE"}`);
+  console.log(`Storage bucket: ${args.bucket}`);
   console.log("");
 
   const lookupRef = db.collection("userEmailLookup").doc(emailLower);
@@ -166,7 +174,13 @@ async function main() {
   }
 
   try {
-    const bucket = storage.bucket();
+    if (!args.bucket) {
+    throw new Error(
+      "Storage bucket is required. Pass --bucket bucket-name or set FIREBASE_STORAGE_BUCKET."
+    );
+  }
+
+  const bucket = storage.bucket(args.bucket);
     const storagePrefixes = [
       `recordings/${uid}/`,
       `classMaterials/${uid}/`,
