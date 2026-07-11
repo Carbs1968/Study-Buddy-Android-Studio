@@ -60,6 +60,8 @@ class _RecorderPageState extends State<RecorderPage> with WidgetsBindingObserver
   bool _isLoadingAcademicSettings = true;
   String? _levelName;
   String? _semesterName;
+  StreamSubscription<DocumentSnapshot<Map<String, dynamic>>>?
+      _academicSettingsSub;
 
   String get _titleText {
     final strings = SBStrings.of(context);
@@ -102,13 +104,14 @@ class _RecorderPageState extends State<RecorderPage> with WidgetsBindingObserver
     WidgetsBinding.instance.addObserver(this);
     _classCtl.addListener(_recomputeReady);
     _topicCtl.addListener(_recomputeReady);
-    _loadAcademicSettings();
+    _watchAcademicSettings();
     unawaited(_restoreRecoverableRecordingState());
   }
 
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    _academicSettingsSub?.cancel();
     _ticker?.cancel();
     _topicFocus.dispose();
     _classCtl.dispose();
@@ -129,6 +132,41 @@ class _RecorderPageState extends State<RecorderPage> with WidgetsBindingObserver
 
   void _recomputeReady() {
     if (mounted) setState(() {});
+  }
+
+  void _watchAcademicSettings() {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid == null) {
+      setState(() {
+        _levelName = null;
+        _semesterName = null;
+        _isLoadingAcademicSettings = false;
+      });
+      return;
+    }
+
+    _academicSettingsSub?.cancel();
+    _academicSettingsSub = FirebaseFirestore.instance
+        .collection('users')
+        .doc(uid)
+        .collection('academicSettings')
+        .doc('current')
+        .snapshots()
+        .listen((snapshot) {
+      if (!mounted) return;
+      final data = snapshot.data();
+      setState(() {
+        _levelName = data?['levelName']?.toString().trim();
+        _semesterName = data?['semesterName']?.toString().trim();
+        _isLoadingAcademicSettings = false;
+      });
+    }, onError: (error) {
+      appLogger('Failed to watch academic settings: $error');
+      if (!mounted) return;
+      setState(() {
+        _isLoadingAcademicSettings = false;
+      });
+    });
   }
 
   Future<void> _loadAcademicSettings() async {
