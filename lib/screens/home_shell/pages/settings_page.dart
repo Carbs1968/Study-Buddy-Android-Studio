@@ -7,6 +7,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../l10n/strings.dart';
 import '../../../main.dart';
@@ -15,6 +16,22 @@ import '../../login_screen.dart';
 
 class SettingsPage extends StatelessWidget {
   const SettingsPage({super.key});
+
+  static final Uri _privacyPolicyUri =
+      Uri.parse('https://studybuddynote.com/privacy');
+  static final Uri _termsUri =
+      Uri.parse('https://studybuddynote.com/terms');
+  static final Uri _deleteAccountUri =
+      Uri.parse('https://studybuddynote.com/delete-account');
+
+  Future<void> _openExternalUrl(BuildContext context, Uri uri) async {
+    final opened = await launchUrl(uri, mode: LaunchMode.externalApplication);
+    if (!opened && context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Could not open link. Please try again.')),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -259,6 +276,66 @@ class SettingsPage extends StatelessWidget {
                     MaterialPageRoute(builder: (_) => const AcademicSettingsScreen()),
                   );
                 },
+              ),
+            ),
+            const SizedBox(height: 12),
+            Card(
+              elevation: 0,
+              color: theme.cardColor,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(18),
+              ),
+              child: Column(
+                children: [
+                  ListTile(
+                    leading: Icon(
+                      Icons.privacy_tip_outlined,
+                      color: theme.colorScheme.primary,
+                    ),
+                    title: Text(
+                      'Privacy Policy',
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    trailing: const Icon(Icons.open_in_new),
+                    onTap: () => _openExternalUrl(context, _privacyPolicyUri),
+                  ),
+                  const Divider(height: 1),
+                  ListTile(
+                    leading: Icon(
+                      Icons.description_outlined,
+                      color: theme.colorScheme.primary,
+                    ),
+                    title: Text(
+                      'Terms and Conditions',
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    trailing: const Icon(Icons.open_in_new),
+                    onTap: () => _openExternalUrl(context, _termsUri),
+                  ),
+                  const Divider(height: 1),
+                  ListTile(
+                    leading: Icon(
+                      Icons.delete_outline,
+                      color: theme.colorScheme.error,
+                    ),
+                    title: Text(
+                      'Request Account Deletion',
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        color: theme.colorScheme.error,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    subtitle: const Text(
+                      'Open the deletion request page for your Study Buddy account.',
+                    ),
+                    trailing: const Icon(Icons.open_in_new),
+                    onTap: () => _openExternalUrl(context, _deleteAccountUri),
+                  ),
+                ],
               ),
             ),
             const SizedBox(height: 24),
