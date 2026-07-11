@@ -91,39 +91,62 @@ class SettingsPage extends StatelessWidget {
                 borderRadius: BorderRadius.circular(18),
               ),
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+                padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
                 child: Row(
                   children: [
-                    Text(
-                      '${strings.language}:',
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.w800,
-                          ),
+                    Icon(
+                      Icons.language_outlined,
+                      color: theme.colorScheme.primary,
                     ),
-                    const SizedBox(width: 16),
+                    const SizedBox(width: 12),
                     Expanded(
-                      child: DropdownButton<Locale>(
-                        value: appLocale.value,
-                        isExpanded: true,
-                        underline: const SizedBox.shrink(),
-                        items: SBStrings.supportedLocales
-                            .map((l) => DropdownMenuItem(
-                          value: l,
-                          child: Text(SBStrings.localeNames[l.languageCode] ?? l.languageCode),
-                        ))
-                            .toList(),
-                        onChanged: (val) async {
-                          if (val == null) return;
-                          appLocale.value = val;
-                          final u = FirebaseAuth.instance.currentUser;
-                          if (u != null) {
-                            await FirebaseFirestore.instance.collection('users').doc(u.uid).set(
-                              {'locale': val.languageCode},
-                              SetOptions(merge: true),
-                            );
-                          }
-                        },
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            strings.language,
+                            style: theme.textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            'Choose the app language.',
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: theme.colorScheme.onSurfaceVariant,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
                       ),
+                    ),
+                    const SizedBox(width: 12),
+                    DropdownButton<Locale>(
+                      value: appLocale.value,
+                      underline: const SizedBox.shrink(),
+                      items: SBStrings.supportedLocales
+                          .map((l) => DropdownMenuItem(
+                                value: l,
+                                child: Text(
+                                  SBStrings.localeNames[l.languageCode] ??
+                                      l.languageCode,
+                                ),
+                              ))
+                          .toList(),
+                      onChanged: (val) async {
+                        if (val == null) return;
+                        appLocale.value = val;
+                        final u = FirebaseAuth.instance.currentUser;
+                        if (u != null) {
+                          await FirebaseFirestore.instance
+                              .collection('users')
+                              .doc(u.uid)
+                              .set(
+                            {'locale': val.languageCode},
+                            SetOptions(merge: true),
+                          );
+                        }
+                      },
                     ),
                   ],
                 ),
