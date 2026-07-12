@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart' as fb;
 
-import '../l10n/strings.dart';
+import '../l10n/app_localizations.dart';
 
 class AcademicSettingsScreen extends StatefulWidget {
   const AcademicSettingsScreen({super.key});
@@ -55,7 +55,7 @@ class _AcademicSettingsScreenState extends State<AcademicSettingsScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to load academic settings: $e')),
+          SnackBar(content: Text('${AppLocalizations.of(context).academicSettingsLoadFailed} $e')),
         );
       }
     } finally {
@@ -72,8 +72,8 @@ class _AcademicSettingsScreenState extends State<AcademicSettingsScreen> {
 
     if (levelName.isEmpty || semesterName.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please enter both academic level and semester.'),
+        SnackBar(
+          content: Text(AppLocalizations.of(context).academicSettingsRequired),
         ),
       );
       return;
@@ -98,13 +98,15 @@ class _AcademicSettingsScreenState extends State<AcademicSettingsScreen> {
       if (!mounted) return;
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Academic settings saved successfully.')),
+        SnackBar(
+          content: Text(AppLocalizations.of(context).academicSettingsSaved),
+        ),
       );
       Navigator.pop(context);
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to save academic settings: $e')),
+        SnackBar(content: Text('${AppLocalizations.of(context).academicSettingsSaveFailed} $e')),
       );
     } finally {
       if (mounted) setState(() => _saving = false);
@@ -113,7 +115,7 @@ class _AcademicSettingsScreenState extends State<AcademicSettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final strings = SBStrings.of(context);
+    final strings = AppLocalizations.of(context);
 
     return Scaffold(
       appBar: AppBar(
@@ -128,7 +130,7 @@ class _AcademicSettingsScreenState extends State<AcademicSettingsScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Academic level / year',
+              strings.academicLevelYear,
               style: Theme.of(context).textTheme.titleLarge,
             ),
             const SizedBox(height: 8),
@@ -142,14 +144,14 @@ class _AcademicSettingsScreenState extends State<AcademicSettingsScreen> {
             ),
             const SizedBox(height: 8),
             Text(
-              'Enter the level or year exactly how it makes sense in your school system.',
+              strings.academicLevelYearHelp,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                 color: Colors.black54,
               ),
             ),
             const SizedBox(height: 24),
             Text(
-              'Current semester / term',
+              strings.currentSemesterTerm,
               style: Theme.of(context).textTheme.titleLarge,
             ),
             const SizedBox(height: 8),
@@ -166,7 +168,7 @@ class _AcademicSettingsScreenState extends State<AcademicSettingsScreen> {
             ),
             const SizedBox(height: 8),
             Text(
-              'Enter the semester, trimester, term, or period you are currently in.',
+              strings.currentSemesterTermHelp,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                 color: Colors.black54,
               ),

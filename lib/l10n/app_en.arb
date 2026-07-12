@@ -12,5 +12,18 @@
   "freemium": "Freemium",
   "changePhoto": "Change Photo",
   "signOut": "Sign Out",
-  "loading": "Loading..."
+  "loading": "Loading...",
+  "academicSettingsTitle": "Academic Settings",
+  "academicLevelYear": "Academic level / year",
+  "academicLevelYearHint": "Examples: Senior, Prepa, Primaria, Year 2",
+  "academicLevelYearHelp": "Enter the level or year exactly how it makes sense in your school system.",
+  "currentSemesterTerm": "Current semester / term",
+  "currentSemesterTermHint": "Examples: Fall 2026, 5to semestre, Term 1",
+  "currentSemesterTermHelp": "Enter the semester, trimester, term, or period you are currently in.",
+  "academicSettingsLoadFailed": "Failed to load academic settings.",
+  "academicSettingsRequired": "Please enter both academic level and semester.",
+  "academicSettingsSaved": "Academic settings saved successfully.",
+  "academicSettingsSaveFailed": "Failed to save academic settings.",
+  "saveChanges": "Save Changes",
+  "saving": "Saving..."
 }

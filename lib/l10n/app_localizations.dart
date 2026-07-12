@@ -175,6 +175,84 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Loading...'**
   String get loading;
+
+  /// No description provided for @academicSettingsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Academic Settings'**
+  String get academicSettingsTitle;
+
+  /// No description provided for @academicLevelYear.
+  ///
+  /// In en, this message translates to:
+  /// **'Academic level / year'**
+  String get academicLevelYear;
+
+  /// No description provided for @academicLevelYearHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Examples: Senior, Prepa, Primaria, Year 2'**
+  String get academicLevelYearHint;
+
+  /// No description provided for @academicLevelYearHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the level or year exactly how it makes sense in your school system.'**
+  String get academicLevelYearHelp;
+
+  /// No description provided for @currentSemesterTerm.
+  ///
+  /// In en, this message translates to:
+  /// **'Current semester / term'**
+  String get currentSemesterTerm;
+
+  /// No description provided for @currentSemesterTermHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Examples: Fall 2026, 5to semestre, Term 1'**
+  String get currentSemesterTermHint;
+
+  /// No description provided for @currentSemesterTermHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the semester, trimester, term, or period you are currently in.'**
+  String get currentSemesterTermHelp;
+
+  /// No description provided for @academicSettingsLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load academic settings.'**
+  String get academicSettingsLoadFailed;
+
+  /// No description provided for @academicSettingsRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter both academic level and semester.'**
+  String get academicSettingsRequired;
+
+  /// No description provided for @academicSettingsSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Academic settings saved successfully.'**
+  String get academicSettingsSaved;
+
+  /// No description provided for @academicSettingsSaveFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to save academic settings.'**
+  String get academicSettingsSaveFailed;
+
+  /// No description provided for @saveChanges.
+  ///
+  /// In en, this message translates to:
+  /// **'Save Changes'**
+  String get saveChanges;
+
+  /// No description provided for @saving.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving...'**
+  String get saving;
 }
 
 class _AppLocalizationsDelegate

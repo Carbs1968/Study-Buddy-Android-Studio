@@ -46,4 +46,51 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get loading => 'Cargando...';
+
+  @override
+  String get academicSettingsTitle => 'Configuración académica';
+
+  @override
+  String get academicLevelYear => 'Nivel académico / año';
+
+  @override
+  String get academicLevelYearHint =>
+      'Ejemplos: Preparatoria, Primaria, Secundaria, Año 2';
+
+  @override
+  String get academicLevelYearHelp =>
+      'Ingresa el nivel o año tal como se usa en tu sistema escolar.';
+
+  @override
+  String get currentSemesterTerm => 'Semestre / periodo actual';
+
+  @override
+  String get currentSemesterTermHint =>
+      'Ejemplos: Otoño 2026, 5.º semestre, Periodo 1';
+
+  @override
+  String get currentSemesterTermHelp =>
+      'Ingresa el semestre, trimestre, periodo o ciclo que cursas actualmente.';
+
+  @override
+  String get academicSettingsLoadFailed =>
+      'No se pudo cargar la configuración académica.';
+
+  @override
+  String get academicSettingsRequired =>
+      'Ingresa el nivel académico y el semestre.';
+
+  @override
+  String get academicSettingsSaved =>
+      'La configuración académica se guardó correctamente.';
+
+  @override
+  String get academicSettingsSaveFailed =>
+      'No se pudo guardar la configuración académica.';
+
+  @override
+  String get saveChanges => 'Guardar cambios';
+
+  @override
+  String get saving => 'Guardando...';
 }
