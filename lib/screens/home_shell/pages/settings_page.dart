@@ -416,39 +416,30 @@ class SettingsPage extends StatelessWidget {
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(18),
               ),
-              child: ListTile(
-                leading: Icon(
-                  Icons.edit_calendar_outlined,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
-                title: Text(
-                  'Manage Academic Settings',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w700,
-                      ),
-                ),
-                subtitle: const Text(
-                  'Update the academic year and semester used for new recordings.',
-                ),
-                trailing: const Icon(Icons.chevron_right),
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (_) => const AcademicSettingsScreen()),
-                  );
-                },
-              ),
-            ),
-            const SizedBox(height: 12),
-            Card(
-              elevation: 0,
-              color: theme.cardColor,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(18),
-              ),
               child: Column(
                 children: [
+                  ListTile(
+                    leading: Icon(
+                      Icons.edit_calendar_outlined,
+                      color: theme.colorScheme.primary,
+                    ),
+                    title: Text(
+                      'Manage Academic Settings',
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const AcademicSettingsScreen(),
+                        ),
+                      );
+                    },
+                  ),
+                  const Divider(height: 1),
                   ListTile(
                     leading: Icon(
                       Icons.privacy_tip_outlined,
@@ -490,9 +481,6 @@ class SettingsPage extends StatelessWidget {
                         color: theme.colorScheme.error,
                         fontWeight: FontWeight.w700,
                       ),
-                    ),
-                    subtitle: const Text(
-                      'Permanently delete your account and all associated data.',
                     ),
                     trailing: Icon(
                       Icons.chevron_right,
