@@ -883,6 +883,162 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Recording continues if your screen locks.'**
   String get recordingContinuesWhenLocked;
+
+  /// No description provided for @transcriptReady.
+  ///
+  /// In en, this message translates to:
+  /// **'Ready'**
+  String get transcriptReady;
+
+  /// No description provided for @transcriptProcessing.
+  ///
+  /// In en, this message translates to:
+  /// **'Processing'**
+  String get transcriptProcessing;
+
+  /// No description provided for @transcriptQueued.
+  ///
+  /// In en, this message translates to:
+  /// **'Queued'**
+  String get transcriptQueued;
+
+  /// No description provided for @transcriptFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed'**
+  String get transcriptFailed;
+
+  /// No description provided for @noTranscript.
+  ///
+  /// In en, this message translates to:
+  /// **'No transcript'**
+  String get noTranscript;
+
+  /// No description provided for @aiProcessing.
+  ///
+  /// In en, this message translates to:
+  /// **'AI: Processing'**
+  String get aiProcessing;
+
+  /// No description provided for @aiOutputsReady.
+  ///
+  /// In en, this message translates to:
+  /// **'AI: {count, plural, =1{1 output ready} other{{count} outputs ready}}'**
+  String aiOutputsReady(int count);
+
+  /// No description provided for @aiSummaryReady.
+  ///
+  /// In en, this message translates to:
+  /// **'AI: Summary ready'**
+  String get aiSummaryReady;
+
+  /// No description provided for @aiNotesReady.
+  ///
+  /// In en, this message translates to:
+  /// **'AI: Notes ready'**
+  String get aiNotesReady;
+
+  /// No description provided for @aiQuizReady.
+  ///
+  /// In en, this message translates to:
+  /// **'AI: Quiz ready'**
+  String get aiQuizReady;
+
+  /// No description provided for @aiFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'AI: Failed'**
+  String get aiFailed;
+
+  /// No description provided for @aiNotStarted.
+  ///
+  /// In en, this message translates to:
+  /// **'AI: Not started'**
+  String get aiNotStarted;
+
+  /// No description provided for @generateStudyGuideTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate study guide from recordings'**
+  String get generateStudyGuideTooltip;
+
+  /// No description provided for @materialsTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Materials'**
+  String get materialsTooltip;
+
+  /// No description provided for @studyGuideRequestFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not request the study guide. Please try again.'**
+  String get studyGuideRequestFailed;
+
+  /// No description provided for @studyGuideRequested.
+  ///
+  /// In en, this message translates to:
+  /// **'Study guide requested.'**
+  String get studyGuideRequested;
+
+  /// No description provided for @studyGuideReused.
+  ///
+  /// In en, this message translates to:
+  /// **'Existing study guide opened.'**
+  String get studyGuideReused;
+
+  /// No description provided for @studyGuideOpened.
+  ///
+  /// In en, this message translates to:
+  /// **'Study guide opened.'**
+  String get studyGuideOpened;
+
+  /// No description provided for @studyGuideUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Study guide is not available yet.'**
+  String get studyGuideUnavailable;
+
+  /// No description provided for @classLecturesLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load class recordings. Please try again.'**
+  String get classLecturesLoadFailed;
+
+  /// No description provided for @lectureTopic.
+  ///
+  /// In en, this message translates to:
+  /// **'Lecture topic'**
+  String get lectureTopic;
+
+  /// No description provided for @noLecturesYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No recordings yet'**
+  String get noLecturesYet;
+
+  /// No description provided for @durationValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Duration: {value}'**
+  String durationValue(String value);
+
+  /// No description provided for @studyGuideOpenFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not open the study guide.'**
+  String get studyGuideOpenFailed;
+
+  /// No description provided for @studyGuideRequesting.
+  ///
+  /// In en, this message translates to:
+  /// **'Requesting a study guide from completed transcripts...'**
+  String get studyGuideRequesting;
+
+  /// No description provided for @studyGuideAlreadyRequested.
+  ///
+  /// In en, this message translates to:
+  /// **'A study guide has already been requested from the completed transcripts.'**
+  String get studyGuideAlreadyRequested;
 }
 
 class _AppLocalizationsDelegate

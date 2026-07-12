@@ -482,4 +482,98 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get recordingContinuesWhenLocked =>
       'La grabación continúa aunque se bloquee la pantalla.';
+
+  @override
+  String get transcriptReady => 'Lista';
+
+  @override
+  String get transcriptProcessing => 'Procesando';
+
+  @override
+  String get transcriptQueued => 'En cola';
+
+  @override
+  String get transcriptFailed => 'Error';
+
+  @override
+  String get noTranscript => 'Sin transcripción';
+
+  @override
+  String get aiProcessing => 'IA: Procesando';
+
+  @override
+  String aiOutputsReady(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count resultados listos',
+      one: '1 resultado listo',
+    );
+    return 'IA: $_temp0';
+  }
+
+  @override
+  String get aiSummaryReady => 'IA: Resumen listo';
+
+  @override
+  String get aiNotesReady => 'IA: Notas listas';
+
+  @override
+  String get aiQuizReady => 'IA: Prueba lista';
+
+  @override
+  String get aiFailed => 'IA: Error';
+
+  @override
+  String get aiNotStarted => 'IA: No iniciada';
+
+  @override
+  String get generateStudyGuideTooltip =>
+      'Generar guía de estudio a partir de las grabaciones';
+
+  @override
+  String get materialsTooltip => 'Materiales';
+
+  @override
+  String get studyGuideRequestFailed =>
+      'No se pudo solicitar la guía de estudio. Inténtalo de nuevo.';
+
+  @override
+  String get studyGuideRequested => 'Se solicitó la guía de estudio.';
+
+  @override
+  String get studyGuideReused => 'Se abrió la guía de estudio existente.';
+
+  @override
+  String get studyGuideOpened => 'Se abrió la guía de estudio.';
+
+  @override
+  String get studyGuideUnavailable =>
+      'La guía de estudio aún no está disponible.';
+
+  @override
+  String get classLecturesLoadFailed =>
+      'No se pudieron cargar las grabaciones de la clase. Inténtalo de nuevo.';
+
+  @override
+  String get lectureTopic => 'Tema de la clase';
+
+  @override
+  String get noLecturesYet => 'Aún no hay grabaciones';
+
+  @override
+  String durationValue(String value) {
+    return 'Duración: $value';
+  }
+
+  @override
+  String get studyGuideOpenFailed => 'No se pudo abrir la guía de estudio.';
+
+  @override
+  String get studyGuideRequesting =>
+      'Solicitando una guía de estudio a partir de las transcripciones completadas...';
+
+  @override
+  String get studyGuideAlreadyRequested =>
+      'Ya se solicitó una guía de estudio a partir de las transcripciones completadas.';
 }

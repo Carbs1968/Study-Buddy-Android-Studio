@@ -468,4 +468,97 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get recordingContinuesWhenLocked =>
       'Recording continues if your screen locks.';
+
+  @override
+  String get transcriptReady => 'Ready';
+
+  @override
+  String get transcriptProcessing => 'Processing';
+
+  @override
+  String get transcriptQueued => 'Queued';
+
+  @override
+  String get transcriptFailed => 'Failed';
+
+  @override
+  String get noTranscript => 'No transcript';
+
+  @override
+  String get aiProcessing => 'AI: Processing';
+
+  @override
+  String aiOutputsReady(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count outputs ready',
+      one: '1 output ready',
+    );
+    return 'AI: $_temp0';
+  }
+
+  @override
+  String get aiSummaryReady => 'AI: Summary ready';
+
+  @override
+  String get aiNotesReady => 'AI: Notes ready';
+
+  @override
+  String get aiQuizReady => 'AI: Quiz ready';
+
+  @override
+  String get aiFailed => 'AI: Failed';
+
+  @override
+  String get aiNotStarted => 'AI: Not started';
+
+  @override
+  String get generateStudyGuideTooltip =>
+      'Generate study guide from recordings';
+
+  @override
+  String get materialsTooltip => 'Materials';
+
+  @override
+  String get studyGuideRequestFailed =>
+      'Could not request the study guide. Please try again.';
+
+  @override
+  String get studyGuideRequested => 'Study guide requested.';
+
+  @override
+  String get studyGuideReused => 'Existing study guide opened.';
+
+  @override
+  String get studyGuideOpened => 'Study guide opened.';
+
+  @override
+  String get studyGuideUnavailable => 'Study guide is not available yet.';
+
+  @override
+  String get classLecturesLoadFailed =>
+      'Could not load class recordings. Please try again.';
+
+  @override
+  String get lectureTopic => 'Lecture topic';
+
+  @override
+  String get noLecturesYet => 'No recordings yet';
+
+  @override
+  String durationValue(String value) {
+    return 'Duration: $value';
+  }
+
+  @override
+  String get studyGuideOpenFailed => 'Could not open the study guide.';
+
+  @override
+  String get studyGuideRequesting =>
+      'Requesting a study guide from completed transcripts...';
+
+  @override
+  String get studyGuideAlreadyRequested =>
+      'A study guide has already been requested from the completed transcripts.';
 }

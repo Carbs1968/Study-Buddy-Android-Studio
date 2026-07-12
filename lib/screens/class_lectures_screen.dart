@@ -2,9 +2,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 
-import '../l10n/strings.dart';
+import '../l10n/app_localizations.dart';
 import '../utils/helper.dart';
 import 'class_materials_screen.dart';
 import 'class_study_guide_screen.dart';
@@ -39,33 +38,44 @@ class _ClassLecturesScreenState extends State<ClassLecturesScreen> {
     return null;
   }
 
-  String _formatLectureDate(DateTime dt) {
-    return DateFormat('MMM d, yyyy • h:mm a').format(dt.toLocal());
+  String _formatLectureDate(BuildContext context, DateTime dt) {
+    final local = dt.toLocal();
+    final material = MaterialLocalizations.of(context);
+    return '${material.formatMediumDate(local)} • ${material.formatTimeOfDay(
+      TimeOfDay.fromDateTime(local),
+    )}';
   }
 
-  String _formatTranscriptStatus(String status) {
+  String _formatTranscriptStatus(
+    BuildContext context,
+    String status,
+  ) {
+    final strings = AppLocalizations.of(context);
+
     switch (status.toLowerCase()) {
       case 'done':
-        return 'Ready';
+        return strings.transcriptReady;
       case 'processing':
-        return 'Processing';
+        return strings.transcriptProcessing;
       case 'pending':
-        return 'Queued';
+        return strings.transcriptQueued;
       case 'error':
-        return 'Failed';
+        return strings.transcriptFailed;
       case 'none':
       case '':
-        return 'No transcript';
+        return strings.noTranscript;
       default:
         return status;
     }
   }
 
-  String _formatAiStatus({
+  String _formatAiStatus(
+    BuildContext context, {
     required String summaryStatus,
     required String notesStatus,
     required String quizStatus,
   }) {
+    final strings = AppLocalizations.of(context);
     final statuses = [
       summaryStatus.toLowerCase(),
       notesStatus.toLowerCase(),
@@ -73,23 +83,31 @@ class _ClassLecturesScreenState extends State<ClassLecturesScreen> {
     ];
 
     if (statuses.any((status) => status == 'pending' || status == 'processing')) {
-      return 'AI: Processing';
+      return strings.aiProcessing;
     }
 
     final readyCount = statuses.where((status) => status == 'done').length;
-    if (readyCount == 3) return 'AI: 3 outputs ready';
-    if (readyCount == 2) return 'AI: 2 outputs ready';
+    if (readyCount >= 2) {
+      return strings.aiOutputsReady(readyCount);
+    }
+
     if (readyCount == 1) {
-      if (summaryStatus.toLowerCase() == 'done') return 'AI: Summary ready';
-      if (notesStatus.toLowerCase() == 'done') return 'AI: Notes ready';
-      if (quizStatus.toLowerCase() == 'done') return 'AI: Quiz ready';
+      if (summaryStatus.toLowerCase() == 'done') {
+        return strings.aiSummaryReady;
+      }
+      if (notesStatus.toLowerCase() == 'done') {
+        return strings.aiNotesReady;
+      }
+      if (quizStatus.toLowerCase() == 'done') {
+        return strings.aiQuizReady;
+      }
     }
 
     if (statuses.any((status) => status == 'error')) {
-      return 'AI: Failed';
+      return strings.aiFailed;
     }
 
-    return 'AI: Not started';
+    return strings.aiNotStarted;
   }
 
   Future<void> _openOrRequestClassStudyGuide() async {
@@ -133,7 +151,7 @@ class _ClassLecturesScreenState extends State<ClassLecturesScreen> {
     } catch (_) {
       if (!mounted) return;
       messenger.showSnackBar(
-        const SnackBar(content: Text('Could not open study guide.')),
+        SnackBar(content: Text(AppLocalizations.of(context).studyGuideOpenFailed)),
       );
     }
   }
@@ -142,7 +160,7 @@ class _ClassLecturesScreenState extends State<ClassLecturesScreen> {
     final messenger = ScaffoldMessenger.of(context);
     try {
       messenger.showSnackBar(
-        const SnackBar(content: Text('Requesting study guide from completed transcripts...')),
+        SnackBar(content: Text(AppLocalizations.of(context).studyGuideRequesting)),
       );
 
       final callable =
@@ -155,29 +173,28 @@ class _ClassLecturesScreenState extends State<ClassLecturesScreen> {
 
       final data = result.data;
       final reused = data['reused'] == true;
-      final status = data['status']?.toString() ?? 'requested';
 
       if (!mounted) return;
       messenger.showSnackBar(
         SnackBar(
           content: Text(
             reused
-                ? 'Study guide already requested from completed transcripts ($status).'
-                : 'Study guide requested from completed transcripts.',
+                ? AppLocalizations.of(context).studyGuideAlreadyRequested
+                : AppLocalizations.of(context).studyGuideRequested,
           ),
         ),
       );
-    } on FirebaseFunctionsException catch (e) {
+    } on FirebaseFunctionsException {
       if (!mounted) return;
       messenger.showSnackBar(
         SnackBar(
-          content: Text(e.message ?? 'Could not request study guide.'),
+          content: Text(AppLocalizations.of(context).studyGuideRequestFailed),
         ),
       );
     } catch (_) {
       if (!mounted) return;
       messenger.showSnackBar(
-        const SnackBar(content: Text('Could not request study guide.')),
+        SnackBar(content: Text(AppLocalizations.of(context).studyGuideRequestFailed)),
       );
     }
   }
@@ -185,7 +202,7 @@ class _ClassLecturesScreenState extends State<ClassLecturesScreen> {
   @override
   Widget build(BuildContext context) {
     final uid = FirebaseAuth.instance.currentUser?.uid;
-    final strings = SBStrings.of(context);
+    final strings = AppLocalizations.of(context);
     final theme = Theme.of(context);
 
     if (uid == null) {
@@ -223,12 +240,12 @@ class _ClassLecturesScreenState extends State<ClassLecturesScreen> {
         elevation: 0,
         actions: [
           IconButton(
-            tooltip: 'Generate study guide from recordings',
+            tooltip: AppLocalizations.of(context).generateStudyGuideTooltip,
             icon: const Icon(Icons.auto_awesome_outlined),
             onPressed: hasStableClassContext ? _openOrRequestClassStudyGuide : null,
           ),
           IconButton(
-            tooltip: 'Materials',
+            tooltip: AppLocalizations.of(context).materialsTooltip,
             icon: const Icon(Icons.folder_copy_outlined),
             onPressed: hasStableClassContext
                 ? () {
@@ -290,7 +307,7 @@ class _ClassLecturesScreenState extends State<ClassLecturesScreen> {
                     child: Padding(
                       padding: const EdgeInsets.all(16),
                       child: Text(
-                        '${strings.errorLoading}: ${snap.error}',
+                        strings.classLecturesLoadFailed,
                         textAlign: TextAlign.center,
                       ),
                     ),
@@ -374,17 +391,22 @@ class _ClassLecturesScreenState extends State<ClassLecturesScreen> {
                     final contextParts = <String>[];
                     if (levelName.isNotEmpty) contextParts.add(levelName);
                     if (semesterName.isNotEmpty) contextParts.add(semesterName);
-                    if (dt != null) contextParts.add(_formatLectureDate(dt));
+                    if (dt != null) contextParts.add(_formatLectureDate(context, dt));
 
                     final detailParts = <String>[];
                     if (durationSeconds is num && durationSeconds > 0) {
                       detailParts.add(
-                        'Duration: ${formatDuration(Duration(seconds: durationSeconds.round()))}',
+                        AppLocalizations.of(context).durationValue(
+                          formatDuration(
+                            Duration(seconds: durationSeconds.round()),
+                          ),
+                        ),
                       );
                     }
-                    detailParts.add(_formatTranscriptStatus(status));
+                    detailParts.add(_formatTranscriptStatus(context, status));
 
                     final aiStatus = _formatAiStatus(
+                      context,
                       summaryStatus: summaryStatus,
                       notesStatus: notesStatus,
                       quizStatus: quizStatus,

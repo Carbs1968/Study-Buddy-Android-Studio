@@ -186,5 +186,45 @@
   "recordingsOrganizedByClass": "Las grabaciones se organizan por clase.",
   "chooseClassAndTopicToRecord": "Elige una clase e ingresa un tema para comenzar a grabar.",
   "recordingPausedHelp": "Grabación pausada. Toca Reanudar para continuar. Tu grabación sigue guardada.",
-  "recordingContinuesWhenLocked": "La grabación continúa aunque se bloquee la pantalla."
+  "recordingContinuesWhenLocked": "La grabación continúa aunque se bloquee la pantalla.",
+  "transcriptReady": "Lista",
+  "transcriptProcessing": "Procesando",
+  "transcriptQueued": "En cola",
+  "transcriptFailed": "Error",
+  "noTranscript": "Sin transcripción",
+  "aiProcessing": "IA: Procesando",
+  "aiOutputsReady": "IA: {count, plural, =1{1 resultado listo} other{{count} resultados listos}}",
+  "@aiOutputsReady": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "aiSummaryReady": "IA: Resumen listo",
+  "aiNotesReady": "IA: Notas listas",
+  "aiQuizReady": "IA: Prueba lista",
+  "aiFailed": "IA: Error",
+  "aiNotStarted": "IA: No iniciada",
+  "generateStudyGuideTooltip": "Generar guía de estudio a partir de las grabaciones",
+  "materialsTooltip": "Materiales",
+  "studyGuideRequestFailed": "No se pudo solicitar la guía de estudio. Inténtalo de nuevo.",
+  "studyGuideRequested": "Se solicitó la guía de estudio.",
+  "studyGuideReused": "Se abrió la guía de estudio existente.",
+  "studyGuideOpened": "Se abrió la guía de estudio.",
+  "studyGuideUnavailable": "La guía de estudio aún no está disponible.",
+  "classLecturesLoadFailed": "No se pudieron cargar las grabaciones de la clase. Inténtalo de nuevo.",
+  "lectureTopic": "Tema de la clase",
+  "noLecturesYet": "Aún no hay grabaciones",
+  "durationValue": "Duración: {value}",
+  "@durationValue": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "studyGuideOpenFailed": "No se pudo abrir la guía de estudio.",
+  "studyGuideRequesting": "Solicitando una guía de estudio a partir de las transcripciones completadas...",
+  "studyGuideAlreadyRequested": "Ya se solicitó una guía de estudio a partir de las transcripciones completadas."
 }

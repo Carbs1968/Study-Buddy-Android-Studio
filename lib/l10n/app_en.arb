@@ -186,5 +186,45 @@
   "recordingsOrganizedByClass": "Recordings are organized by class.",
   "chooseClassAndTopicToRecord": "Choose a class and enter a topic to start recording.",
   "recordingPausedHelp": "Recording paused. Tap Resume to continue. Your recording is still saved.",
-  "recordingContinuesWhenLocked": "Recording continues if your screen locks."
+  "recordingContinuesWhenLocked": "Recording continues if your screen locks.",
+  "transcriptReady": "Ready",
+  "transcriptProcessing": "Processing",
+  "transcriptQueued": "Queued",
+  "transcriptFailed": "Failed",
+  "noTranscript": "No transcript",
+  "aiProcessing": "AI: Processing",
+  "aiOutputsReady": "AI: {count, plural, =1{1 output ready} other{{count} outputs ready}}",
+  "@aiOutputsReady": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "aiSummaryReady": "AI: Summary ready",
+  "aiNotesReady": "AI: Notes ready",
+  "aiQuizReady": "AI: Quiz ready",
+  "aiFailed": "AI: Failed",
+  "aiNotStarted": "AI: Not started",
+  "generateStudyGuideTooltip": "Generate study guide from recordings",
+  "materialsTooltip": "Materials",
+  "studyGuideRequestFailed": "Could not request the study guide. Please try again.",
+  "studyGuideRequested": "Study guide requested.",
+  "studyGuideReused": "Existing study guide opened.",
+  "studyGuideOpened": "Study guide opened.",
+  "studyGuideUnavailable": "Study guide is not available yet.",
+  "classLecturesLoadFailed": "Could not load class recordings. Please try again.",
+  "lectureTopic": "Lecture topic",
+  "noLecturesYet": "No recordings yet",
+  "durationValue": "Duration: {value}",
+  "@durationValue": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "studyGuideOpenFailed": "Could not open the study guide.",
+  "studyGuideRequesting": "Requesting a study guide from completed transcripts...",
+  "studyGuideAlreadyRequested": "A study guide has already been requested from the completed transcripts."
 }
