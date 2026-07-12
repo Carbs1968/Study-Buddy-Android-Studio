@@ -3475,16 +3475,33 @@ Earlier localization foundation:
 - `11c187a Localize academic settings screen`
 - `25eaf06 Localize settings screen`
 
+### Android-native localization and verification
+
+Completed follow-up work:
+- Localized the Android app label in default and Spanish native resources.
+- Localized the foreground recording notification title and body in English and Spanish.
+- Localized the Android recording notification channel name in English and Spanish.
+- Preserved the existing notification channel ID, notification ID, service actions, intents, recorder state, wakelock, and foreground-service behavior.
+- Added `tool/check_localization.sh` to:
+  - run `flutter gen-l10n`
+  - validate the untranslated-message report
+  - run `flutter analyze`
+  - detect uncommitted generated localization changes
+- Completed physical Android validation of the localized recorder helper and native recording notification behavior.
+
+Commits:
+- `1efa614 Localize recorder ready helper`
+- `6de0387 Localize Android recording notification`
+- `7cb31f7 Add localization verification script`
+
 ### Remaining localization follow-up
 
-The active Flutter UI migration is complete.
+The active Flutter and Android-native localization work is complete.
 
 Separate follow-up work:
-1. Audit Android-native notification/channel strings and native resources.
-2. Review Google Play listing text, screenshots, release notes, privacy text, and Spanish store metadata.
-3. Add automated English/Spanish widget tests.
-4. Add ARB key-parity validation to CI.
-5. Add an automated hardcoded user-facing string check.
-6. Continue verifying that backend and SDK errors are converted into safe localized UI messages.
-7. Decide whether future AI generation should explicitly request the user's selected language; existing AI output remains displayed as generated.
+1. Review Google Play listing text, screenshots, release notes, privacy text, and Spanish store metadata.
+2. Add automated English/Spanish widget tests.
+3. Add an automated hardcoded user-facing string check.
+4. Continue verifying that backend and SDK errors are converted into safe localized UI messages.
+5. Decide whether future AI generation should explicitly request the user's selected language; existing AI output remains displayed as generated.
 
