@@ -28,6 +28,7 @@ import 'package:study_buddy/utils/utils.dart';
 // --------------------
 import 'firebase_options.dart';
 import 'l10n/strings.dart';
+import 'l10n/app_localizations.dart';
 // Added import for AcademicSettingsScreen at top-level to avoid misplaced directives.
 import 'screens/home_shell/home_shell.dart';
 import 'screens/login_screen.dart';
@@ -214,8 +215,9 @@ class MyApp extends StatelessWidget {
           home: const AuthGate(),
           debugShowCheckedModeBanner: false,
           locale: locale,
-          supportedLocales: SBStrings.supportedLocales,
+          supportedLocales: AppLocalizations.supportedLocales,
           localizationsDelegates: const [
+            AppLocalizations.delegate,
             SBStrings.delegate,
             GlobalMaterialLocalizations.delegate,
             GlobalWidgetsLocalizations.delegate,
