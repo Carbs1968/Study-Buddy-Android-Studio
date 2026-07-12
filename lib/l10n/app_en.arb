@@ -125,5 +125,65 @@
   "selectClass": "Select a class",
   "errorLoading": "Error loading",
   "noRecordingsYet": "No recordings yet",
-  "noClassesMatch": "No classes match your search"
+  "noClassesMatch": "No classes match your search",
+  "loadingAcademicSettings": "Loading academic settings...",
+  "saveDestination": "Save destination",
+  "academicYearLevelValue": "Academic year / level: {value}",
+  "@academicYearLevelValue": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "semesterValue": "Semester: {value}",
+  "@semesterValue": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "newClassLabel": "Or enter a new class",
+  "newClassHelper": "Use this if the class is not listed yet.",
+  "topicLectureName": "Topic / lecture name",
+  "topicLectureExample": "Example: Exam review or Chapter 4 notes.",
+  "recordingSavedLocally": "Recording saved locally. Upload it to Study Buddy, or discard this local copy.",
+  "recordingComplete": "Recording complete",
+  "recording": "Recording",
+  "readyToRecord": "Ready to record",
+  "uploading": "Uploading...",
+  "chooseUploadOrDiscard": "Choose Upload or Discard",
+  "resume": "Resume",
+  "pause": "Pause",
+  "stop": "Stop",
+  "upload": "Upload",
+  "discard": "Discard",
+  "uploadingTo": "Uploading to {destination}",
+  "@uploadingTo": {
+    "placeholders": {
+      "destination": {
+        "type": "String"
+      }
+    }
+  },
+  "recordingStartFailed": "Could not start recording. Please try again.",
+  "recordingDidNotStart": "Recording did not start.",
+  "pauseResumeFailed": "Could not pause or resume recording. Please try again.",
+  "recordingBackendUnknown": "Recording controls are unavailable because the recording state could not be confirmed.",
+  "recordingStopUnconfirmed": "Could not confirm that recording stopped. Please try again before leaving this screen.",
+  "uploadCompleteReady": "Upload complete. Ready for your next lecture!",
+  "uploadFailedSafe": "Upload failed. Please try again.",
+  "recordingCorrupt": "The recording appears empty or corrupt. Please record again.",
+  "academicSettingsRequiredBeforeRecording": "Save your academic level and semester in Academic Settings before recording.",
+  "recordingRecoveredPartial": "Recording appears to have stopped. Recovered audio may be partial.",
+  "recoveredRecordingSmall": "A pending recording was recovered, but it appears unusually small. You can try uploading it or discard it.",
+  "recordingRecoveryMissing": "Recording appears to have stopped, but no recoverable audio file was found.",
+  "microphonePermissionDenied": "Microphone permission denied.",
+  "fileMissing": "The recording file is missing.",
+  "classTopicRequiredBeforeUpload": "Enter a class and topic before uploading.",
+  "chooseExistingClass": "Choose an existing class",
+  "recordingsOrganizedByClass": "Recordings are organized by class.",
+  "chooseClassAndTopicToRecord": "Choose a class and enter a topic to start recording.",
+  "recordingPausedHelp": "Recording paused. Tap Resume to continue. Your recording is still saved."
 }

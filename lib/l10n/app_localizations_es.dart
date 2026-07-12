@@ -336,4 +336,146 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get noClassesMatch => 'Ninguna clase coincide con tu búsqueda';
+
+  @override
+  String get loadingAcademicSettings =>
+      'Cargando la configuración académica...';
+
+  @override
+  String get saveDestination => 'Destino de guardado';
+
+  @override
+  String academicYearLevelValue(String value) {
+    return 'Año académico / nivel: $value';
+  }
+
+  @override
+  String semesterValue(String value) {
+    return 'Semestre: $value';
+  }
+
+  @override
+  String get newClassLabel => 'O ingresa una clase nueva';
+
+  @override
+  String get newClassHelper => 'Usa esta opción si la clase aún no aparece.';
+
+  @override
+  String get topicLectureName => 'Nombre del tema / clase';
+
+  @override
+  String get topicLectureExample =>
+      'Ejemplo: Repaso para examen o notas del capítulo 4.';
+
+  @override
+  String get recordingSavedLocally =>
+      'La grabación se guardó localmente. Súbela a Study Buddy o descarta esta copia local.';
+
+  @override
+  String get recordingComplete => 'Grabación completada';
+
+  @override
+  String get recording => 'Grabando';
+
+  @override
+  String get readyToRecord => 'Listo para grabar';
+
+  @override
+  String get uploading => 'Subiendo...';
+
+  @override
+  String get chooseUploadOrDiscard => 'Elige subir o descartar';
+
+  @override
+  String get resume => 'Reanudar';
+
+  @override
+  String get pause => 'Pausar';
+
+  @override
+  String get stop => 'Detener';
+
+  @override
+  String get upload => 'Subir';
+
+  @override
+  String get discard => 'Descartar';
+
+  @override
+  String uploadingTo(String destination) {
+    return 'Subiendo a $destination';
+  }
+
+  @override
+  String get recordingStartFailed =>
+      'No se pudo iniciar la grabación. Inténtalo de nuevo.';
+
+  @override
+  String get recordingDidNotStart => 'La grabación no se inició.';
+
+  @override
+  String get pauseResumeFailed =>
+      'No se pudo pausar o reanudar la grabación. Inténtalo de nuevo.';
+
+  @override
+  String get recordingBackendUnknown =>
+      'Los controles de grabación no están disponibles porque no se pudo confirmar el estado de la grabación.';
+
+  @override
+  String get recordingStopUnconfirmed =>
+      'No se pudo confirmar que la grabación se detuvo. Inténtalo de nuevo antes de salir de esta pantalla.';
+
+  @override
+  String get uploadCompleteReady =>
+      'La carga se completó. ¡Todo listo para tu próxima clase!';
+
+  @override
+  String get uploadFailedSafe =>
+      'No se pudo subir la grabación. Inténtalo de nuevo.';
+
+  @override
+  String get recordingCorrupt =>
+      'La grabación parece estar vacía o dañada. Graba de nuevo.';
+
+  @override
+  String get academicSettingsRequiredBeforeRecording =>
+      'Guarda tu nivel académico y semestre en Configuración académica antes de grabar.';
+
+  @override
+  String get recordingRecoveredPartial =>
+      'Parece que la grabación se detuvo. El audio recuperado puede estar incompleto.';
+
+  @override
+  String get recoveredRecordingSmall =>
+      'Se recuperó una grabación pendiente, pero parece ser inusualmente pequeña. Puedes intentar subirla o descartarla.';
+
+  @override
+  String get recordingRecoveryMissing =>
+      'Parece que la grabación se detuvo, pero no se encontró ningún archivo de audio recuperable.';
+
+  @override
+  String get microphonePermissionDenied =>
+      'Se denegó el permiso del micrófono.';
+
+  @override
+  String get fileMissing => 'Falta el archivo de la grabación.';
+
+  @override
+  String get classTopicRequiredBeforeUpload =>
+      'Ingresa una clase y un tema antes de subir la grabación.';
+
+  @override
+  String get chooseExistingClass => 'Elige una clase existente';
+
+  @override
+  String get recordingsOrganizedByClass =>
+      'Las grabaciones se organizan por clase.';
+
+  @override
+  String get chooseClassAndTopicToRecord =>
+      'Elige una clase e ingresa un tema para comenzar a grabar.';
+
+  @override
+  String get recordingPausedHelp =>
+      'Grabación pausada. Toca Reanudar para continuar. Tu grabación sigue guardada.';
 }

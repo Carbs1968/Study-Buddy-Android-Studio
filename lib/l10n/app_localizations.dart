@@ -643,6 +643,240 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No classes match your search'**
   String get noClassesMatch;
+
+  /// No description provided for @loadingAcademicSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading academic settings...'**
+  String get loadingAcademicSettings;
+
+  /// No description provided for @saveDestination.
+  ///
+  /// In en, this message translates to:
+  /// **'Save destination'**
+  String get saveDestination;
+
+  /// No description provided for @academicYearLevelValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Academic year / level: {value}'**
+  String academicYearLevelValue(String value);
+
+  /// No description provided for @semesterValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Semester: {value}'**
+  String semesterValue(String value);
+
+  /// No description provided for @newClassLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Or enter a new class'**
+  String get newClassLabel;
+
+  /// No description provided for @newClassHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'Use this if the class is not listed yet.'**
+  String get newClassHelper;
+
+  /// No description provided for @topicLectureName.
+  ///
+  /// In en, this message translates to:
+  /// **'Topic / lecture name'**
+  String get topicLectureName;
+
+  /// No description provided for @topicLectureExample.
+  ///
+  /// In en, this message translates to:
+  /// **'Example: Exam review or Chapter 4 notes.'**
+  String get topicLectureExample;
+
+  /// No description provided for @recordingSavedLocally.
+  ///
+  /// In en, this message translates to:
+  /// **'Recording saved locally. Upload it to Study Buddy, or discard this local copy.'**
+  String get recordingSavedLocally;
+
+  /// No description provided for @recordingComplete.
+  ///
+  /// In en, this message translates to:
+  /// **'Recording complete'**
+  String get recordingComplete;
+
+  /// No description provided for @recording.
+  ///
+  /// In en, this message translates to:
+  /// **'Recording'**
+  String get recording;
+
+  /// No description provided for @readyToRecord.
+  ///
+  /// In en, this message translates to:
+  /// **'Ready to record'**
+  String get readyToRecord;
+
+  /// No description provided for @uploading.
+  ///
+  /// In en, this message translates to:
+  /// **'Uploading...'**
+  String get uploading;
+
+  /// No description provided for @chooseUploadOrDiscard.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose Upload or Discard'**
+  String get chooseUploadOrDiscard;
+
+  /// No description provided for @resume.
+  ///
+  /// In en, this message translates to:
+  /// **'Resume'**
+  String get resume;
+
+  /// No description provided for @pause.
+  ///
+  /// In en, this message translates to:
+  /// **'Pause'**
+  String get pause;
+
+  /// No description provided for @stop.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop'**
+  String get stop;
+
+  /// No description provided for @upload.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload'**
+  String get upload;
+
+  /// No description provided for @discard.
+  ///
+  /// In en, this message translates to:
+  /// **'Discard'**
+  String get discard;
+
+  /// No description provided for @uploadingTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Uploading to {destination}'**
+  String uploadingTo(String destination);
+
+  /// No description provided for @recordingStartFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not start recording. Please try again.'**
+  String get recordingStartFailed;
+
+  /// No description provided for @recordingDidNotStart.
+  ///
+  /// In en, this message translates to:
+  /// **'Recording did not start.'**
+  String get recordingDidNotStart;
+
+  /// No description provided for @pauseResumeFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not pause or resume recording. Please try again.'**
+  String get pauseResumeFailed;
+
+  /// No description provided for @recordingBackendUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Recording controls are unavailable because the recording state could not be confirmed.'**
+  String get recordingBackendUnknown;
+
+  /// No description provided for @recordingStopUnconfirmed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not confirm that recording stopped. Please try again before leaving this screen.'**
+  String get recordingStopUnconfirmed;
+
+  /// No description provided for @uploadCompleteReady.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload complete. Ready for your next lecture!'**
+  String get uploadCompleteReady;
+
+  /// No description provided for @uploadFailedSafe.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload failed. Please try again.'**
+  String get uploadFailedSafe;
+
+  /// No description provided for @recordingCorrupt.
+  ///
+  /// In en, this message translates to:
+  /// **'The recording appears empty or corrupt. Please record again.'**
+  String get recordingCorrupt;
+
+  /// No description provided for @academicSettingsRequiredBeforeRecording.
+  ///
+  /// In en, this message translates to:
+  /// **'Save your academic level and semester in Academic Settings before recording.'**
+  String get academicSettingsRequiredBeforeRecording;
+
+  /// No description provided for @recordingRecoveredPartial.
+  ///
+  /// In en, this message translates to:
+  /// **'Recording appears to have stopped. Recovered audio may be partial.'**
+  String get recordingRecoveredPartial;
+
+  /// No description provided for @recoveredRecordingSmall.
+  ///
+  /// In en, this message translates to:
+  /// **'A pending recording was recovered, but it appears unusually small. You can try uploading it or discard it.'**
+  String get recoveredRecordingSmall;
+
+  /// No description provided for @recordingRecoveryMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'Recording appears to have stopped, but no recoverable audio file was found.'**
+  String get recordingRecoveryMissing;
+
+  /// No description provided for @microphonePermissionDenied.
+  ///
+  /// In en, this message translates to:
+  /// **'Microphone permission denied.'**
+  String get microphonePermissionDenied;
+
+  /// No description provided for @fileMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'The recording file is missing.'**
+  String get fileMissing;
+
+  /// No description provided for @classTopicRequiredBeforeUpload.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a class and topic before uploading.'**
+  String get classTopicRequiredBeforeUpload;
+
+  /// No description provided for @chooseExistingClass.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose an existing class'**
+  String get chooseExistingClass;
+
+  /// No description provided for @recordingsOrganizedByClass.
+  ///
+  /// In en, this message translates to:
+  /// **'Recordings are organized by class.'**
+  String get recordingsOrganizedByClass;
+
+  /// No description provided for @chooseClassAndTopicToRecord.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a class and enter a topic to start recording.'**
+  String get chooseClassAndTopicToRecord;
+
+  /// No description provided for @recordingPausedHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Recording paused. Tap Resume to continue. Your recording is still saved.'**
+  String get recordingPausedHelp;
 }
 
 class _AppLocalizationsDelegate

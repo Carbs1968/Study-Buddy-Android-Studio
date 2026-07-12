@@ -125,5 +125,65 @@
   "selectClass": "Selecciona una clase",
   "errorLoading": "Error al cargar",
   "noRecordingsYet": "Aún no hay grabaciones",
-  "noClassesMatch": "Ninguna clase coincide con tu búsqueda"
+  "noClassesMatch": "Ninguna clase coincide con tu búsqueda",
+  "loadingAcademicSettings": "Cargando la configuración académica...",
+  "saveDestination": "Destino de guardado",
+  "academicYearLevelValue": "Año académico / nivel: {value}",
+  "@academicYearLevelValue": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "semesterValue": "Semestre: {value}",
+  "@semesterValue": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "newClassLabel": "O ingresa una clase nueva",
+  "newClassHelper": "Usa esta opción si la clase aún no aparece.",
+  "topicLectureName": "Nombre del tema / clase",
+  "topicLectureExample": "Ejemplo: Repaso para examen o notas del capítulo 4.",
+  "recordingSavedLocally": "La grabación se guardó localmente. Súbela a Study Buddy o descarta esta copia local.",
+  "recordingComplete": "Grabación completada",
+  "recording": "Grabando",
+  "readyToRecord": "Listo para grabar",
+  "uploading": "Subiendo...",
+  "chooseUploadOrDiscard": "Elige subir o descartar",
+  "resume": "Reanudar",
+  "pause": "Pausar",
+  "stop": "Detener",
+  "upload": "Subir",
+  "discard": "Descartar",
+  "uploadingTo": "Subiendo a {destination}",
+  "@uploadingTo": {
+    "placeholders": {
+      "destination": {
+        "type": "String"
+      }
+    }
+  },
+  "recordingStartFailed": "No se pudo iniciar la grabación. Inténtalo de nuevo.",
+  "recordingDidNotStart": "La grabación no se inició.",
+  "pauseResumeFailed": "No se pudo pausar o reanudar la grabación. Inténtalo de nuevo.",
+  "recordingBackendUnknown": "Los controles de grabación no están disponibles porque no se pudo confirmar el estado de la grabación.",
+  "recordingStopUnconfirmed": "No se pudo confirmar que la grabación se detuvo. Inténtalo de nuevo antes de salir de esta pantalla.",
+  "uploadCompleteReady": "La carga se completó. ¡Todo listo para tu próxima clase!",
+  "uploadFailedSafe": "No se pudo subir la grabación. Inténtalo de nuevo.",
+  "recordingCorrupt": "La grabación parece estar vacía o dañada. Graba de nuevo.",
+  "academicSettingsRequiredBeforeRecording": "Guarda tu nivel académico y semestre en Configuración académica antes de grabar.",
+  "recordingRecoveredPartial": "Parece que la grabación se detuvo. El audio recuperado puede estar incompleto.",
+  "recoveredRecordingSmall": "Se recuperó una grabación pendiente, pero parece ser inusualmente pequeña. Puedes intentar subirla o descartarla.",
+  "recordingRecoveryMissing": "Parece que la grabación se detuvo, pero no se encontró ningún archivo de audio recuperable.",
+  "microphonePermissionDenied": "Se denegó el permiso del micrófono.",
+  "fileMissing": "Falta el archivo de la grabación.",
+  "classTopicRequiredBeforeUpload": "Ingresa una clase y un tema antes de subir la grabación.",
+  "chooseExistingClass": "Elige una clase existente",
+  "recordingsOrganizedByClass": "Las grabaciones se organizan por clase.",
+  "chooseClassAndTopicToRecord": "Elige una clase e ingresa un tema para comenzar a grabar.",
+  "recordingPausedHelp": "Grabación pausada. Toca Reanudar para continuar. Tu grabación sigue guardada."
 }

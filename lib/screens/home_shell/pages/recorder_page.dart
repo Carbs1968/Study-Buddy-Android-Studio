@@ -13,7 +13,7 @@ import 'package:record/record.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 
 import '../../../firebase_options.dart';
-import '../../../l10n/strings.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../../utils/app_logger.dart';
 import '../../../utils/helper.dart';
 
@@ -64,7 +64,7 @@ class _RecorderPageState extends State<RecorderPage> with WidgetsBindingObserver
       _academicSettingsSub;
 
   String get _titleText {
-    final strings = SBStrings.of(context);
+    final strings = AppLocalizations.of(context);
     if (_recordingComplete) return strings.recordingComplete;
     if (_isRecording) return strings.recording;
     return strings.readyToRecord;
@@ -73,18 +73,18 @@ class _RecorderPageState extends State<RecorderPage> with WidgetsBindingObserver
   String get _clockText => formatDuration(Duration(seconds: _elapsedSeconds));
 
   String get _helperText {
-    final strings = SBStrings.of(context);
+    final strings = AppLocalizations.of(context);
     if (_isLoadingAcademicSettings) return 'Loading...';
     if (_isUploading) return strings.uploading;
     if (_recordingComplete) return strings.chooseUploadOrDiscard;
     if (_isRecording && _isPaused) {
-      return 'Recording paused. Tap Resume to continue. Your recording is still saved.';
+      return AppLocalizations.of(context).recordingPausedHelp;
     }
     if (_isRecording) {
       return 'Recording continues if your screen locks.';
     }
     if (!_isReadyToRecord) {
-      return 'Choose a class and enter a topic to start recording.';
+      return AppLocalizations.of(context).chooseClassAndTopicToRecord;
     }
     return 'Ready to record. This lecture will be saved to the selected class and topic.';
   }
@@ -215,9 +215,9 @@ class _RecorderPageState extends State<RecorderPage> with WidgetsBindingObserver
 
     if (!ok && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+        SnackBar(
           content: Text(
-            'Please save your academic level and semester first in Academic Settings.',
+            AppLocalizations.of(context).academicSettingsRequiredBeforeRecording,
           ),
         ),
       );
@@ -298,6 +298,9 @@ class _RecorderPageState extends State<RecorderPage> with WidgetsBindingObserver
   Future<bool> _restoreNativeRecordingState() async {
     if (!Platform.isAndroid || _debugForcePluginRecorder) return false;
 
+    final recoveryMessage =
+        AppLocalizations.of(context).recordingRecoveredPartial;
+
     try {
       final raw = await _recSvc.invokeMapMethod<String, dynamic>('getServiceState');
       if (raw == null) return false;
@@ -312,7 +315,7 @@ class _RecorderPageState extends State<RecorderPage> with WidgetsBindingObserver
         appLogger('Native recording state looks stale/unhealthy: $raw');
         final recovered = await _recoverPartialNativeRecording(
           restoredPath,
-          'Recording appears to have stopped. Recovered audio may be partial.',
+          recoveryMessage,
         );
         return recovered;
       }
@@ -442,7 +445,7 @@ class _RecorderPageState extends State<RecorderPage> with WidgetsBindingObserver
         SnackBar(
           content: Text(
             warning ??
-                'Recovered a pending recording, but it looks very small ($len bytes). You can try uploading it or discard it.',
+                AppLocalizations.of(context).recoveredRecordingSmall,
           ),
         ),
       );
@@ -460,6 +463,9 @@ class _RecorderPageState extends State<RecorderPage> with WidgetsBindingObserver
     }
 
     _checkingRecordingHealth = true;
+    final recoveryMessage =
+        AppLocalizations.of(context).recordingRecoveredPartial;
+
     try {
       final raw = await _recSvc.invokeMapMethod<String, dynamic>('getServiceState');
       if (raw == null || _isHealthyNativeRecordingState(raw)) return;
@@ -471,7 +477,7 @@ class _RecorderPageState extends State<RecorderPage> with WidgetsBindingObserver
       if (recoveredPath != null && recoveredPath.isNotEmpty) {
         final recovered = await _recoverPartialNativeRecording(
           recoveredPath,
-          'Recording appears to have stopped. Recovered audio may be partial.',
+          recoveryMessage,
         );
         if (recovered) {
           await WakelockPlus.disable();
@@ -489,9 +495,9 @@ class _RecorderPageState extends State<RecorderPage> with WidgetsBindingObserver
       if (!mounted) return;
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+        SnackBar(
           content: Text(
-            'Recording appears to have stopped, but no recoverable audio file was found.',
+            AppLocalizations.of(context).recordingRecoveryMissing,
           ),
         ),
       );
@@ -594,7 +600,7 @@ class _RecorderPageState extends State<RecorderPage> with WidgetsBindingObserver
       appLogger('Microphone permission missing/denied');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Microphone permission denied')),
+          SnackBar(content: Text(AppLocalizations.of(context).microphonePermissionDenied)),
         );
       }
       return;
@@ -667,7 +673,7 @@ class _RecorderPageState extends State<RecorderPage> with WidgetsBindingObserver
         _recordingBackend = _RecordingBackend.none;
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Could not start recording: $e')),
+            SnackBar(content: Text(AppLocalizations.of(context).recordingStartFailed)),
           );
         }
         await WakelockPlus.disable();
@@ -689,7 +695,7 @@ class _RecorderPageState extends State<RecorderPage> with WidgetsBindingObserver
       _recordingBackend = _RecordingBackend.none;
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Recording did not start')),
+          SnackBar(content: Text(AppLocalizations.of(context).recordingDidNotStart)),
         );
       }
       await WakelockPlus.disable();
@@ -717,7 +723,7 @@ class _RecorderPageState extends State<RecorderPage> with WidgetsBindingObserver
           appLogger('Service pause/resume failed: $e');
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Pause/Resume failed: $e')),
+              SnackBar(content: Text(AppLocalizations.of(context).pauseResumeFailed)),
             );
           }
         }
@@ -735,7 +741,7 @@ class _RecorderPageState extends State<RecorderPage> with WidgetsBindingObserver
           appLogger('Pause/resume error: $e');
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Pause/Resume failed: $e')),
+              SnackBar(content: Text(AppLocalizations.of(context).pauseResumeFailed)),
             );
           }
         }
@@ -744,8 +750,10 @@ class _RecorderPageState extends State<RecorderPage> with WidgetsBindingObserver
         appLogger('Pause/resume blocked: recording backend is unknown.');
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Cannot pause/resume: recording backend is unknown.'),
+            SnackBar(
+              content: Text(
+                AppLocalizations.of(context).recordingBackendUnknown,
+              ),
             ),
           );
         }
@@ -809,9 +817,9 @@ class _RecorderPageState extends State<RecorderPage> with WidgetsBindingObserver
       if (!stopped || usablePath == null || usablePath.isEmpty) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
+            SnackBar(
               content: Text(
-                'Could not confirm recording stopped. Please try again before leaving this screen.',
+                AppLocalizations.of(context).recordingStopUnconfirmed,
               ),
             ),
           );
@@ -864,7 +872,7 @@ class _RecorderPageState extends State<RecorderPage> with WidgetsBindingObserver
       appLogger('Upload requested but file missing: $_filePath');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('File missing')),
+          SnackBar(content: Text(AppLocalizations.of(context).fileMissing)),
         );
       }
       return;
@@ -910,8 +918,10 @@ class _RecorderPageState extends State<RecorderPage> with WidgetsBindingObserver
             _uploadPhase = null;
           });
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Please enter a class and topic before uploading.'),
+            SnackBar(
+              content: Text(
+                AppLocalizations.of(context).classTopicRequiredBeforeUpload,
+              ),
             ),
           );
         }
@@ -1086,8 +1096,10 @@ class _RecorderPageState extends State<RecorderPage> with WidgetsBindingObserver
         _selectedExistingClass = false;
 
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Upload complete. Ready for your next lecture!'),
+          SnackBar(
+            content: Text(
+              AppLocalizations.of(context).uploadCompleteReady,
+            ),
           ),
         );
       }
@@ -1120,7 +1132,7 @@ class _RecorderPageState extends State<RecorderPage> with WidgetsBindingObserver
           _uploadPhase = null;
         });
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Upload failed: $e')),
+          SnackBar(content: Text(AppLocalizations.of(context).uploadFailedSafe)),
         );
       }
     }
@@ -1153,7 +1165,7 @@ class _RecorderPageState extends State<RecorderPage> with WidgetsBindingObserver
     final len = await _waitForStableFileLength(f);
     appLogger('Finalized file length before upload: $len bytes');
     if (len < 4096) {
-      throw 'Recording looks empty or corrupt (size $len bytes). Please record again.';
+      throw StateError('recording-corrupt:$len');
     }
   }
 
@@ -1227,7 +1239,7 @@ class _RecorderPageState extends State<RecorderPage> with WidgetsBindingObserver
             const SizedBox(width: 10),
             Expanded(
               child: Text(
-                'Loading academic settings...',
+                AppLocalizations.of(context).loadingAcademicSettings,
                 style: TextStyle(color: textColor),
               ),
             ),
@@ -1238,7 +1250,7 @@ class _RecorderPageState extends State<RecorderPage> with WidgetsBindingObserver
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Save destination',
+              AppLocalizations.of(context).saveDestination,
               style: TextStyle(
                 fontWeight: FontWeight.w700,
                 fontSize: 16,
@@ -1247,7 +1259,7 @@ class _RecorderPageState extends State<RecorderPage> with WidgetsBindingObserver
             ),
             const SizedBox(height: 10),
             Text(
-              'Academic year / level: ${_levelName!}',
+              AppLocalizations.of(context).academicYearLevelValue(_levelName!),
               style: TextStyle(
                 color: textColor,
                 fontSize: 15,
@@ -1255,7 +1267,7 @@ class _RecorderPageState extends State<RecorderPage> with WidgetsBindingObserver
             ),
             const SizedBox(height: 4),
             Text(
-              'Semester: ${_semesterName!}',
+              AppLocalizations.of(context).semesterValue(_semesterName!),
               style: TextStyle(
                 color: textColor,
                 fontSize: 15,
@@ -1264,7 +1276,8 @@ class _RecorderPageState extends State<RecorderPage> with WidgetsBindingObserver
           ],
         )
             : Text(
-          'Please save your academic level and semester in Academic Settings before recording.',
+          AppLocalizations.of(context)
+              .academicSettingsRequiredBeforeRecording,
           style: TextStyle(
             color: textColor,
             fontSize: 15,
@@ -1275,7 +1288,7 @@ class _RecorderPageState extends State<RecorderPage> with WidgetsBindingObserver
 
   @override
   Widget build(BuildContext context) {
-    final strings = SBStrings.of(context);
+    final strings = AppLocalizations.of(context);
 
     return Scaffold(
       appBar: AppBar(
@@ -1375,9 +1388,9 @@ class _RecorderPageState extends State<RecorderPage> with WidgetsBindingObserver
                                 DropdownButtonFormField<String>(
                                   initialValue: dropdownValue,
                                   decoration: InputDecoration(
-                                    labelText: 'Choose an existing class',
+                                    labelText: strings.chooseExistingClass,
                                     helperText: canEditRecordingContext && !_isReadyToRecord
-                                        ? 'Recordings are organized by class.'
+                                        ? strings.recordingsOrganizedByClass
                                         : null,
                                     border: const OutlineInputBorder(),
                                   ),
@@ -1412,9 +1425,9 @@ class _RecorderPageState extends State<RecorderPage> with WidgetsBindingObserver
                                     controller: _classCtl,
                                     enabled: canEditRecordingContext,
                                     decoration: InputDecoration(
-                                      labelText: 'Or enter a new class',
+                                      labelText: strings.newClassLabel,
                                       helperText: canEditRecordingContext && !_isReadyToRecord
-                                          ? 'Use this if the class is not listed yet.'
+                                          ? strings.newClassHelper
                                           : null,
                                       border: const OutlineInputBorder(),
                                     ),
@@ -1432,12 +1445,12 @@ class _RecorderPageState extends State<RecorderPage> with WidgetsBindingObserver
                           enabled:
                           !_isRecording && !_isUploading && !_recordingComplete,
                           decoration: InputDecoration(
-                            labelText: 'Topic / lecture name',
+                            labelText: strings.topicLectureName,
                             helperText: !_isRecording &&
                                     !_isUploading &&
                                     !_recordingComplete &&
                                     _topicCtl.text.trim().isEmpty
-                                ? 'Example: Exam review or Chapter 4 notes.'
+                                ? strings.topicLectureExample
                                 : null,
                             border: const OutlineInputBorder(),
                           ),
@@ -1544,7 +1557,7 @@ class _RecorderPageState extends State<RecorderPage> with WidgetsBindingObserver
                         if (_recordingComplete) ...[
                           const SizedBox(height: 8),
                           Text(
-                            'Recording saved locally. Upload it to Study Buddy, or discard this local copy.',
+                            strings.recordingSavedLocally,
                             textAlign: TextAlign.center,
                             style: TextStyle(
                               color: Colors.grey.shade700,

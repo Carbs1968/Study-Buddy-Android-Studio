@@ -327,4 +327,141 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get noClassesMatch => 'No classes match your search';
+
+  @override
+  String get loadingAcademicSettings => 'Loading academic settings...';
+
+  @override
+  String get saveDestination => 'Save destination';
+
+  @override
+  String academicYearLevelValue(String value) {
+    return 'Academic year / level: $value';
+  }
+
+  @override
+  String semesterValue(String value) {
+    return 'Semester: $value';
+  }
+
+  @override
+  String get newClassLabel => 'Or enter a new class';
+
+  @override
+  String get newClassHelper => 'Use this if the class is not listed yet.';
+
+  @override
+  String get topicLectureName => 'Topic / lecture name';
+
+  @override
+  String get topicLectureExample => 'Example: Exam review or Chapter 4 notes.';
+
+  @override
+  String get recordingSavedLocally =>
+      'Recording saved locally. Upload it to Study Buddy, or discard this local copy.';
+
+  @override
+  String get recordingComplete => 'Recording complete';
+
+  @override
+  String get recording => 'Recording';
+
+  @override
+  String get readyToRecord => 'Ready to record';
+
+  @override
+  String get uploading => 'Uploading...';
+
+  @override
+  String get chooseUploadOrDiscard => 'Choose Upload or Discard';
+
+  @override
+  String get resume => 'Resume';
+
+  @override
+  String get pause => 'Pause';
+
+  @override
+  String get stop => 'Stop';
+
+  @override
+  String get upload => 'Upload';
+
+  @override
+  String get discard => 'Discard';
+
+  @override
+  String uploadingTo(String destination) {
+    return 'Uploading to $destination';
+  }
+
+  @override
+  String get recordingStartFailed =>
+      'Could not start recording. Please try again.';
+
+  @override
+  String get recordingDidNotStart => 'Recording did not start.';
+
+  @override
+  String get pauseResumeFailed =>
+      'Could not pause or resume recording. Please try again.';
+
+  @override
+  String get recordingBackendUnknown =>
+      'Recording controls are unavailable because the recording state could not be confirmed.';
+
+  @override
+  String get recordingStopUnconfirmed =>
+      'Could not confirm that recording stopped. Please try again before leaving this screen.';
+
+  @override
+  String get uploadCompleteReady =>
+      'Upload complete. Ready for your next lecture!';
+
+  @override
+  String get uploadFailedSafe => 'Upload failed. Please try again.';
+
+  @override
+  String get recordingCorrupt =>
+      'The recording appears empty or corrupt. Please record again.';
+
+  @override
+  String get academicSettingsRequiredBeforeRecording =>
+      'Save your academic level and semester in Academic Settings before recording.';
+
+  @override
+  String get recordingRecoveredPartial =>
+      'Recording appears to have stopped. Recovered audio may be partial.';
+
+  @override
+  String get recoveredRecordingSmall =>
+      'A pending recording was recovered, but it appears unusually small. You can try uploading it or discard it.';
+
+  @override
+  String get recordingRecoveryMissing =>
+      'Recording appears to have stopped, but no recoverable audio file was found.';
+
+  @override
+  String get microphonePermissionDenied => 'Microphone permission denied.';
+
+  @override
+  String get fileMissing => 'The recording file is missing.';
+
+  @override
+  String get classTopicRequiredBeforeUpload =>
+      'Enter a class and topic before uploading.';
+
+  @override
+  String get chooseExistingClass => 'Choose an existing class';
+
+  @override
+  String get recordingsOrganizedByClass => 'Recordings are organized by class.';
+
+  @override
+  String get chooseClassAndTopicToRecord =>
+      'Choose a class and enter a topic to start recording.';
+
+  @override
+  String get recordingPausedHelp =>
+      'Recording paused. Tap Resume to continue. Your recording is still saved.';
 }
