@@ -391,5 +391,6 @@
   "reviewQuestions": "Preguntas de repaso",
   "aiSummaryTitle": "Resumen de IA",
   "aiNotesTitle": "Notas de IA",
-  "aiQuizTitle": "Prueba práctica de IA"
+  "aiQuizTitle": "Prueba práctica de IA",
+  "readyToRecordDescription": "Listo para grabar. Esta clase se guardará en la clase y el tema seleccionados."
 }

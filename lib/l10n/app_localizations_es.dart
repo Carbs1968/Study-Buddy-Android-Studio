@@ -876,4 +876,8 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get aiQuizTitle => 'Prueba práctica de IA';
+
+  @override
+  String get readyToRecordDescription =>
+      'Listo para grabar. Esta clase se guardará en la clase y el tema seleccionados.';
 }

@@ -391,5 +391,6 @@
   "reviewQuestions": "Review questions",
   "aiSummaryTitle": "AI Summary",
   "aiNotesTitle": "AI Notes",
-  "aiQuizTitle": "AI Practice Test"
+  "aiQuizTitle": "AI Practice Test",
+  "readyToRecordDescription": "Ready to record. This lecture will be saved to the selected class and topic."
 }

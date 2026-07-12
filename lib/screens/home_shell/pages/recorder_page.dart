@@ -86,7 +86,7 @@ class _RecorderPageState extends State<RecorderPage> with WidgetsBindingObserver
     if (!_isReadyToRecord) {
       return AppLocalizations.of(context).chooseClassAndTopicToRecord;
     }
-    return 'Ready to record. This lecture will be saved to the selected class and topic.';
+    return AppLocalizations.of(context).readyToRecordDescription;
   }
 
   bool get _isReadyToRecord =>

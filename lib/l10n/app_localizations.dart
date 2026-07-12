@@ -1567,6 +1567,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'AI Practice Test'**
   String get aiQuizTitle;
+
+  /// No description provided for @readyToRecordDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Ready to record. This lecture will be saved to the selected class and topic.'**
+  String get readyToRecordDescription;
 }
 
 class _AppLocalizationsDelegate
