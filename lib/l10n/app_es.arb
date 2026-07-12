@@ -25,5 +25,38 @@
   "academicSettingsSaved": "La configuración académica se guardó correctamente.",
   "academicSettingsSaveFailed": "No se pudo guardar la configuración académica.",
   "saveChanges": "Guardar cambios",
-  "saving": "Guardando..."
+  "saving": "Guardando...",
+  "settingsTitle": "Configuración",
+  "chooseAppLanguage": "Elige el idioma de la aplicación.",
+  "english": "Inglés",
+  "spanish": "Español",
+  "notSet": "No configurado",
+  "currentAcademicPeriod": "Periodo académico actual",
+  "academicYear": "Año académico",
+  "semester": "Semestre",
+  "manageAcademicSettings": "Administrar configuración académica",
+  "privacyPolicy": "Política de privacidad",
+  "termsAndConditions": "Términos y condiciones",
+  "deleteAccount": "Eliminar cuenta",
+  "linkOpenFailed": "No se pudo abrir el enlace. Inténtalo de nuevo.",
+  "deleteAccountTitle": "¿Eliminar tu cuenta permanentemente?",
+  "deleteAccountIntro": "Esto eliminará permanentemente tu cuenta de Study Buddy y todos los datos asociados, incluidos:",
+  "deleteAccountAcademicData": "• Años académicos, semestres, clases y temas",
+  "deleteAccountFiles": "• Grabaciones y archivos subidos",
+  "deleteAccountAiData": "• Transcripciones, resúmenes, notas, cuestionarios y guías de estudio",
+  "deleteAccountProfileData": "• Información de la cuenta y del perfil",
+  "deleteAccountWarning": "Esta acción no se puede deshacer.",
+  "deleteAccountTypeToken": "Para continuar, escribe {token} a continuación:",
+  "@deleteAccountTypeToken": {
+    "placeholders": {
+      "token": {
+        "type": "String"
+      }
+    }
+  },
+  "cancel": "Cancelar",
+  "deleteAccountPermanently": "Eliminar mi cuenta permanentemente",
+  "deletingAccount": "Eliminando tu cuenta y tus datos…",
+  "deleteAccountFailed": "No pudimos eliminar tu cuenta. Inténtalo de nuevo.",
+  "unknownUser": "Usuario desconocido"
 }

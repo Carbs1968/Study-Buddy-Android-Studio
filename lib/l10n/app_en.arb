@@ -25,5 +25,38 @@
   "academicSettingsSaved": "Academic settings saved successfully.",
   "academicSettingsSaveFailed": "Failed to save academic settings.",
   "saveChanges": "Save Changes",
-  "saving": "Saving..."
+  "saving": "Saving...",
+  "settingsTitle": "Settings",
+  "chooseAppLanguage": "Choose the app language.",
+  "english": "English",
+  "spanish": "Spanish",
+  "notSet": "Not set",
+  "currentAcademicPeriod": "Current Academic Period",
+  "academicYear": "Academic year",
+  "semester": "Semester",
+  "manageAcademicSettings": "Manage Academic Settings",
+  "privacyPolicy": "Privacy Policy",
+  "termsAndConditions": "Terms and Conditions",
+  "deleteAccount": "Delete Account",
+  "linkOpenFailed": "Could not open link. Please try again.",
+  "deleteAccountTitle": "Permanently delete your account?",
+  "deleteAccountIntro": "This will permanently delete your Study Buddy account and all associated data, including:",
+  "deleteAccountAcademicData": "• Academic years, semesters, classes, and topics",
+  "deleteAccountFiles": "• Recordings and uploaded files",
+  "deleteAccountAiData": "• Transcripts, summaries, notes, quizzes, and study guides",
+  "deleteAccountProfileData": "• Account and profile information",
+  "deleteAccountWarning": "This action cannot be undone.",
+  "deleteAccountTypeToken": "To continue, type {token} below:",
+  "@deleteAccountTypeToken": {
+    "placeholders": {
+      "token": {
+        "type": "String"
+      }
+    }
+  },
+  "cancel": "Cancel",
+  "deleteAccountPermanently": "Delete My Account Permanently",
+  "deletingAccount": "Deleting your account and data…",
+  "deleteAccountFailed": "We could not delete your account. Please try again.",
+  "unknownUser": "Unknown user"
 }

@@ -90,4 +90,88 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get saving => 'Saving...';
+
+  @override
+  String get settingsTitle => 'Settings';
+
+  @override
+  String get chooseAppLanguage => 'Choose the app language.';
+
+  @override
+  String get english => 'English';
+
+  @override
+  String get spanish => 'Spanish';
+
+  @override
+  String get notSet => 'Not set';
+
+  @override
+  String get currentAcademicPeriod => 'Current Academic Period';
+
+  @override
+  String get academicYear => 'Academic year';
+
+  @override
+  String get semester => 'Semester';
+
+  @override
+  String get manageAcademicSettings => 'Manage Academic Settings';
+
+  @override
+  String get privacyPolicy => 'Privacy Policy';
+
+  @override
+  String get termsAndConditions => 'Terms and Conditions';
+
+  @override
+  String get deleteAccount => 'Delete Account';
+
+  @override
+  String get linkOpenFailed => 'Could not open link. Please try again.';
+
+  @override
+  String get deleteAccountTitle => 'Permanently delete your account?';
+
+  @override
+  String get deleteAccountIntro =>
+      'This will permanently delete your Study Buddy account and all associated data, including:';
+
+  @override
+  String get deleteAccountAcademicData =>
+      '• Academic years, semesters, classes, and topics';
+
+  @override
+  String get deleteAccountFiles => '• Recordings and uploaded files';
+
+  @override
+  String get deleteAccountAiData =>
+      '• Transcripts, summaries, notes, quizzes, and study guides';
+
+  @override
+  String get deleteAccountProfileData => '• Account and profile information';
+
+  @override
+  String get deleteAccountWarning => 'This action cannot be undone.';
+
+  @override
+  String deleteAccountTypeToken(String token) {
+    return 'To continue, type $token below:';
+  }
+
+  @override
+  String get cancel => 'Cancel';
+
+  @override
+  String get deleteAccountPermanently => 'Delete My Account Permanently';
+
+  @override
+  String get deletingAccount => 'Deleting your account and data…';
+
+  @override
+  String get deleteAccountFailed =>
+      'We could not delete your account. Please try again.';
+
+  @override
+  String get unknownUser => 'Unknown user';
 }

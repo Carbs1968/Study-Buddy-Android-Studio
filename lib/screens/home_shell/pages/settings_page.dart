@@ -10,7 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../../../l10n/strings.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../../main.dart';
 import '../../academic_settings_screen.dart';
 import '../../login_screen.dart';
@@ -26,7 +26,7 @@ class SettingsPage extends StatelessWidget {
     final opened = await launchUrl(uri, mode: LaunchMode.externalApplication);
     if (!opened && context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Could not open link. Please try again.')),
+        SnackBar(content: Text(AppLocalizations.of(context).linkOpenFailed)),
       );
     }
   }
@@ -50,8 +50,8 @@ class SettingsPage extends StatelessWidget {
                 color: Theme.of(context).colorScheme.error,
                 size: 48,
               ),
-              title: const Text(
-                'Permanently delete your account?',
+              title: Text(
+                AppLocalizations.of(context).deleteAccountTitle,
                 textAlign: TextAlign.center,
               ),
               content: SingleChildScrollView(
@@ -59,27 +59,28 @@ class SettingsPage extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      'This will permanently delete your Study Buddy account and all associated data, including:',
+                    Text(
+                      AppLocalizations.of(context).deleteAccountIntro,
                     ),
                     const SizedBox(height: 12),
-                    const Text(
-                        '• Academic years, semesters, classes, and topics'),
-                    const Text('• Recordings and uploaded files'),
-                    const Text(
-                      '• Transcripts, summaries, notes, quizzes, and study guides',
+                    Text(
+                      AppLocalizations.of(context).deleteAccountAcademicData,
                     ),
-                    const Text('• Account and profile information'),
+                    Text(AppLocalizations.of(context).deleteAccountFiles),
+                    Text(
+                      AppLocalizations.of(context).deleteAccountAiData,
+                    ),
+                    Text(AppLocalizations.of(context).deleteAccountProfileData),
                     const SizedBox(height: 16),
                     Text(
-                      'This action cannot be undone.',
+                      AppLocalizations.of(context).deleteAccountWarning,
                       style: TextStyle(
                         color: Theme.of(context).colorScheme.error,
                         fontWeight: FontWeight.w800,
                       ),
                     ),
                     const SizedBox(height: 16),
-                    const Text('To continue, type DELETE below:'),
+                    Text(AppLocalizations.of(context).deleteAccountTypeToken('DELETE')),
                     const SizedBox(height: 8),
                     TextField(
                       controller: confirmationController,
@@ -102,7 +103,7 @@ class SettingsPage extends StatelessWidget {
                   onPressed: isDeleting
                       ? null
                       : () => Navigator.of(dialogContext).pop(false),
-                  child: const Text('Cancel'),
+                  child: Text(AppLocalizations.of(context).cancel),
                 ),
                 FilledButton(
                   style: FilledButton.styleFrom(
@@ -117,7 +118,7 @@ class SettingsPage extends StatelessWidget {
                           Navigator.of(dialogContext).pop(true);
                         }
                       : null,
-                  child: const Text('Delete My Account Permanently'),
+                  child: Text(AppLocalizations.of(context).deleteAccountPermanently),
                 ),
               ],
             );
@@ -134,8 +135,8 @@ class SettingsPage extends StatelessWidget {
 
     try {
       messenger.showSnackBar(
-        const SnackBar(
-          content: Text('Deleting your account and data…'),
+        SnackBar(
+          content: Text(AppLocalizations.of(context).deletingAccount),
           duration: Duration(seconds: 30),
         ),
       );
@@ -158,7 +159,7 @@ class SettingsPage extends StatelessWidget {
       }
 
       messenger.hideCurrentSnackBar();
-    } on FirebaseFunctionsException catch (error) {
+    } on FirebaseFunctionsException {
       if (!context.mounted) {
         return;
       }
@@ -167,8 +168,7 @@ class SettingsPage extends StatelessWidget {
       messenger.showSnackBar(
         SnackBar(
           content: Text(
-            error.message ??
-                'We could not delete your account. Please try again.',
+            AppLocalizations.of(context).deleteAccountFailed,
           ),
         ),
       );
@@ -179,10 +179,8 @@ class SettingsPage extends StatelessWidget {
 
       messenger.hideCurrentSnackBar();
       messenger.showSnackBar(
-        const SnackBar(
-          content: Text(
-            'We could not delete your account. Please try again.',
-          ),
+        SnackBar(
+          content: Text(AppLocalizations.of(context).deleteAccountFailed),
         ),
       );
     }
@@ -192,12 +190,12 @@ class SettingsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final user = FirebaseAuth.instance.currentUser;
 
-    final strings = SBStrings.of(context);
+    final strings = AppLocalizations.of(context);
     final theme = Theme.of(context);
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        title: Text(strings.settings),
+        title: Text(strings.settingsTitle),
         backgroundColor: theme.scaffoldBackgroundColor,
         elevation: 0,
       ),
@@ -289,7 +287,7 @@ class SettingsPage extends StatelessWidget {
                           ),
                           const SizedBox(height: 2),
                           Text(
-                            'Choose the app language.',
+                            strings.chooseAppLanguage,
                             style: theme.textTheme.bodySmall?.copyWith(
                               color: theme.colorScheme.onSurfaceVariant,
                               fontWeight: FontWeight.w600,
@@ -302,12 +300,13 @@ class SettingsPage extends StatelessWidget {
                     DropdownButton<Locale>(
                       value: appLocale.value,
                       underline: const SizedBox.shrink(),
-                      items: SBStrings.supportedLocales
+                      items: AppLocalizations.supportedLocales
                           .map((l) => DropdownMenuItem(
                                 value: l,
                                 child: Text(
-                                  SBStrings.localeNames[l.languageCode] ??
-                                      l.languageCode,
+                                  l.languageCode == 'es'
+                                      ? strings.spanish
+                                      : strings.english,
                                 ),
                               ))
                           .toList(),
@@ -342,9 +341,9 @@ class SettingsPage extends StatelessWidget {
                 builder: (context, snapshot) {
                   final data = snapshot.data?.data();
                   final academicYear =
-                      (data?['levelName'] ?? 'Not set').toString();
+                      (data?['levelName'] ?? strings.notSet).toString();
                   final semester =
-                      (data?['semesterName'] ?? 'Not set').toString();
+                      (data?['semesterName'] ?? strings.notSet).toString();
 
                   return Card(
                     elevation: 0,
@@ -365,7 +364,7 @@ class SettingsPage extends StatelessWidget {
                               ),
                               const SizedBox(width: 12),
                               Text(
-                                'Current Academic Period',
+                                strings.currentAcademicPeriod,
                                 style: theme.textTheme.titleMedium?.copyWith(
                                   fontWeight: FontWeight.w800,
                                 ),
@@ -374,7 +373,7 @@ class SettingsPage extends StatelessWidget {
                           ),
                           const SizedBox(height: 14),
                           Text(
-                            'Academic year',
+                            strings.academicYear,
                             style: theme.textTheme.labelMedium?.copyWith(
                               color: theme.colorScheme.onSurfaceVariant,
                               fontWeight: FontWeight.w700,
@@ -389,7 +388,7 @@ class SettingsPage extends StatelessWidget {
                           ),
                           const SizedBox(height: 12),
                           Text(
-                            'Semester',
+                            strings.semester,
                             style: theme.textTheme.labelMedium?.copyWith(
                               color: theme.colorScheme.onSurfaceVariant,
                               fontWeight: FontWeight.w700,
@@ -424,7 +423,7 @@ class SettingsPage extends StatelessWidget {
                       color: theme.colorScheme.primary,
                     ),
                     title: Text(
-                      'Manage Academic Settings',
+                      strings.manageAcademicSettings,
                       style: theme.textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.w700,
                       ),
@@ -446,7 +445,7 @@ class SettingsPage extends StatelessWidget {
                       color: theme.colorScheme.primary,
                     ),
                     title: Text(
-                      'Privacy Policy',
+                      strings.privacyPolicy,
                       style: theme.textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.w700,
                       ),
@@ -461,7 +460,7 @@ class SettingsPage extends StatelessWidget {
                       color: theme.colorScheme.primary,
                     ),
                     title: Text(
-                      'Terms and Conditions',
+                      strings.termsAndConditions,
                       style: theme.textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.w700,
                       ),
@@ -476,7 +475,7 @@ class SettingsPage extends StatelessWidget {
                       color: theme.colorScheme.error,
                     ),
                     title: Text(
-                      'Delete Account',
+                      strings.deleteAccount,
                       style: theme.textTheme.titleMedium?.copyWith(
                         color: theme.colorScheme.error,
                         fontWeight: FontWeight.w700,

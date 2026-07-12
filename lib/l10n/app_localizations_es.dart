@@ -93,4 +93,90 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get saving => 'Guardando...';
+
+  @override
+  String get settingsTitle => 'Configuración';
+
+  @override
+  String get chooseAppLanguage => 'Elige el idioma de la aplicación.';
+
+  @override
+  String get english => 'Inglés';
+
+  @override
+  String get spanish => 'Español';
+
+  @override
+  String get notSet => 'No configurado';
+
+  @override
+  String get currentAcademicPeriod => 'Periodo académico actual';
+
+  @override
+  String get academicYear => 'Año académico';
+
+  @override
+  String get semester => 'Semestre';
+
+  @override
+  String get manageAcademicSettings => 'Administrar configuración académica';
+
+  @override
+  String get privacyPolicy => 'Política de privacidad';
+
+  @override
+  String get termsAndConditions => 'Términos y condiciones';
+
+  @override
+  String get deleteAccount => 'Eliminar cuenta';
+
+  @override
+  String get linkOpenFailed =>
+      'No se pudo abrir el enlace. Inténtalo de nuevo.';
+
+  @override
+  String get deleteAccountTitle => '¿Eliminar tu cuenta permanentemente?';
+
+  @override
+  String get deleteAccountIntro =>
+      'Esto eliminará permanentemente tu cuenta de Study Buddy y todos los datos asociados, incluidos:';
+
+  @override
+  String get deleteAccountAcademicData =>
+      '• Años académicos, semestres, clases y temas';
+
+  @override
+  String get deleteAccountFiles => '• Grabaciones y archivos subidos';
+
+  @override
+  String get deleteAccountAiData =>
+      '• Transcripciones, resúmenes, notas, cuestionarios y guías de estudio';
+
+  @override
+  String get deleteAccountProfileData =>
+      '• Información de la cuenta y del perfil';
+
+  @override
+  String get deleteAccountWarning => 'Esta acción no se puede deshacer.';
+
+  @override
+  String deleteAccountTypeToken(String token) {
+    return 'Para continuar, escribe $token a continuación:';
+  }
+
+  @override
+  String get cancel => 'Cancelar';
+
+  @override
+  String get deleteAccountPermanently => 'Eliminar mi cuenta permanentemente';
+
+  @override
+  String get deletingAccount => 'Eliminando tu cuenta y tus datos…';
+
+  @override
+  String get deleteAccountFailed =>
+      'No pudimos eliminar tu cuenta. Inténtalo de nuevo.';
+
+  @override
+  String get unknownUser => 'Usuario desconocido';
 }

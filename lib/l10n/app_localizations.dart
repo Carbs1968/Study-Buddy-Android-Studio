@@ -253,6 +253,162 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Saving...'**
   String get saving;
+
+  /// No description provided for @settingsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings'**
+  String get settingsTitle;
+
+  /// No description provided for @chooseAppLanguage.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose the app language.'**
+  String get chooseAppLanguage;
+
+  /// No description provided for @english.
+  ///
+  /// In en, this message translates to:
+  /// **'English'**
+  String get english;
+
+  /// No description provided for @spanish.
+  ///
+  /// In en, this message translates to:
+  /// **'Spanish'**
+  String get spanish;
+
+  /// No description provided for @notSet.
+  ///
+  /// In en, this message translates to:
+  /// **'Not set'**
+  String get notSet;
+
+  /// No description provided for @currentAcademicPeriod.
+  ///
+  /// In en, this message translates to:
+  /// **'Current Academic Period'**
+  String get currentAcademicPeriod;
+
+  /// No description provided for @academicYear.
+  ///
+  /// In en, this message translates to:
+  /// **'Academic year'**
+  String get academicYear;
+
+  /// No description provided for @semester.
+  ///
+  /// In en, this message translates to:
+  /// **'Semester'**
+  String get semester;
+
+  /// No description provided for @manageAcademicSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage Academic Settings'**
+  String get manageAcademicSettings;
+
+  /// No description provided for @privacyPolicy.
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy Policy'**
+  String get privacyPolicy;
+
+  /// No description provided for @termsAndConditions.
+  ///
+  /// In en, this message translates to:
+  /// **'Terms and Conditions'**
+  String get termsAndConditions;
+
+  /// No description provided for @deleteAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Account'**
+  String get deleteAccount;
+
+  /// No description provided for @linkOpenFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not open link. Please try again.'**
+  String get linkOpenFailed;
+
+  /// No description provided for @deleteAccountTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Permanently delete your account?'**
+  String get deleteAccountTitle;
+
+  /// No description provided for @deleteAccountIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'This will permanently delete your Study Buddy account and all associated data, including:'**
+  String get deleteAccountIntro;
+
+  /// No description provided for @deleteAccountAcademicData.
+  ///
+  /// In en, this message translates to:
+  /// **'• Academic years, semesters, classes, and topics'**
+  String get deleteAccountAcademicData;
+
+  /// No description provided for @deleteAccountFiles.
+  ///
+  /// In en, this message translates to:
+  /// **'• Recordings and uploaded files'**
+  String get deleteAccountFiles;
+
+  /// No description provided for @deleteAccountAiData.
+  ///
+  /// In en, this message translates to:
+  /// **'• Transcripts, summaries, notes, quizzes, and study guides'**
+  String get deleteAccountAiData;
+
+  /// No description provided for @deleteAccountProfileData.
+  ///
+  /// In en, this message translates to:
+  /// **'• Account and profile information'**
+  String get deleteAccountProfileData;
+
+  /// No description provided for @deleteAccountWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'This action cannot be undone.'**
+  String get deleteAccountWarning;
+
+  /// No description provided for @deleteAccountTypeToken.
+  ///
+  /// In en, this message translates to:
+  /// **'To continue, type {token} below:'**
+  String deleteAccountTypeToken(String token);
+
+  /// No description provided for @cancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get cancel;
+
+  /// No description provided for @deleteAccountPermanently.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete My Account Permanently'**
+  String get deleteAccountPermanently;
+
+  /// No description provided for @deletingAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Deleting your account and data…'**
+  String get deletingAccount;
+
+  /// No description provided for @deleteAccountFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'We could not delete your account. Please try again.'**
+  String get deleteAccountFailed;
+
+  /// No description provided for @unknownUser.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown user'**
+  String get unknownUser;
 }
 
 class _AppLocalizationsDelegate
