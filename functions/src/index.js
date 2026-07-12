@@ -8,6 +8,7 @@ const OpenAI = require("openai");
 const { initializeApp } = require("firebase-admin/app");
 const { getFirestore, FieldValue } = require("firebase-admin/firestore");
 const { getStorage } = require("firebase-admin/storage");
+const { getAuth } = require("firebase-admin/auth");
 const { defineSecret } = require("firebase-functions/params");
 const { onSchedule } = require("firebase-functions/v2/scheduler");
 const { onCall, HttpsError } = require("firebase-functions/v2/https");
@@ -38,6 +39,7 @@ const MATERIAL_EXTRACTION_DOC =
 
 const db = getFirestore();
 const storage = getStorage();
+const auth = getAuth();
 
 function now() {
   return FieldValue.serverTimestamp();
@@ -804,6 +806,123 @@ exports.getTranscriptText = onCall({ region: REGION }, async (request) => {
     text: typeof session.transcriptText === "string" ? session.transcriptText : "",
   };
 });
+
+
+exports.deleteMyAccount = onCall(
+  { region: REGION, timeoutSeconds: 540, memory: "512MiB" },
+  async (request) => {
+    if (!request.auth) {
+      throw new HttpsError("unauthenticated", "Sign in before deleting your account.");
+    }
+
+    const uid = request.auth.uid;
+    const emailLower = String(request.auth.token.email || "").trim().toLowerCase();
+
+    if (!emailLower) {
+      throw new HttpsError(
+        "failed-precondition",
+        "Your signed-in account does not have an email address."
+      );
+    }
+
+    const lookupRef = db.collection("userEmailLookup").doc(emailLower);
+    const deletionLogRef = db.collection("accountDeletionRequests").doc();
+
+    await deletionLogRef.set({
+      uid,
+      emailLower,
+      source: "in_app_callable",
+      status: "running",
+      startedAt: FieldValue.serverTimestamp(),
+    });
+
+    try {
+      const lookupSnap = await lookupRef.get();
+      if (lookupSnap.exists) {
+        const lookup = lookupSnap.data() || {};
+        if (lookup.uid !== uid) {
+          throw new HttpsError(
+            "permission-denied",
+            "Email lookup does not match the signed-in account."
+          );
+        }
+      }
+
+      try {
+        const authUser = await auth.getUser(uid);
+        const authEmail = String(authUser.email || "").trim().toLowerCase();
+        if (authEmail && authEmail !== emailLower) {
+          throw new HttpsError(
+            "permission-denied",
+            "Firebase Auth email does not match the signed-in account."
+          );
+        }
+      } catch (error) {
+        if (error.code !== "auth/user-not-found") {
+          throw error;
+        }
+      }
+
+      const bucket = storage.bucket(
+        process.env.FIREBASE_STORAGE_BUCKET || "study-buddy-dev-25a7a.firebasestorage.app"
+      );
+      const storagePrefixes = [
+        `recordings/${uid}/`,
+        `classMaterials/${uid}/`,
+        `user_photos/${uid}/`,
+      ];
+
+      for (const prefix of storagePrefixes) {
+        const [files] = await bucket.getFiles({ prefix });
+        for (const file of files) {
+          await file.delete({ ignoreNotFound: true });
+        }
+      }
+
+      const aiJobsSnap = await db.collection("aiJobs").where("uid", "==", uid).get();
+      for (const doc of aiJobsSnap.docs) {
+        await doc.ref.delete();
+      }
+
+      const userRef = db.collection("users").doc(uid);
+      const userSnap = await userRef.get();
+      if (userSnap.exists) {
+        await db.recursiveDelete(userRef);
+      }
+
+      if (lookupSnap.exists) {
+        await lookupRef.delete();
+      }
+
+      try {
+        await auth.deleteUser(uid);
+      } catch (error) {
+        if (error.code !== "auth/user-not-found") {
+          throw error;
+        }
+      }
+
+      await deletionLogRef.set({
+        status: "completed",
+        completedAt: FieldValue.serverTimestamp(),
+      }, { merge: true });
+
+      return { ok: true };
+    } catch (error) {
+      await deletionLogRef.set({
+        status: "failed",
+        failedAt: FieldValue.serverTimestamp(),
+        errorMessage: String(error && error.message ? error.message : error),
+      }, { merge: true });
+
+      if (error instanceof HttpsError) {
+        throw error;
+      }
+
+      throw new HttpsError("internal", "Account deletion failed.");
+    }
+  }
+);
 
 exports.requestClassStudyGuide = onCall({ region: REGION }, async (request) => {
   if (!request.auth) {

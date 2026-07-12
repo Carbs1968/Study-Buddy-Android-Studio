@@ -4,6 +4,7 @@
 
 // (imports moved to top-level; removed duplicate local imports)
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -19,16 +20,170 @@ class SettingsPage extends StatelessWidget {
 
   static final Uri _privacyPolicyUri =
       Uri.parse('https://studybuddynote.com/privacy');
-  static final Uri _termsUri =
-      Uri.parse('https://studybuddynote.com/terms');
-  static final Uri _deleteAccountUri =
-      Uri.parse('https://studybuddynote.com/delete-account');
+  static final Uri _termsUri = Uri.parse('https://studybuddynote.com/terms');
 
   Future<void> _openExternalUrl(BuildContext context, Uri uri) async {
     final opened = await launchUrl(uri, mode: LaunchMode.externalApplication);
     if (!opened && context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Could not open link. Please try again.')),
+      );
+    }
+  }
+
+  Future<void> _confirmAndDeleteAccount(BuildContext context) async {
+    final confirmationController = TextEditingController();
+    var isDeleting = false;
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            final canDelete =
+                confirmationController.text.trim() == 'DELETE' && !isDeleting;
+
+            return AlertDialog(
+              icon: Icon(
+                Icons.warning_amber_rounded,
+                color: Theme.of(context).colorScheme.error,
+                size: 48,
+              ),
+              title: const Text(
+                'Permanently delete your account?',
+                textAlign: TextAlign.center,
+              ),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'This will permanently delete your Study Buddy account and all associated data, including:',
+                    ),
+                    const SizedBox(height: 12),
+                    const Text(
+                        '• Academic years, semesters, classes, and topics'),
+                    const Text('• Recordings and uploaded files'),
+                    const Text(
+                      '• Transcripts, summaries, notes, quizzes, and study guides',
+                    ),
+                    const Text('• Account and profile information'),
+                    const SizedBox(height: 16),
+                    Text(
+                      'This action cannot be undone.',
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.error,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    const Text('To continue, type DELETE below:'),
+                    const SizedBox(height: 8),
+                    TextField(
+                      controller: confirmationController,
+                      enabled: !isDeleting,
+                      autofocus: true,
+                      autocorrect: false,
+                      enableSuggestions: false,
+                      textCapitalization: TextCapitalization.characters,
+                      decoration: const InputDecoration(
+                        border: OutlineInputBorder(),
+                        hintText: 'DELETE',
+                      ),
+                      onChanged: (_) => setState(() {}),
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: isDeleting
+                      ? null
+                      : () => Navigator.of(dialogContext).pop(false),
+                  child: const Text('Cancel'),
+                ),
+                FilledButton(
+                  style: FilledButton.styleFrom(
+                    backgroundColor: Theme.of(context).colorScheme.error,
+                    foregroundColor: Theme.of(context).colorScheme.onError,
+                  ),
+                  onPressed: canDelete
+                      ? () {
+                          setState(() {
+                            isDeleting = true;
+                          });
+                          Navigator.of(dialogContext).pop(true);
+                        }
+                      : null,
+                  child: const Text('Delete My Account Permanently'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+
+    if (confirmed != true || !context.mounted) {
+      return;
+    }
+
+    final messenger = ScaffoldMessenger.of(context);
+
+    try {
+      messenger.showSnackBar(
+        const SnackBar(
+          content: Text('Deleting your account and data…'),
+          duration: Duration(seconds: 30),
+        ),
+      );
+
+      final callable =
+          FirebaseFunctions.instance.httpsCallable('deleteMyAccount');
+      await callable.call();
+
+      try {
+        await FirebaseAuth.instance.signOut();
+      } catch (_) {}
+
+      try {
+        final googleSignIn = GoogleSignIn(scopes: ['email']);
+        await googleSignIn.signOut();
+      } catch (_) {}
+
+      if (!context.mounted) {
+        return;
+      }
+
+      messenger.hideCurrentSnackBar();
+    } on FirebaseFunctionsException catch (error) {
+      if (!context.mounted) {
+        return;
+      }
+
+      messenger.hideCurrentSnackBar();
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text(
+            error.message ??
+                'We could not delete your account. Please try again.',
+          ),
+        ),
+      );
+    } catch (_) {
+      if (!context.mounted) {
+        return;
+      }
+
+      messenger.hideCurrentSnackBar();
+      messenger.showSnackBar(
+        const SnackBar(
+          content: Text(
+            'We could not delete your account. Please try again.',
+          ),
+        ),
       );
     }
   }
@@ -79,7 +234,10 @@ class SettingsPage extends StatelessWidget {
                               user.displayName ?? strings.unknownUser,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
-                              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .titleMedium
+                                  ?.copyWith(
                                     fontWeight: FontWeight.w800,
                                   ),
                             ),
@@ -88,7 +246,10 @@ class SettingsPage extends StatelessWidget {
                               user.email ?? '',
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
-                              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodyMedium
+                                  ?.copyWith(
                                     color: theme.colorScheme.onSurfaceVariant,
                                   ),
                             ),
@@ -273,7 +434,8 @@ class SettingsPage extends StatelessWidget {
                 onTap: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (_) => const AcademicSettingsScreen()),
+                    MaterialPageRoute(
+                        builder: (_) => const AcademicSettingsScreen()),
                   );
                 },
               ),
@@ -319,21 +481,24 @@ class SettingsPage extends StatelessWidget {
                   const Divider(height: 1),
                   ListTile(
                     leading: Icon(
-                      Icons.delete_outline,
+                      Icons.delete_forever_outlined,
                       color: theme.colorScheme.error,
                     ),
                     title: Text(
-                      'Request Account Deletion',
+                      'Delete Account',
                       style: theme.textTheme.titleMedium?.copyWith(
                         color: theme.colorScheme.error,
                         fontWeight: FontWeight.w700,
                       ),
                     ),
                     subtitle: const Text(
-                      'Open the deletion request page for your Study Buddy account.',
+                      'Permanently delete your account and all associated data.',
                     ),
-                    trailing: const Icon(Icons.open_in_new),
-                    onTap: () => _openExternalUrl(context, _deleteAccountUri),
+                    trailing: Icon(
+                      Icons.chevron_right,
+                      color: theme.colorScheme.error,
+                    ),
+                    onTap: () => _confirmAndDeleteAccount(context),
                   ),
                 ],
               ),
@@ -349,21 +514,25 @@ class SettingsPage extends StatelessWidget {
                   final gsi = GoogleSignIn(scopes: ['email']);
                   GoogleSignInAccount? acc = await gsi.signInSilently();
                   if (acc != null) {
-                    try { await gsi.signOut(); } catch (_) {}
-                    try { await gsi.disconnect(); } catch (_) {}
+                    try {
+                      await gsi.signOut();
+                    } catch (_) {}
+                    try {
+                      await gsi.disconnect();
+                    } catch (_) {}
                   }
 
                   if (context.mounted) {
                     Navigator.of(context).pushAndRemoveUntil(
                       MaterialPageRoute(builder: (_) => const LoginScreen()),
-                          (_) => false,
+                      (_) => false,
                     );
                   }
                 } catch (_) {
                   if (context.mounted) {
                     Navigator.of(context).pushAndRemoveUntil(
                       MaterialPageRoute(builder: (_) => const LoginScreen()),
-                          (_) => false,
+                      (_) => false,
                     );
                   }
                 }
