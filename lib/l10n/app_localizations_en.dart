@@ -174,4 +174,38 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get unknownUser => 'Unknown user';
+
+  @override
+  String get loginTagline => 'Record and organize your classes.';
+
+  @override
+  String get unableToOpenPage => 'Unable to open this page. Please try again.';
+
+  @override
+  String get signInCanceled => 'Sign-in canceled.';
+
+  @override
+  String get signInFailed => 'We could not sign you in. Please try again.';
+
+  @override
+  String get legalAgreementPrefix => 'By continuing, you agree to our ';
+
+  @override
+  String get legalAgreementMiddle => ' and acknowledge our ';
+
+  @override
+  String get openClassOrTopicBeforeUpload =>
+      'Open a class or topic before uploading study material.';
+
+  @override
+  String get dashboard => 'Home';
+
+  @override
+  String get record => 'Record';
+
+  @override
+  String get library => 'Library';
+
+  @override
+  String get settings => 'Settings';
 }

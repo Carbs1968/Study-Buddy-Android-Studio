@@ -409,6 +409,72 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Unknown user'**
   String get unknownUser;
+
+  /// No description provided for @loginTagline.
+  ///
+  /// In en, this message translates to:
+  /// **'Record and organize your classes.'**
+  String get loginTagline;
+
+  /// No description provided for @unableToOpenPage.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to open this page. Please try again.'**
+  String get unableToOpenPage;
+
+  /// No description provided for @signInCanceled.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign-in canceled.'**
+  String get signInCanceled;
+
+  /// No description provided for @signInFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'We could not sign you in. Please try again.'**
+  String get signInFailed;
+
+  /// No description provided for @legalAgreementPrefix.
+  ///
+  /// In en, this message translates to:
+  /// **'By continuing, you agree to our '**
+  String get legalAgreementPrefix;
+
+  /// No description provided for @legalAgreementMiddle.
+  ///
+  /// In en, this message translates to:
+  /// **' and acknowledge our '**
+  String get legalAgreementMiddle;
+
+  /// No description provided for @openClassOrTopicBeforeUpload.
+  ///
+  /// In en, this message translates to:
+  /// **'Open a class or topic before uploading study material.'**
+  String get openClassOrTopicBeforeUpload;
+
+  /// No description provided for @dashboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Home'**
+  String get dashboard;
+
+  /// No description provided for @record.
+  ///
+  /// In en, this message translates to:
+  /// **'Record'**
+  String get record;
+
+  /// No description provided for @library.
+  ///
+  /// In en, this message translates to:
+  /// **'Library'**
+  String get library;
+
+  /// No description provided for @settings.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings'**
+  String get settings;
 }
 
 class _AppLocalizationsDelegate

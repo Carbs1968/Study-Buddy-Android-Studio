@@ -58,5 +58,16 @@
   "deleteAccountPermanently": "Delete My Account Permanently",
   "deletingAccount": "Deleting your account and data…",
   "deleteAccountFailed": "We could not delete your account. Please try again.",
-  "unknownUser": "Unknown user"
+  "unknownUser": "Unknown user",
+  "loginTagline": "Record and organize your classes.",
+  "unableToOpenPage": "Unable to open this page. Please try again.",
+  "signInCanceled": "Sign-in canceled.",
+  "signInFailed": "We could not sign you in. Please try again.",
+  "legalAgreementPrefix": "By continuing, you agree to our ",
+  "legalAgreementMiddle": " and acknowledge our ",
+  "openClassOrTopicBeforeUpload": "Open a class or topic before uploading study material.",
+  "dashboard": "Home",
+  "record": "Record",
+  "library": "Library",
+  "settings": "Settings"
 }

@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../l10n/strings.dart';
+import '../l10n/app_localizations.dart';
 import '../main.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -26,8 +26,8 @@ class _LoginScreenState extends State<LoginScreen> {
 
     if (!opened && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Unable to open this page. Please try again.'),
+        SnackBar(
+          content: Text(AppLocalizations.of(context).unableToOpenPage),
         ),
       );
     }
@@ -41,26 +41,47 @@ class _LoginScreenState extends State<LoginScreen> {
       _loading = true;
       _error = null;
     });
+
     try {
       final gsi = GoogleSignIn(scopes: ['email']);
 
       // Prefer silent sign-in first (handles "already signed in" after logout)
       GoogleSignInAccount? acc = await gsi.signInSilently();
       acc ??= await gsi.signIn();
-      if (acc == null) throw 'Sign-in canceled';
+
+      if (acc == null) {
+        if (mounted) {
+          setState(() {
+            _error = AppLocalizations.of(context).signInCanceled;
+          });
+        }
+        return;
+      }
 
       final auth = await acc.authentication;
       final credential = GoogleAuthProvider.credential(
         accessToken: auth.accessToken,
         idToken: auth.idToken,
       );
+
       await FirebaseAuth.instance.signInWithCredential(credential);
       final user = FirebaseAuth.instance.currentUser;
       await _createUserIfNeeded(user);
-    } catch (e) {
-      if (mounted) setState(() => _error = e.toString());
+    } catch (error, stackTrace) {
+      debugPrint('Google sign-in failed: $error');
+      debugPrintStack(stackTrace: stackTrace);
+
+      if (mounted) {
+        setState(() {
+          _error = AppLocalizations.of(context).signInFailed;
+        });
+      }
     } finally {
-      if (mounted) setState(() => _loading = false);
+      if (mounted) {
+        setState(() {
+          _loading = false;
+        });
+      }
     }
   }
 
@@ -105,7 +126,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final strings = SBStrings.of(context);
+    final strings = AppLocalizations.of(context);
 
     return Scaffold(
       backgroundColor: const Color(0xFFF7F4FC),
@@ -154,8 +175,8 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                         ),
                         const SizedBox(height: 14),
-                        const Text(
-                          'Record and organize your classes.',
+                        Text(
+                          strings.loginTagline,
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             fontSize: 17,
@@ -232,8 +253,8 @@ class _LoginScreenState extends State<LoginScreen> {
                           alignment: WrapAlignment.center,
                           crossAxisAlignment: WrapCrossAlignment.center,
                           children: [
-                            const Text(
-                              'By continuing, you agree to our ',
+                            Text(
+                              strings.legalAgreementPrefix,
                               style: TextStyle(
                                 color: Color(0xFF98A2B3),
                                 fontSize: 13,
@@ -246,8 +267,8 @@ class _LoginScreenState extends State<LoginScreen> {
                                 minimumSize: Size.zero,
                                 tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                               ),
-                              child: const Text(
-                                'Terms and Conditions',
+                              child: Text(
+                                strings.termsAndConditions,
                                 style: TextStyle(
                                   fontSize: 13,
                                   fontWeight: FontWeight.w600,
@@ -255,8 +276,8 @@ class _LoginScreenState extends State<LoginScreen> {
                                 ),
                               ),
                             ),
-                            const Text(
-                              ' and acknowledge our ',
+                            Text(
+                              strings.legalAgreementMiddle,
                               style: TextStyle(
                                 color: Color(0xFF98A2B3),
                                 fontSize: 13,
@@ -270,8 +291,8 @@ class _LoginScreenState extends State<LoginScreen> {
                                 minimumSize: Size.zero,
                                 tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                               ),
-                              child: const Text(
-                                'Privacy Policy',
+                              child: Text(
+                                strings.privacyPolicy,
                                 style: TextStyle(
                                   fontSize: 13,
                                   fontWeight: FontWeight.w600,

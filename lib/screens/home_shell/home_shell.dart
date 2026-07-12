@@ -2,7 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
-import '../../l10n/strings.dart';
+import '../../l10n/app_localizations.dart';
 import '../../main.dart';
 import 'pages/dashboard_page.dart';
 import 'pages/library_page.dart';
@@ -27,9 +27,9 @@ class _HomeShellState extends State<HomeShell> {
       },
       onUploadMaterialTap: () {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
+          SnackBar(
             content:
-                Text('Open a class or topic before uploading study material.'),
+                Text(AppLocalizations.of(context).openClassOrTopicBeforeUpload),
           ),
         );
       },
@@ -56,7 +56,7 @@ class _HomeShellState extends State<HomeShell> {
       final data = doc.data();
       if (data != null && data['locale'] != null) {
         final code = data['locale'] as String;
-        if (SBStrings.supportedLocales.any((l) => l.languageCode == code)) {
+        if (AppLocalizations.supportedLocales.any((l) => l.languageCode == code)) {
           appLocale.value = Locale(code);
         }
       }
@@ -71,7 +71,7 @@ class _HomeShellState extends State<HomeShell> {
 
   @override
   Widget build(BuildContext context) {
-    final strings = SBStrings.of(context);
+    final strings = AppLocalizations.of(context);
 
     return Scaffold(
       body: IndexedStack(

@@ -58,5 +58,16 @@
   "deleteAccountPermanently": "Eliminar mi cuenta permanentemente",
   "deletingAccount": "Eliminando tu cuenta y tus datos…",
   "deleteAccountFailed": "No pudimos eliminar tu cuenta. Inténtalo de nuevo.",
-  "unknownUser": "Usuario desconocido"
+  "unknownUser": "Usuario desconocido",
+  "loginTagline": "Graba y organiza tus clases.",
+  "unableToOpenPage": "No se pudo abrir esta página. Inténtalo de nuevo.",
+  "signInCanceled": "Se canceló el inicio de sesión.",
+  "signInFailed": "No pudimos iniciar sesión. Inténtalo de nuevo.",
+  "legalAgreementPrefix": "Al continuar, aceptas nuestros ",
+  "legalAgreementMiddle": " y reconoces nuestra ",
+  "openClassOrTopicBeforeUpload": "Abre una clase o un tema antes de subir material de estudio.",
+  "dashboard": "Inicio",
+  "record": "Grabar",
+  "library": "Biblioteca",
+  "settings": "Configuración"
 }

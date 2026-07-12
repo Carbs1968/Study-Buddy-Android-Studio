@@ -179,4 +179,39 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get unknownUser => 'Usuario desconocido';
+
+  @override
+  String get loginTagline => 'Graba y organiza tus clases.';
+
+  @override
+  String get unableToOpenPage =>
+      'No se pudo abrir esta página. Inténtalo de nuevo.';
+
+  @override
+  String get signInCanceled => 'Se canceló el inicio de sesión.';
+
+  @override
+  String get signInFailed => 'No pudimos iniciar sesión. Inténtalo de nuevo.';
+
+  @override
+  String get legalAgreementPrefix => 'Al continuar, aceptas nuestros ';
+
+  @override
+  String get legalAgreementMiddle => ' y reconoces nuestra ';
+
+  @override
+  String get openClassOrTopicBeforeUpload =>
+      'Abre una clase o un tema antes de subir material de estudio.';
+
+  @override
+  String get dashboard => 'Inicio';
+
+  @override
+  String get record => 'Grabar';
+
+  @override
+  String get library => 'Biblioteca';
+
+  @override
+  String get settings => 'Configuración';
 }
