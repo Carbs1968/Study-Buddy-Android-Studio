@@ -12,7 +12,7 @@
 
     <application
         android:name="${applicationName}"
-        android:label="Study Buddy Note"
+        android:label="@string/app_name"
         android:icon="@mipmap/ic_launcher">
 
         <!-- Use your app's MainActivity so the MethodChannel is available -->

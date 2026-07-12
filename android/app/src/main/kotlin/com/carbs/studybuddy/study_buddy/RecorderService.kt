@@ -304,8 +304,8 @@ class RecorderService : Service() {
 
     private fun buildNotification(): Notification {
         return NotificationCompat.Builder(this, channelId)
-            .setContentTitle("Recording in progress")
-            .setContentText("Study Buddy is recording your lecture")
+            .setContentTitle(getString(R.string.recording_notification_title))
+            .setContentText(getString(R.string.recording_notification_body))
             .setSmallIcon(android.R.drawable.ic_btn_speak_now)
             .setOngoing(true)
             .setCategory(NotificationCompat.CATEGORY_SERVICE)
@@ -324,7 +324,7 @@ class RecorderService : Service() {
             val nm = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
             val channel = NotificationChannel(
                 channelId,
-                "Study Buddy Recording",
+                getString(R.string.recording_channel_name),
                 NotificationManager.IMPORTANCE_LOW
             )
             nm.createNotificationChannel(channel)

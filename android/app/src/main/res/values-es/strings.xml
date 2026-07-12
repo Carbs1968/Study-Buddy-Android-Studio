@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Study Buddy Note</string>
+    <string name="recording_notification_title">Grabación en curso</string>
+    <string name="recording_notification_body">Study Buddy está grabando tu clase</string>
+    <string name="recording_channel_name">Grabación de Study Buddy</string>
+</resources>
