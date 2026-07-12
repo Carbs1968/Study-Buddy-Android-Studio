@@ -1495,6 +1495,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Material deleted.'**
   String get materialDeleted;
+
+  /// No description provided for @classStudyGuideTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{className} Study Guide'**
+  String classStudyGuideTitle(String className);
+
+  /// No description provided for @studyGuideLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load the study guide.'**
+  String get studyGuideLoadFailed;
+
+  /// No description provided for @studyGuideNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'Study guide not found.'**
+  String get studyGuideNotFound;
+
+  /// No description provided for @generatedFromTranscriptsAndMaterials.
+  ///
+  /// In en, this message translates to:
+  /// **'Generated from completed class transcripts and extracted class materials.'**
+  String get generatedFromTranscriptsAndMaterials;
+
+  /// No description provided for @generatedFromTranscripts.
+  ///
+  /// In en, this message translates to:
+  /// **'Generated from completed class transcripts.'**
+  String get generatedFromTranscripts;
+
+  /// No description provided for @classStudyGuideFallbackTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Class Study Guide'**
+  String get classStudyGuideFallbackTitle;
+
+  /// No description provided for @keyTopics.
+  ///
+  /// In en, this message translates to:
+  /// **'Key topics'**
+  String get keyTopics;
+
+  /// No description provided for @studySections.
+  ///
+  /// In en, this message translates to:
+  /// **'Study sections'**
+  String get studySections;
+
+  /// No description provided for @reviewQuestions.
+  ///
+  /// In en, this message translates to:
+  /// **'Review questions'**
+  String get reviewQuestions;
 }
 
 class _AppLocalizationsDelegate

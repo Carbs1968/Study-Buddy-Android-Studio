@@ -836,4 +836,35 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get materialDeleted => 'Material eliminado.';
+
+  @override
+  String classStudyGuideTitle(String className) {
+    return 'Guía de estudio de $className';
+  }
+
+  @override
+  String get studyGuideLoadFailed => 'No se pudo cargar la guía de estudio.';
+
+  @override
+  String get studyGuideNotFound => 'No se encontró la guía de estudio.';
+
+  @override
+  String get generatedFromTranscriptsAndMaterials =>
+      'Generada a partir de transcripciones completadas y materiales extraídos de la clase.';
+
+  @override
+  String get generatedFromTranscripts =>
+      'Generada a partir de transcripciones completadas de la clase.';
+
+  @override
+  String get classStudyGuideFallbackTitle => 'Guía de estudio de la clase';
+
+  @override
+  String get keyTopics => 'Temas clave';
+
+  @override
+  String get studySections => 'Secciones de estudio';
+
+  @override
+  String get reviewQuestions => 'Preguntas de repaso';
 }

@@ -372,5 +372,21 @@
     }
   },
   "materialPreviewUnavailable": "Este archivo está guardado como material de la clase. La vista previa aún no está disponible para este tipo de archivo.",
-  "materialDeleted": "Material eliminado."
+  "materialDeleted": "Material eliminado.",
+  "classStudyGuideTitle": "Guía de estudio de {className}",
+  "@classStudyGuideTitle": {
+    "placeholders": {
+      "className": {
+        "type": "String"
+      }
+    }
+  },
+  "studyGuideLoadFailed": "No se pudo cargar la guía de estudio.",
+  "studyGuideNotFound": "No se encontró la guía de estudio.",
+  "generatedFromTranscriptsAndMaterials": "Generada a partir de transcripciones completadas y materiales extraídos de la clase.",
+  "generatedFromTranscripts": "Generada a partir de transcripciones completadas de la clase.",
+  "classStudyGuideFallbackTitle": "Guía de estudio de la clase",
+  "keyTopics": "Temas clave",
+  "studySections": "Secciones de estudio",
+  "reviewQuestions": "Preguntas de repaso"
 }

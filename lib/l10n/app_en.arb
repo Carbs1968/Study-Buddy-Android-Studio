@@ -372,5 +372,21 @@
     }
   },
   "materialPreviewUnavailable": "This file is saved as class material. Preview is not available for this file type yet.",
-  "materialDeleted": "Material deleted."
+  "materialDeleted": "Material deleted.",
+  "classStudyGuideTitle": "{className} Study Guide",
+  "@classStudyGuideTitle": {
+    "placeholders": {
+      "className": {
+        "type": "String"
+      }
+    }
+  },
+  "studyGuideLoadFailed": "Could not load the study guide.",
+  "studyGuideNotFound": "Study guide not found.",
+  "generatedFromTranscriptsAndMaterials": "Generated from completed class transcripts and extracted class materials.",
+  "generatedFromTranscripts": "Generated from completed class transcripts.",
+  "classStudyGuideFallbackTitle": "Class Study Guide",
+  "keyTopics": "Key topics",
+  "studySections": "Study sections",
+  "reviewQuestions": "Review questions"
 }

@@ -2,6 +2,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
+import '../l10n/app_localizations.dart';
+
 class ClassStudyGuideScreen extends StatelessWidget {
   const ClassStudyGuideScreen({
     super.key,
@@ -22,10 +24,11 @@ class ClassStudyGuideScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final uid = FirebaseAuth.instance.currentUser?.uid;
     final theme = Theme.of(context);
+    final strings = AppLocalizations.of(context);
 
     if (uid == null) {
-      return const Scaffold(
-        body: Center(child: Text('Not signed in')),
+      return Scaffold(
+        body: Center(child: Text(strings.notSignedIn)),
       );
     }
 
@@ -44,7 +47,7 @@ class ClassStudyGuideScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        title: Text('$className Study Guide'),
+        title: Text(strings.classStudyGuideTitle(className)),
         backgroundColor: theme.scaffoldBackgroundColor,
         elevation: 0,
       ),
@@ -52,7 +55,7 @@ class ClassStudyGuideScreen extends StatelessWidget {
         stream: guideRef.snapshots(),
         builder: (context, snapshot) {
           if (snapshot.hasError) {
-            return const Center(child: Text('Could not load study guide.'));
+            return Center(child: Text(strings.studyGuideLoadFailed));
           }
 
           if (!snapshot.hasData) {
@@ -61,7 +64,7 @@ class ClassStudyGuideScreen extends StatelessWidget {
 
           final doc = snapshot.data!;
           if (!doc.exists) {
-            return const Center(child: Text('Study guide not found.'));
+            return Center(child: Text(strings.studyGuideNotFound));
           }
 
           final data = doc.data() ?? {};
@@ -74,9 +77,9 @@ class ClassStudyGuideScreen extends StatelessWidget {
               contentSnapshot['includedMaterials'] == true ||
               (includedMaterialCount is num && includedMaterialCount > 0);
           final sourceDescription = usedMaterials
-              ? 'Generated from completed class transcripts and extracted class materials.'
-              : 'Generated from completed class transcripts.';
-          final title = (output['title'] ?? 'Class Study Guide').toString();
+              ? strings.generatedFromTranscriptsAndMaterials
+              : strings.generatedFromTranscripts;
+          final title = (output['title'] ?? strings.classStudyGuideFallbackTitle).toString();
           final overview = (output['overview'] ?? '').toString();
           final keyTopics =
               ((output['keyTopics'] as List?) ?? const <dynamic>[])
@@ -116,7 +119,7 @@ class ClassStudyGuideScreen extends StatelessWidget {
                 Text(overview, style: theme.textTheme.bodyLarge),
               ],
               const SizedBox(height: 24),
-              _SectionTitle('Key topics'),
+              _SectionTitle(strings.keyTopics),
               ...keyTopics.map(
                 (topic) => _GuideCard(
                   title: (topic['title'] ?? '').toString(),
@@ -124,7 +127,7 @@ class ClassStudyGuideScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 12),
-              _SectionTitle('Study sections'),
+              _SectionTitle(strings.studySections),
               ...sections.map(
                 (section) {
                   final bullets = ((section['bullets'] as List?) ??
@@ -139,7 +142,7 @@ class ClassStudyGuideScreen extends StatelessWidget {
                 },
               ),
               const SizedBox(height: 12),
-              _SectionTitle('Review questions'),
+              _SectionTitle(strings.reviewQuestions),
               ...questions.map(
                 (question) => _GuideCard(
                   title: (question['question'] ?? '').toString(),
