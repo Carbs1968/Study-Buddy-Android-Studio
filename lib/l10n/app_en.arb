@@ -185,5 +185,6 @@
   "chooseExistingClass": "Choose an existing class",
   "recordingsOrganizedByClass": "Recordings are organized by class.",
   "chooseClassAndTopicToRecord": "Choose a class and enter a topic to start recording.",
-  "recordingPausedHelp": "Recording paused. Tap Resume to continue. Your recording is still saved."
+  "recordingPausedHelp": "Recording paused. Tap Resume to continue. Your recording is still saved.",
+  "recordingContinuesWhenLocked": "Recording continues if your screen locks."
 }

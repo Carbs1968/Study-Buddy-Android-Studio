@@ -185,5 +185,6 @@
   "chooseExistingClass": "Elige una clase existente",
   "recordingsOrganizedByClass": "Las grabaciones se organizan por clase.",
   "chooseClassAndTopicToRecord": "Elige una clase e ingresa un tema para comenzar a grabar.",
-  "recordingPausedHelp": "Grabación pausada. Toca Reanudar para continuar. Tu grabación sigue guardada."
+  "recordingPausedHelp": "Grabación pausada. Toca Reanudar para continuar. Tu grabación sigue guardada.",
+  "recordingContinuesWhenLocked": "La grabación continúa aunque se bloquee la pantalla."
 }

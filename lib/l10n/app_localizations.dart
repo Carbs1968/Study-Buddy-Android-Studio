@@ -877,6 +877,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Recording paused. Tap Resume to continue. Your recording is still saved.'**
   String get recordingPausedHelp;
+
+  /// No description provided for @recordingContinuesWhenLocked.
+  ///
+  /// In en, this message translates to:
+  /// **'Recording continues if your screen locks.'**
+  String get recordingContinuesWhenLocked;
 }
 
 class _AppLocalizationsDelegate

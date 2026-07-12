@@ -81,7 +81,7 @@ class _RecorderPageState extends State<RecorderPage> with WidgetsBindingObserver
       return AppLocalizations.of(context).recordingPausedHelp;
     }
     if (_isRecording) {
-      return 'Recording continues if your screen locks.';
+      return AppLocalizations.of(context).recordingContinuesWhenLocked;
     }
     if (!_isReadyToRecord) {
       return AppLocalizations.of(context).chooseClassAndTopicToRecord;

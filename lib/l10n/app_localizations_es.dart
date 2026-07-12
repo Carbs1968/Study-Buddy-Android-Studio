@@ -478,4 +478,8 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get recordingPausedHelp =>
       'Grabación pausada. Toca Reanudar para continuar. Tu grabación sigue guardada.';
+
+  @override
+  String get recordingContinuesWhenLocked =>
+      'La grabación continúa aunque se bloquee la pantalla.';
 }

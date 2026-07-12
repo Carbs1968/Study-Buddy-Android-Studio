@@ -464,4 +464,8 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get recordingPausedHelp =>
       'Recording paused. Tap Resume to continue. Your recording is still saved.';
+
+  @override
+  String get recordingContinuesWhenLocked =>
+      'Recording continues if your screen locks.';
 }
