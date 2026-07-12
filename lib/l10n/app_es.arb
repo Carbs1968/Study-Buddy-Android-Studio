@@ -9,5 +9,8 @@
   "language": "Idioma",
   "school": "Escuela / Universidad",
   "accountType": "Tipo de cuenta",
-  "freemium": "Freemium"
+  "freemium": "Freemium",
+  "changePhoto": "Cambiar foto",
+  "signOut": "Cerrar sesión",
+  "loading": "Cargando..."
 }
