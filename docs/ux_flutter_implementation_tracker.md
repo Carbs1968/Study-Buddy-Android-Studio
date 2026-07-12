@@ -3359,3 +3359,132 @@ Planned staged migration:
 6. Locale-aware dates, times, durations, numbers, file sizes, and pluralization.
 7. Remove `SBStrings`, unused `LocaleProvider`, and remaining stale localization artifacts after all active screens use `AppLocalizations`.
 8. Add English/Spanish widget tests, ARB key-parity checks, and hardcoded user-facing string checks.
+
+## 2026-07-12 — English/Spanish Localization Migration Complete
+
+### Summary
+
+The active Flutter application has completed its staged migration to Flutter's generated localization system.
+
+Current localization source of truth:
+- Flutter `gen_l10n`
+- `lib/l10n/app_en.arb`
+- `lib/l10n/app_es.arb`
+- generated `AppLocalizations` classes
+- English and Spanish currently supported
+
+The legacy custom `SBStrings` implementation and `lib/l10n/strings.dart` were removed after all active application screens migrated successfully.
+
+User-authored data and AI-generated content continue to display exactly as stored. The application localizes its own labels, controls, statuses, validation, helper text, dialogs, and safe error messages without rewriting academic content.
+
+### Screens and flows localized
+
+Completed localization coverage includes:
+- Login and authentication interface
+- Home navigation
+- Dashboard
+- Library and session lists
+- Academic Settings
+- Main Settings
+- Account deletion dialogs and progress states
+- Recorder
+- Locked-screen recording helper text
+- Class Lectures
+- Lecture Detail
+- Transcript statuses
+- AI job statuses
+- AI summary, notes, and practice-test interface labels
+- Class Materials and upload flows
+- Material image, PDF, DOCX, and generic file-detail views
+- Material deletion dialogs and status messages
+- Class Study Guide interface
+- Study-guide source descriptions and section headings
+
+Locale-aware formatting was added where relevant for:
+- dates
+- times
+- durations
+- material-added dates
+- AI output counts and pluralization
+
+### Error-safety cleanup
+
+User-facing raw Firebase, Firestore, callable-function, upload, transcript, AI-output, and academic-settings exceptions were replaced with safe localized messages where identified.
+
+Technical exception details remain available through application logging for troubleshooting.
+
+The Academic Settings load/save flow was specifically corrected so:
+- users see localized failure messages;
+- raw exception details are logged through `appLogger`;
+- Firestore loading and saving behavior remains unchanged.
+
+### Validation
+
+Validation completed during the migration:
+- `flutter gen-l10n` completed successfully after ARB changes.
+- `flutter analyze` reported no issues at completion.
+- Hardcoded user-facing string audits were run across active Flutter screens.
+- No active Dart files reference `SBStrings`, `SBLocale`, or `lib/l10n/strings.dart`.
+- Physical Android testing was completed throughout the migration.
+- English/Spanish language switching and persistence were tested.
+- Spanish layouts were checked for overflow and system-bar obstruction.
+- Recording controls, timer, foreground recording, upload, Firestore metadata, local cleanup, materials upload, preview, deletion, and study-guide display remained operational in the tested flows.
+
+### Safety statement
+
+Baseline behavior preserved:
+- Firebase Auth login/logout
+- Firebase Storage recording and material uploads
+- Firestore session and academic metadata
+- UID-based user structure and email lookup support
+- Academic hierarchy: Academic Year → Semester → Class → Topic
+- Recording start, pause, resume, stop, and timer
+- Android foreground and locked-screen recording behavior
+- Wakelock behavior
+- Recording filename format
+- Local file cleanup safeguards
+- Library and session loading
+- Transcript, summary, notes, quiz, and study-guide flows
+- Responsive layout behavior
+- Material upload, preview, and deletion behavior
+
+No Google Drive functionality was reintroduced.
+
+Backend status identifiers, Firestore field names, collection names, storage paths, MIME types, and Cloud Function contracts were not renamed as part of localization.
+
+### Commits
+
+Localization implementation:
+- `3bd3b9e Localize login and home navigation`
+- `e06132c Localize dashboard and library`
+- `1749241 Localize recorder screen`
+- `02038aa Localize locked-screen recording helper`
+- `945c3f6 Localize class lectures screen`
+- `71667ee Localize lecture detail screen`
+- `d00fb08 Localize class materials screen`
+- `7282219 Localize class study guide screen`
+- `18b5ff8 Complete generated localization migration`
+
+Final error-safety cleanup:
+- `d81c21b Hide raw academic settings errors`
+- `b5fd1c0 Import academic settings logger`
+
+Earlier localization foundation:
+- `249ac17 Establish generated localization foundation`
+- `da9c453 Register generated app localizations`
+- `11c187a Localize academic settings screen`
+- `25eaf06 Localize settings screen`
+
+### Remaining localization follow-up
+
+The active Flutter UI migration is complete.
+
+Separate follow-up work:
+1. Audit Android-native notification/channel strings and native resources.
+2. Review Google Play listing text, screenshots, release notes, privacy text, and Spanish store metadata.
+3. Add automated English/Spanish widget tests.
+4. Add ARB key-parity validation to CI.
+5. Add an automated hardcoded user-facing string check.
+6. Continue verifying that backend and SDK errors are converted into safe localized UI messages.
+7. Decide whether future AI generation should explicitly request the user's selected language; existing AI output remains displayed as generated.
+
