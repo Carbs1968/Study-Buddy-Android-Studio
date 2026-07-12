@@ -475,6 +475,174 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Settings'**
   String get settings;
+
+  /// No description provided for @dashboardSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your study workspace, organized by class and topic.'**
+  String get dashboardSubtitle;
+
+  /// No description provided for @quickActions.
+  ///
+  /// In en, this message translates to:
+  /// **'Quick actions'**
+  String get quickActions;
+
+  /// No description provided for @startNewRecordingDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Start a new classroom recording.'**
+  String get startNewRecordingDescription;
+
+  /// No description provided for @uploadStudyMaterial.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload Study Material'**
+  String get uploadStudyMaterial;
+
+  /// No description provided for @chooseClassOrTopicBeforeUpload.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a class or topic before uploading.'**
+  String get chooseClassOrTopicBeforeUpload;
+
+  /// No description provided for @recentClasses.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent Classes'**
+  String get recentClasses;
+
+  /// No description provided for @academicContext.
+  ///
+  /// In en, this message translates to:
+  /// **'Academic context'**
+  String get academicContext;
+
+  /// No description provided for @academicStructure.
+  ///
+  /// In en, this message translates to:
+  /// **'Year → Semester → Class → Topic'**
+  String get academicStructure;
+
+  /// No description provided for @recentClassesLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load recent classes'**
+  String get recentClassesLoadFailed;
+
+  /// No description provided for @checkConnectionTryAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Check your connection and try again.'**
+  String get checkConnectionTryAgain;
+
+  /// No description provided for @loadingRecentClasses.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading recent classes'**
+  String get loadingRecentClasses;
+
+  /// No description provided for @checkingLatestStudyActivity.
+  ///
+  /// In en, this message translates to:
+  /// **'Checking your latest study activity...'**
+  String get checkingLatestStudyActivity;
+
+  /// No description provided for @recentClassesEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent classes will appear here'**
+  String get recentClassesEmptyTitle;
+
+  /// No description provided for @recentClassesEmptyMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Record a class session to see your most recent study activity here.'**
+  String get recentClassesEmptyMessage;
+
+  /// No description provided for @libraryEmptyMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Record a lecture from the Recorder tab to build your Library.'**
+  String get libraryEmptyMessage;
+
+  /// No description provided for @librarySearchEmptyMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Try a different class name or clear the search.'**
+  String get librarySearchEmptyMessage;
+
+  /// No description provided for @today.
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get today;
+
+  /// No description provided for @yesterday.
+  ///
+  /// In en, this message translates to:
+  /// **'Yesterday'**
+  String get yesterday;
+
+  /// No description provided for @latestDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Latest: {date}'**
+  String latestDate(String date);
+
+  /// No description provided for @sessionCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No sessions} =1{1 session} other{{count} sessions}}'**
+  String sessionCount(int count);
+
+  /// No description provided for @lectureCountGenerated.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No lectures} =1{1 lecture} other{{count} lectures}}'**
+  String lectureCountGenerated(int count);
+
+  /// No description provided for @daysAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 day ago} other{{count} days ago}}'**
+  String daysAgo(int count);
+
+  /// No description provided for @libraryLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load your Library. Please try again.'**
+  String get libraryLoadFailed;
+
+  /// No description provided for @notSignedIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Not signed in.'**
+  String get notSignedIn;
+
+  /// No description provided for @selectClass.
+  ///
+  /// In en, this message translates to:
+  /// **'Select a class'**
+  String get selectClass;
+
+  /// No description provided for @errorLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Error loading'**
+  String get errorLoading;
+
+  /// No description provided for @noRecordingsYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No recordings yet'**
+  String get noRecordingsYet;
+
+  /// No description provided for @noClassesMatch.
+  ///
+  /// In en, this message translates to:
+  /// **'No classes match your search'**
+  String get noClassesMatch;
 }
 
 class _AppLocalizationsDelegate

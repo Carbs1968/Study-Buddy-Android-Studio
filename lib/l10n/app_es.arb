@@ -69,5 +69,61 @@
   "dashboard": "Inicio",
   "record": "Grabar",
   "library": "Biblioteca",
-  "settings": "Configuración"
+  "settings": "Configuración",
+  "dashboardSubtitle": "Tu espacio de estudio, organizado por clase y tema.",
+  "quickActions": "Acciones rápidas",
+  "startNewRecordingDescription": "Inicia una nueva grabación de clase.",
+  "uploadStudyMaterial": "Subir material de estudio",
+  "chooseClassOrTopicBeforeUpload": "Elige una clase o un tema antes de subir archivos.",
+  "recentClasses": "Clases recientes",
+  "academicContext": "Contexto académico",
+  "academicStructure": "Año → Semestre → Clase → Tema",
+  "recentClassesLoadFailed": "No se pudieron cargar las clases recientes",
+  "checkConnectionTryAgain": "Revisa tu conexión e inténtalo de nuevo.",
+  "loadingRecentClasses": "Cargando clases recientes",
+  "checkingLatestStudyActivity": "Buscando tu actividad de estudio más reciente...",
+  "recentClassesEmptyTitle": "Tus clases recientes aparecerán aquí",
+  "recentClassesEmptyMessage": "Graba una sesión de clase para ver aquí tu actividad de estudio más reciente.",
+  "libraryEmptyMessage": "Graba una clase desde la pestaña Grabar para crear tu Biblioteca.",
+  "librarySearchEmptyMessage": "Prueba con otro nombre de clase o borra la búsqueda.",
+  "today": "Hoy",
+  "yesterday": "Ayer",
+  "latestDate": "Más reciente: {date}",
+  "@latestDate": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "sessionCount": "{count, plural, =0{Sin sesiones} =1{1 sesión} other{{count} sesiones}}",
+  "@sessionCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "lectureCountGenerated": "{count, plural, =0{Sin clases grabadas} =1{1 clase grabada} other{{count} clases grabadas}}",
+  "@lectureCountGenerated": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "daysAgo": "{count, plural, =1{Hace 1 día} other{Hace {count} días}}",
+  "@daysAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "libraryLoadFailed": "No se pudo cargar tu Biblioteca. Inténtalo de nuevo.",
+  "notSignedIn": "No has iniciado sesión.",
+  "selectClass": "Selecciona una clase",
+  "errorLoading": "Error al cargar",
+  "noRecordingsYet": "Aún no hay grabaciones",
+  "noClassesMatch": "Ninguna clase coincide con tu búsqueda"
 }

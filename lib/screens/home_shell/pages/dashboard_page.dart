@@ -4,7 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 import '../../class_lectures_screen.dart';
 
-import '../../../l10n/strings.dart';
+import '../../../l10n/app_localizations.dart';
 
 class DashboardPage extends StatelessWidget {
   const DashboardPage({
@@ -18,7 +18,7 @@ class DashboardPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final strings = SBStrings.of(context);
+    final strings = AppLocalizations.of(context);
     final theme = Theme.of(context);
 
     return Scaffold(
@@ -35,7 +35,7 @@ class DashboardPage extends StatelessWidget {
             ),
             const SizedBox(height: 6),
             Text(
-              'Your study workspace, organized by class and topic.',
+              strings.dashboardSubtitle,
               style: theme.textTheme.bodyLarge?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
               ),
@@ -44,7 +44,7 @@ class DashboardPage extends StatelessWidget {
             const _AcademicContextCard(),
             const SizedBox(height: 20),
             Text(
-              'Quick actions',
+              strings.quickActions,
               style: theme.textTheme.titleLarge?.copyWith(
                 fontWeight: FontWeight.w800,
               ),
@@ -53,19 +53,19 @@ class DashboardPage extends StatelessWidget {
             _DashboardActionCard(
               icon: Icons.mic_none,
               title: strings.record,
-              subtitle: 'Start a new classroom recording.',
+              subtitle: strings.startNewRecordingDescription,
               onTap: onRecordTap,
             ),
             const SizedBox(height: 12),
             _DashboardActionCard(
               icon: Icons.upload_file_outlined,
-              title: 'Upload Study Material',
-              subtitle: 'Choose a class or topic before uploading.',
+              title: strings.uploadStudyMaterial,
+              subtitle: strings.chooseClassOrTopicBeforeUpload,
               onTap: onUploadMaterialTap,
             ),
             const SizedBox(height: 24),
             Text(
-              'Recent Classes',
+              strings.recentClasses,
               style: theme.textTheme.titleLarge?.copyWith(
                 fontWeight: FontWeight.w800,
               ),
@@ -101,14 +101,14 @@ class _AcademicContextCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Academic context',
+                    AppLocalizations.of(context).academicContext,
                     style: theme.textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.w800,
                     ),
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'Year → Semester → Class → Topic',
+                    AppLocalizations.of(context).academicStructure,
                     style: theme.textTheme.bodyMedium?.copyWith(
                       color: theme.colorScheme.onSurfaceVariant,
                     ),
@@ -187,18 +187,18 @@ class _RecentClassesSection extends StatelessWidget {
           .snapshots(),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
-          return const _DashboardMessageCard(
+          return _DashboardMessageCard(
             icon: Icons.warning_amber_outlined,
-            title: 'Could not load recent classes',
-            message: 'Check your connection and try again.',
+            title: AppLocalizations.of(context).recentClassesLoadFailed,
+            message: AppLocalizations.of(context).checkConnectionTryAgain,
           );
         }
 
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const _DashboardMessageCard(
+          return _DashboardMessageCard(
             icon: Icons.hourglass_empty,
-            title: 'Loading recent classes',
-            message: 'Checking your latest study activity...',
+            title: AppLocalizations.of(context).loadingRecentClasses,
+            message: AppLocalizations.of(context).checkingLatestStudyActivity,
           );
         }
 
@@ -229,11 +229,11 @@ class _RecentClassCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final latest = row.latest;
-    final sessionsLabel =
-        '${row.sessionCount} session${row.sessionCount == 1 ? '' : 's'}';
+    final strings = AppLocalizations.of(context);
+    final sessionsLabel = strings.sessionCount(row.sessionCount);
     final activityLabel = latest == null
         ? sessionsLabel
-        : '$sessionsLabel • ${_formatRecentDate(latest)}';
+        : '$sessionsLabel • ${_formatRecentDate(context, latest)}';
 
     return Card(
       elevation: 0,
@@ -431,21 +431,24 @@ DateTime? _toDateTime(dynamic value) {
   return null;
 }
 
-String _formatRecentDate(DateTime date) {
-  final days = DateTime.now().difference(date).inDays;
+String _formatRecentDate(BuildContext context, DateTime date) {
+  final strings = AppLocalizations.of(context);
+  final now = DateTime.now();
+  final today = DateTime(now.year, now.month, now.day);
+  final target = DateTime(date.year, date.month, date.day);
+  final days = today.difference(target).inDays;
+
   if (days <= 0) {
-    return 'Today';
+    return strings.today;
   }
   if (days == 1) {
-    return 'Yesterday';
+    return strings.yesterday;
   }
   if (days < 7) {
-    return '$days days ago';
+    return strings.daysAgo(days);
   }
 
-  final month = date.month.toString().padLeft(2, '0');
-  final day = date.day.toString().padLeft(2, '0');
-  return '${date.year}-$month-$day';
+  return MaterialLocalizations.of(context).formatMediumDate(date);
 }
 
 String _stableDocumentId(String value) {
@@ -508,14 +511,14 @@ class _EmptyStateCard extends StatelessWidget {
             ),
             const SizedBox(height: 12),
             Text(
-              'Recent classes will appear here',
+              AppLocalizations.of(context).recentClassesEmptyTitle,
               style: theme.textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.w800,
               ),
             ),
             const SizedBox(height: 6),
             Text(
-              'Record a class session to see your most recent study activity here.',
+              AppLocalizations.of(context).recentClassesEmptyMessage,
               style: theme.textTheme.bodyMedium?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
               ),

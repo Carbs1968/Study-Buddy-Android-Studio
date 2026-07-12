@@ -214,4 +214,126 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get settings => 'Configuración';
+
+  @override
+  String get dashboardSubtitle =>
+      'Tu espacio de estudio, organizado por clase y tema.';
+
+  @override
+  String get quickActions => 'Acciones rápidas';
+
+  @override
+  String get startNewRecordingDescription =>
+      'Inicia una nueva grabación de clase.';
+
+  @override
+  String get uploadStudyMaterial => 'Subir material de estudio';
+
+  @override
+  String get chooseClassOrTopicBeforeUpload =>
+      'Elige una clase o un tema antes de subir archivos.';
+
+  @override
+  String get recentClasses => 'Clases recientes';
+
+  @override
+  String get academicContext => 'Contexto académico';
+
+  @override
+  String get academicStructure => 'Año → Semestre → Clase → Tema';
+
+  @override
+  String get recentClassesLoadFailed =>
+      'No se pudieron cargar las clases recientes';
+
+  @override
+  String get checkConnectionTryAgain =>
+      'Revisa tu conexión e inténtalo de nuevo.';
+
+  @override
+  String get loadingRecentClasses => 'Cargando clases recientes';
+
+  @override
+  String get checkingLatestStudyActivity =>
+      'Buscando tu actividad de estudio más reciente...';
+
+  @override
+  String get recentClassesEmptyTitle => 'Tus clases recientes aparecerán aquí';
+
+  @override
+  String get recentClassesEmptyMessage =>
+      'Graba una sesión de clase para ver aquí tu actividad de estudio más reciente.';
+
+  @override
+  String get libraryEmptyMessage =>
+      'Graba una clase desde la pestaña Grabar para crear tu Biblioteca.';
+
+  @override
+  String get librarySearchEmptyMessage =>
+      'Prueba con otro nombre de clase o borra la búsqueda.';
+
+  @override
+  String get today => 'Hoy';
+
+  @override
+  String get yesterday => 'Ayer';
+
+  @override
+  String latestDate(String date) {
+    return 'Más reciente: $date';
+  }
+
+  @override
+  String sessionCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count sesiones',
+      one: '1 sesión',
+      zero: 'Sin sesiones',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String lectureCountGenerated(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count clases grabadas',
+      one: '1 clase grabada',
+      zero: 'Sin clases grabadas',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String daysAgo(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Hace $count días',
+      one: 'Hace 1 día',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get libraryLoadFailed =>
+      'No se pudo cargar tu Biblioteca. Inténtalo de nuevo.';
+
+  @override
+  String get notSignedIn => 'No has iniciado sesión.';
+
+  @override
+  String get selectClass => 'Selecciona una clase';
+
+  @override
+  String get errorLoading => 'Error al cargar';
+
+  @override
+  String get noRecordingsYet => 'Aún no hay grabaciones';
+
+  @override
+  String get noClassesMatch => 'Ninguna clase coincide con tu búsqueda';
 }

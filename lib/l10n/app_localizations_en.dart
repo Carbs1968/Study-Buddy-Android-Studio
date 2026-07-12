@@ -208,4 +208,123 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settings => 'Settings';
+
+  @override
+  String get dashboardSubtitle =>
+      'Your study workspace, organized by class and topic.';
+
+  @override
+  String get quickActions => 'Quick actions';
+
+  @override
+  String get startNewRecordingDescription => 'Start a new classroom recording.';
+
+  @override
+  String get uploadStudyMaterial => 'Upload Study Material';
+
+  @override
+  String get chooseClassOrTopicBeforeUpload =>
+      'Choose a class or topic before uploading.';
+
+  @override
+  String get recentClasses => 'Recent Classes';
+
+  @override
+  String get academicContext => 'Academic context';
+
+  @override
+  String get academicStructure => 'Year → Semester → Class → Topic';
+
+  @override
+  String get recentClassesLoadFailed => 'Could not load recent classes';
+
+  @override
+  String get checkConnectionTryAgain => 'Check your connection and try again.';
+
+  @override
+  String get loadingRecentClasses => 'Loading recent classes';
+
+  @override
+  String get checkingLatestStudyActivity =>
+      'Checking your latest study activity...';
+
+  @override
+  String get recentClassesEmptyTitle => 'Recent classes will appear here';
+
+  @override
+  String get recentClassesEmptyMessage =>
+      'Record a class session to see your most recent study activity here.';
+
+  @override
+  String get libraryEmptyMessage =>
+      'Record a lecture from the Recorder tab to build your Library.';
+
+  @override
+  String get librarySearchEmptyMessage =>
+      'Try a different class name or clear the search.';
+
+  @override
+  String get today => 'Today';
+
+  @override
+  String get yesterday => 'Yesterday';
+
+  @override
+  String latestDate(String date) {
+    return 'Latest: $date';
+  }
+
+  @override
+  String sessionCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count sessions',
+      one: '1 session',
+      zero: 'No sessions',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String lectureCountGenerated(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count lectures',
+      one: '1 lecture',
+      zero: 'No lectures',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String daysAgo(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count days ago',
+      one: '1 day ago',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get libraryLoadFailed =>
+      'Could not load your Library. Please try again.';
+
+  @override
+  String get notSignedIn => 'Not signed in.';
+
+  @override
+  String get selectClass => 'Select a class';
+
+  @override
+  String get errorLoading => 'Error loading';
+
+  @override
+  String get noRecordingsYet => 'No recordings yet';
+
+  @override
+  String get noClassesMatch => 'No classes match your search';
 }

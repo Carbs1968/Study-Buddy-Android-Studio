@@ -2,7 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
-import '../../../l10n/strings.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../class_lectures_screen.dart';
 
 class LibraryPage extends StatefulWidget {
@@ -24,7 +24,7 @@ class _LibraryPageState extends State<LibraryPage> {
   @override
   Widget build(BuildContext context) {
     final uid = FirebaseAuth.instance.currentUser?.uid;
-    final strings = SBStrings.of(context);
+    final strings = AppLocalizations.of(context);
     final theme = Theme.of(context);
 
     if (uid == null) {
@@ -87,7 +87,7 @@ class _LibraryPageState extends State<LibraryPage> {
                     child: Padding(
                       padding: const EdgeInsets.all(16),
                       child: Text(
-                        '${strings.errorLoading}: ${snap.error}',
+                        strings.libraryLoadFailed,
                         textAlign: TextAlign.center,
                       ),
                     ),
@@ -99,7 +99,7 @@ class _LibraryPageState extends State<LibraryPage> {
                   return _LibraryEmptyState(
                     message: strings.noRecordingsYet,
                     helper:
-                        'Record a lecture from the Recorder tab to build your Library.',
+                        strings.libraryEmptyMessage,
                   );
                 }
 
@@ -182,7 +182,7 @@ class _LibraryPageState extends State<LibraryPage> {
                 if (items.isEmpty) {
                   return _LibraryEmptyState(
                     message: strings.noClassesMatch,
-                    helper: 'Try a different class name or clear the search.',
+                    helper: strings.librarySearchEmptyMessage,
                   );
                 }
 
@@ -196,24 +196,14 @@ class _LibraryPageState extends State<LibraryPage> {
                     final latest = r.latest?.toLocal();
                     final latestLabel = latest == null
                         ? null
-                        : 'Latest: ${const [
-                            'Jan',
-                            'Feb',
-                            'Mar',
-                            'Apr',
-                            'May',
-                            'Jun',
-                            'Jul',
-                            'Aug',
-                            'Sep',
-                            'Oct',
-                            'Nov',
-                            'Dec',
-                          ][latest.month - 1]} ${latest.day}, ${latest.year}';
+                        : strings.latestDate(
+                            MaterialLocalizations.of(context)
+                                .formatMediumDate(latest),
+                          );
 
                     final subtitleParts = <String>[
                       if (latestLabel != null) latestLabel,
-                      strings.lectureCount(r.count),
+                      strings.lectureCountGenerated(r.count),
                     ];
 
                     return Card(
