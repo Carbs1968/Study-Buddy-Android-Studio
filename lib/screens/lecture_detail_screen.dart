@@ -108,7 +108,14 @@ class LectureDetailScreen extends StatelessWidget {
       showDialog(
         context: context,
         builder: (_) => AlertDialog(
-          title: Text('AI ${type[0].toUpperCase()}${type.substring(1)}'),
+          title: Text(
+            switch (type) {
+              'summary' => AppLocalizations.of(context).aiSummaryTitle,
+              'notes' => AppLocalizations.of(context).aiNotesTitle,
+              'quiz' => AppLocalizations.of(context).aiQuizTitle,
+              _ => AppLocalizations.of(context).aiOutputs,
+            },
+          ),
           content: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 800, maxHeight: 520),
             child: Scrollbar(

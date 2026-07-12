@@ -388,5 +388,8 @@
   "classStudyGuideFallbackTitle": "Guía de estudio de la clase",
   "keyTopics": "Temas clave",
   "studySections": "Secciones de estudio",
-  "reviewQuestions": "Preguntas de repaso"
+  "reviewQuestions": "Preguntas de repaso",
+  "aiSummaryTitle": "Resumen de IA",
+  "aiNotesTitle": "Notas de IA",
+  "aiQuizTitle": "Prueba práctica de IA"
 }

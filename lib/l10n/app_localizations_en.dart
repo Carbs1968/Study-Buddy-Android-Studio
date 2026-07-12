@@ -848,4 +848,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get reviewQuestions => 'Review questions';
+
+  @override
+  String get aiSummaryTitle => 'AI Summary';
+
+  @override
+  String get aiNotesTitle => 'AI Notes';
+
+  @override
+  String get aiQuizTitle => 'AI Practice Test';
 }

@@ -867,4 +867,13 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get reviewQuestions => 'Preguntas de repaso';
+
+  @override
+  String get aiSummaryTitle => 'Resumen de IA';
+
+  @override
+  String get aiNotesTitle => 'Notas de IA';
+
+  @override
+  String get aiQuizTitle => 'Prueba práctica de IA';
 }

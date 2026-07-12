@@ -388,5 +388,8 @@
   "classStudyGuideFallbackTitle": "Class Study Guide",
   "keyTopics": "Key topics",
   "studySections": "Study sections",
-  "reviewQuestions": "Review questions"
+  "reviewQuestions": "Review questions",
+  "aiSummaryTitle": "AI Summary",
+  "aiNotesTitle": "AI Notes",
+  "aiQuizTitle": "AI Practice Test"
 }

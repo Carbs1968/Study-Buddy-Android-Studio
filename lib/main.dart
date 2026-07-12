@@ -27,7 +27,6 @@ import 'package:study_buddy/utils/utils.dart';
 // Local project imports
 // --------------------
 import 'firebase_options.dart';
-import 'l10n/strings.dart';
 import 'l10n/app_localizations.dart';
 // Added import for AcademicSettingsScreen at top-level to avoid misplaced directives.
 import 'screens/home_shell/home_shell.dart';
@@ -36,17 +35,6 @@ import 'utils/app_logger.dart';
 import 'utils/constants.dart';
 
 final ValueNotifier<Locale> appLocale = ValueNotifier(const Locale('en'));
-
-// -----------------------------------------------------------------------------
-// SBLocale
-//
-// A simple InheritedWidget that holds the current Locale and SBStrings. This
-// replicates the previous localization wrapper used in MyApp without relying
-// on misplaced import directives. Widgets can depend on this to rebuild when
-// the locale or strings change. Placing this definition near the top keeps it
-// visible for MyApp while maintaining Dart import order.
-// Make SBLocale public so it can be looked up by SBStrings.of() in other files.
-// Removed SBLocale wrapper: localization is now handled via SBStrings.delegate
 
 // // ✅ Single Functions handle (same app-wide region as your backend)
 // late FirebaseFunctions functions;
@@ -94,7 +82,7 @@ class MyApp extends StatelessWidget {
       valueListenable: appLocale,
       builder: (context, locale, _) {
         return MaterialApp(
-          title: SBStrings(locale).appTitle,
+          onGenerateTitle: (context) => AppLocalizations.of(context).appTitle,
           theme: ThemeData(
             useMaterial3: true,
             colorScheme: ColorScheme.fromSeed(
@@ -218,7 +206,6 @@ class MyApp extends StatelessWidget {
           supportedLocales: AppLocalizations.supportedLocales,
           localizationsDelegates: const [
             AppLocalizations.delegate,
-            SBStrings.delegate,
             GlobalMaterialLocalizations.delegate,
             GlobalWidgetsLocalizations.delegate,
             GlobalCupertinoLocalizations.delegate,

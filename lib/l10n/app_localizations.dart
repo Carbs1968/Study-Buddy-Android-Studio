@@ -1549,6 +1549,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Review questions'**
   String get reviewQuestions;
+
+  /// No description provided for @aiSummaryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'AI Summary'**
+  String get aiSummaryTitle;
+
+  /// No description provided for @aiNotesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'AI Notes'**
+  String get aiNotesTitle;
+
+  /// No description provided for @aiQuizTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'AI Practice Test'**
+  String get aiQuizTitle;
 }
 
 class _AppLocalizationsDelegate
