@@ -3226,3 +3226,136 @@ Safety:
 - Required UID/email match before deletion.
 - Required explicit `--confirm-delete` for destructive mode.
 - No production/student account deletion was performed.
+
+## 2026-07-12 — In-App Account Deletion and Localization Foundation
+
+### In-app account deletion
+
+Summary:
+- Added and deployed the authenticated callable Cloud Function `deleteMyAccount`.
+- Wired the Settings screen to call the backend deletion flow.
+- Preserved the fixed destructive confirmation token `DELETE`.
+- Added deletion progress, failure handling, forced sign-out, and return-to-login behavior.
+- Tested the full deletion flow from the physical Android app using a disposable burner account.
+
+Deletion scope verified:
+- Firebase Auth user deleted.
+- `users/{uid}` recursively deleted.
+- `userEmailLookup/{email}` deleted.
+- Firebase Storage files deleted under:
+  - `recordings/{uid}/`
+  - `classMaterials/{uid}/`
+  - `user_photos/{uid}/`
+- Top-level `aiJobs` for the UID deleted when present.
+- `accountDeletionRequests` status log retained.
+- Firestore console visual verification confirmed account data was removed.
+
+Safety:
+- Backend uses the authenticated UID and email rather than accepting another user’s UID.
+- Email lookup and Firebase Auth identity are verified before deletion.
+- No recording, upload, academic structure, library, or AI-generation behavior was changed.
+
+Commits:
+- `9633f83 Add in-app account deletion`
+
+### Settings interface cleanup
+
+Summary:
+- Removed redundant explanations from self-explanatory Settings actions.
+- Combined Manage Academic Settings, Privacy Policy, Terms and Conditions, and Delete Account into one consistent grouped action card.
+- Preserved all navigation, deletion, logout, and academic settings behavior.
+
+Commits:
+- `0e9acc6 Unify settings action card layout`
+
+### Localization architecture audit
+
+Summary:
+- Completed a review-only Codex audit against the latest `origin/dev`.
+- Confirmed the app had three overlapping localization systems:
+  - active custom `SBStrings`
+  - inactive ARB/generated localization trees
+  - unused `LocaleProvider`
+- Confirmed most active user-facing text was still hardcoded in English.
+- Selected Flutter `gen_l10n` and generated `AppLocalizations` as the long-term localization source of truth.
+- English and Spanish remain the currently supported languages.
+- Future languages will be added through ARB translation resources rather than editing every screen.
+
+### Generated localization foundation
+
+Summary:
+- Added `l10n.yaml`.
+- Configured `app_en.arb` as the template language.
+- Completed the initial English/Spanish ARB key parity.
+- Generated typed `AppLocalizations` accessors.
+- Removed the unused Flutter Intl generator configuration and `intl_utils`.
+- Removed duplicate inactive generated localization trees.
+- Registered `AppLocalizations` alongside `SBStrings` during the staged migration.
+- Preserved the existing `appLocale` notifier and Firestore locale persistence.
+
+Validation:
+- `flutter gen-l10n` completed successfully.
+- `flutter analyze` reported no issues.
+
+Commits:
+- `249ac17 Establish generated localization foundation`
+- `da9c453 Register generated app localizations`
+
+### Academic Settings localization
+
+Summary:
+- Migrated Academic Settings from partial `SBStrings` usage and hardcoded English to generated `AppLocalizations`.
+- Localized:
+  - page title
+  - academic level/year label
+  - examples and helper text
+  - semester/term label
+  - validation
+  - loading, save-success, and save-failure messages
+  - save button and saving state
+- Preserved Firestore loading and save behavior.
+
+Validation:
+- Tested on a physical Android phone in Spanish.
+- Longer Spanish strings rendered without overflow.
+- `flutter analyze` reported no issues.
+
+Commit:
+- `11c187a Localize academic settings screen`
+
+### Settings localization
+
+Summary:
+- Migrated the main Settings screen to generated `AppLocalizations`.
+- Localized:
+  - page title and profile fallback
+  - language selector and language names
+  - academic-period labels
+  - academic-settings action
+  - Privacy Policy and Terms and Conditions
+  - Delete Account row
+  - full account-deletion confirmation dialog
+  - cancellation, deletion progress, and safe failure messages
+- Kept the destructive confirmation token `DELETE` fixed in every language.
+- Replaced raw callable error display with a safe localized deletion failure message.
+
+Validation:
+- Tested the Settings screen and deletion dialog on a physical Android phone in Spanish.
+- Ran a complete string-literal scan of `settings_page.dart`.
+- The only remaining visible hardcoded text is the intentional fixed token `DELETE`.
+- `flutter analyze` reported no issues.
+
+Commit:
+- `25eaf06 Localize settings screen`
+
+### Remaining localization work
+
+Planned staged migration:
+1. Login and Home navigation.
+2. Dashboard and Library.
+3. Recorder.
+4. Class lectures and Lecture detail.
+5. Class materials and Class study guide.
+6. Locale-aware dates, times, durations, numbers, file sizes, and pluralization.
+7. Remove `SBStrings`, unused `LocaleProvider`, and remaining stale localization artifacts after all active screens use `AppLocalizations`.
+8. Add English/Spanish widget tests, ARB key-parity checks, and hardcoded user-facing string checks.
