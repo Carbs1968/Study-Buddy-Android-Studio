@@ -12,6 +12,8 @@ import 'package:image_picker/image_picker.dart';
 import 'package:pdfrx/pdfrx.dart';
 import 'package:xml/xml.dart';
 
+import '../l10n/app_localizations.dart';
+
 class ClassMaterialsScreen extends StatefulWidget {
   final String academicYearId;
   final String semesterId;
@@ -120,43 +122,40 @@ class _ClassMaterialsScreenState extends State<ClassMaterialsScreen> {
     }
   }
 
-  String _formatMaterialTypeLabel(String type) {
+  String _formatMaterialTypeLabel(
+    BuildContext context,
+    String type,
+  ) {
+    final strings = AppLocalizations.of(context);
+
     switch (type.toLowerCase()) {
       case 'image':
-        return 'Image';
+        return strings.materialTypeImage;
       case 'pdf':
-        return 'PDF';
+        return strings.materialTypePdf;
       case 'spreadsheet':
-        return 'Spreadsheet';
+        return strings.materialTypeSpreadsheet;
       case 'presentation':
-        return 'Presentation';
+        return strings.materialTypePresentation;
       case 'document':
-        return 'Document';
+        return strings.materialTypeDocument;
       case 'text':
-        return 'Text';
+        return strings.materialTypeText;
       default:
-        return 'File';
+        return strings.materialTypeFile;
     }
   }
 
-  String _formatMaterialDate(DateTime date) {
-    const months = [
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'May',
-      'Jun',
-      'Jul',
-      'Aug',
-      'Sep',
-      'Oct',
-      'Nov',
-      'Dec',
-    ];
-
+  String _formatMaterialDate(
+    BuildContext context,
+    DateTime date,
+  ) {
+    final strings = AppLocalizations.of(context);
     final local = date.toLocal();
-    return 'Added ${months[local.month - 1]} ${local.day}, ${local.year}';
+    final formattedDate =
+        MaterialLocalizations.of(context).formatMediumDate(local);
+
+    return strings.materialAddedDate(formattedDate);
   }
 
   IconData _iconForMaterialType(String type) {
@@ -251,7 +250,7 @@ class _ClassMaterialsScreenState extends State<ClassMaterialsScreen> {
 
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Material uploaded to this class.')),
+        SnackBar(content: Text(AppLocalizations.of(context).materialUploaded)),
       );
     } catch (error) {
       final orphanedStoragePath = uploadedStoragePath;
@@ -266,7 +265,7 @@ class _ClassMaterialsScreenState extends State<ClassMaterialsScreen> {
 
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Upload failed. Please try again.')),
+        SnackBar(content: Text(AppLocalizations.of(context).materialUploadFailed)),
       );
     } finally {
       if (mounted) {
@@ -322,7 +321,7 @@ class _ClassMaterialsScreenState extends State<ClassMaterialsScreen> {
     if (pickedPath == null || pickedPath.trim().isEmpty) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Could not access the selected file.')),
+        SnackBar(content: Text(AppLocalizations.of(context).selectedFileUnavailable)),
       );
       return;
     }
@@ -351,8 +350,8 @@ class _ClassMaterialsScreenState extends State<ClassMaterialsScreen> {
             children: [
               ListTile(
                 leading: const Icon(Icons.add_photo_alternate_outlined),
-                title: const Text('Add image'),
-                subtitle: const Text('Upload a photo or image from your gallery.'),
+                title: Text(AppLocalizations.of(context).addImage),
+                subtitle: Text(AppLocalizations.of(context).addImageDescription),
                 onTap: () {
                   Navigator.pop(context);
                   _addImageFromGallery();
@@ -360,8 +359,8 @@ class _ClassMaterialsScreenState extends State<ClassMaterialsScreen> {
               ),
               ListTile(
                 leading: const Icon(Icons.upload_file_outlined),
-                title: const Text('Add file'),
-                subtitle: const Text('PDF, Word, PowerPoint, Excel, TXT, or CSV. TXT/CSV can be extracted for Study Guides in v1.'),
+                title: Text(AppLocalizations.of(context).addFile),
+                subtitle: Text(AppLocalizations.of(context).addFileDescription),
                 onTap: () {
                   Navigator.pop(context);
                   _addAcademicFile();
@@ -378,17 +377,18 @@ class _ClassMaterialsScreenState extends State<ClassMaterialsScreen> {
   Widget build(BuildContext context) {
     final uid = FirebaseAuth.instance.currentUser?.uid;
     final theme = Theme.of(context);
+    final strings = AppLocalizations.of(context);
 
     if (uid == null) {
-      return const Scaffold(
-        body: Center(child: Text('Not signed in.')),
+      return Scaffold(
+        body: Center(child: Text(strings.notSignedIn)),
       );
     }
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        title: Text('${widget.className} Materials'),
+        title: Text(strings.materialsTitle(widget.className)),
         backgroundColor: theme.scaffoldBackgroundColor,
         elevation: 0,
       ),
@@ -401,7 +401,7 @@ class _ClassMaterialsScreenState extends State<ClassMaterialsScreen> {
                 child: CircularProgressIndicator(strokeWidth: 2),
               )
             : const Icon(Icons.add_outlined),
-        label: Text(_uploading ? 'Uploading...' : 'Add material'),
+        label: Text(_uploading ? strings.uploading : strings.addMaterial),
       ),
       body: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
         stream: _materialsRef(uid).orderBy('createdAt', descending: true).snapshots(),
@@ -415,7 +415,7 @@ class _ClassMaterialsScreenState extends State<ClassMaterialsScreen> {
               padding: const EdgeInsets.all(16),
               child: Center(
                 child: Text(
-                  'Could not load materials: ${snapshot.error}',
+                  strings.couldNotLoadMaterials,
                   textAlign: TextAlign.center,
                 ),
               ),
@@ -446,7 +446,7 @@ class _ClassMaterialsScreenState extends State<ClassMaterialsScreen> {
                         ),
                         const SizedBox(height: 12),
                         Text(
-                          'No class materials yet',
+                          strings.noClassMaterials,
                           textAlign: TextAlign.center,
                           style: Theme.of(context).textTheme.titleMedium?.copyWith(
                                 fontWeight: FontWeight.w800,
@@ -454,7 +454,7 @@ class _ClassMaterialsScreenState extends State<ClassMaterialsScreen> {
                         ),
                         const SizedBox(height: 6),
                         Text(
-                          'Add images of notes, worksheets, PDFs, or documents here.',
+                          strings.noClassMaterialsDescription,
                           textAlign: TextAlign.center,
                           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                                 color: theme.colorScheme.onSurfaceVariant,
@@ -474,13 +474,13 @@ class _ClassMaterialsScreenState extends State<ClassMaterialsScreen> {
             separatorBuilder: (_, __) => const SizedBox(height: 12),
             itemBuilder: (context, index) {
               final data = docs[index].data();
-              final title = (data['originalFileName'] ?? data['fileName'] ?? 'Material')
+              final title = (data['originalFileName'] ?? data['fileName'] ?? strings.materialFallbackName)
                   .toString();
               final type = (data['materialType'] ?? 'image').toString();
               final createdAt = _toDateTime(data['createdAt']);
               final subtitleParts = <String>[
-                _formatMaterialTypeLabel(type),
-                if (createdAt != null) _formatMaterialDate(createdAt),
+                _formatMaterialTypeLabel(context, type),
+                if (createdAt != null) _formatMaterialDate(context, createdAt),
               ];
 
               final downloadUrl = (data['downloadUrl'] ?? '').toString();
@@ -604,18 +604,18 @@ Future<void> _deleteMaterial(
   final confirmed = await showDialog<bool>(
     context: context,
     builder: (context) => AlertDialog(
-      title: const Text('Delete material?'),
-      content: const Text(
-        'This will remove the material from this class and delete the uploaded file.',
+      title: Text(AppLocalizations.of(context).deleteMaterialTitle),
+      content: Text(
+        AppLocalizations.of(context).deleteMaterialMessage,
       ),
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context, false),
-          child: const Text('Cancel'),
+          child: Text(AppLocalizations.of(context).cancel),
         ),
         FilledButton(
           onPressed: () => Navigator.pop(context, true),
-          child: const Text('Delete'),
+          child: Text(AppLocalizations.of(context).delete),
         ),
       ],
     ),
@@ -644,7 +644,7 @@ Future<void> _deleteMaterial(
     if (!context.mounted) return;
 
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Material deleted.')),
+      SnackBar(content: Text(AppLocalizations.of(context).materialDeleted)),
     );
 
     Navigator.pop(context);
@@ -652,7 +652,7 @@ Future<void> _deleteMaterial(
     if (!context.mounted) return;
 
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Delete failed. Please try again.')),
+      SnackBar(content: Text(AppLocalizations.of(context).deleteFailed)),
     );
   }
 }
@@ -677,7 +677,7 @@ class _MaterialImagePreviewScreen extends StatelessWidget {
         title: Text(title),
         actions: [
           IconButton(
-            tooltip: 'Delete material',
+            tooltip: AppLocalizations.of(context).deleteMaterialTooltip,
             icon: const Icon(Icons.delete_outline),
             onPressed: () => _deleteMaterial(
               context,
@@ -709,7 +709,7 @@ class _MaterialImagePreviewScreen extends StatelessWidget {
               return Padding(
                 padding: const EdgeInsets.all(24),
                 child: Text(
-                  'Could not load image: $error',
+                  AppLocalizations.of(context).imageLoadFailed,
                   textAlign: TextAlign.center,
                 ),
               );
@@ -742,7 +742,7 @@ class _MaterialPdfPreviewScreen extends StatelessWidget {
         title: Text(title),
         actions: [
           IconButton(
-            tooltip: 'Delete material',
+            tooltip: AppLocalizations.of(context).deleteMaterialTooltip,
             icon: const Icon(Icons.delete_outline),
             onPressed: () => _deleteMaterial(
               context,
@@ -820,7 +820,7 @@ String _extractTextFromDocxBytes(Uint8List bytes) {
       .trim();
 
   if (fallbackText.isEmpty) {
-    throw Exception('No readable text was found in this DOCX file.');
+    throw Exception('No readable DOCX text found.');
   }
 
   return fallbackText;
@@ -851,7 +851,7 @@ class _MaterialDocxTextPreviewScreen extends StatelessWidget {
         title: Text(title),
         actions: [
           IconButton(
-            tooltip: 'Delete material',
+            tooltip: AppLocalizations.of(context).deleteMaterialTooltip,
             icon: const Icon(Icons.delete_outline),
             onPressed: () => _deleteMaterial(
               context,
@@ -873,7 +873,7 @@ class _MaterialDocxTextPreviewScreen extends StatelessWidget {
               padding: const EdgeInsets.all(24),
               child: Center(
                 child: Text(
-                  'Could not preview DOCX text: ${snapshot.error}',
+                  AppLocalizations.of(context).docxPreviewFailed,
                   textAlign: TextAlign.center,
                 ),
               ),
@@ -883,11 +883,11 @@ class _MaterialDocxTextPreviewScreen extends StatelessWidget {
           final docText = snapshot.data?.trim() ?? '';
 
           if (docText.isEmpty) {
-            return const Center(
+            return Center(
               child: Padding(
-                padding: EdgeInsets.all(24),
+                padding: const EdgeInsets.all(24),
                 child: Text(
-                  'No readable text was found in this DOCX file.',
+                  AppLocalizations.of(context).docxNoReadableText,
                   textAlign: TextAlign.center,
                 ),
               ),
@@ -930,28 +930,33 @@ class _MaterialFileDetailsScreen extends StatelessWidget {
     required this.storagePath,
   });
 
-  String _formatMaterialDetailsTypeLabel(String type) {
+  String _formatMaterialDetailsTypeLabel(
+    BuildContext context,
+    String type,
+  ) {
+    final strings = AppLocalizations.of(context);
+
     switch (type.toLowerCase()) {
       case 'image':
-        return 'Image';
+        return strings.materialTypeImage;
       case 'pdf':
-        return 'PDF';
+        return strings.materialTypePdf;
       case 'spreadsheet':
-        return 'Spreadsheet';
+        return strings.materialTypeSpreadsheet;
       case 'presentation':
-        return 'Presentation';
+        return strings.materialTypePresentation;
       case 'document':
-        return 'Document';
+        return strings.materialTypeDocument;
       case 'text':
-        return 'Text';
+        return strings.materialTypeText;
       default:
-        return 'File';
+        return strings.materialTypeFile;
     }
   }
 
-  String _formatSize(dynamic value) {
+  String _formatSize(BuildContext context, dynamic value) {
     final bytes = value is int ? value : int.tryParse(value.toString());
-    if (bytes == null) return 'Unknown size';
+    if (bytes == null) return AppLocalizations.of(context).unknownSize;
     if (bytes < 1024) return '$bytes B';
     if (bytes < 1024 * 1024) return '${(bytes / 1024).toStringAsFixed(1)} KB';
     return '${(bytes / (1024 * 1024)).toStringAsFixed(1)} MB';
@@ -964,7 +969,7 @@ class _MaterialFileDetailsScreen extends StatelessWidget {
         title: Text(title),
         actions: [
           IconButton(
-            tooltip: 'Delete material',
+            tooltip: AppLocalizations.of(context).deleteMaterialTooltip,
             icon: const Icon(Icons.delete_outline),
             onPressed: () => _deleteMaterial(
               context,
@@ -988,11 +993,19 @@ class _MaterialFileDetailsScreen extends StatelessWidget {
             style: Theme.of(context).textTheme.titleLarge,
           ),
           const SizedBox(height: 12),
-          Text('Type: ${_formatMaterialDetailsTypeLabel(materialType)}'),
-          Text('Size: ${_formatSize(sizeBytes)}'),
+          Text(
+            AppLocalizations.of(context).materialTypeValue(
+              _formatMaterialDetailsTypeLabel(context, materialType),
+            ),
+          ),
+          Text(
+            AppLocalizations.of(context).materialSizeValue(
+              _formatSize(context, sizeBytes),
+            ),
+          ),
           const SizedBox(height: 24),
-          const Text(
-            'This file is saved as class material. Preview is not available for this file type yet.',
+          Text(
+            AppLocalizations.of(context).materialPreviewUnavailable,
           ),
         ],
       ),

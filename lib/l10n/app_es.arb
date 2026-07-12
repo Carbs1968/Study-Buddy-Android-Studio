@@ -310,5 +310,67 @@
       }
     }
   },
-  "transcriptLoadFailed": "No se pudo cargar la transcripción."
+  "transcriptLoadFailed": "No se pudo cargar la transcripción.",
+  "materialsTitle": "Materiales de {className}",
+  "@materialsTitle": {
+    "placeholders": {
+      "className": {
+        "type": "String"
+      }
+    }
+  },
+  "materialTypeImage": "Imagen",
+  "materialTypePdf": "PDF",
+  "materialTypeSpreadsheet": "Hoja de cálculo",
+  "materialTypePresentation": "Presentación",
+  "materialTypeDocument": "Documento",
+  "materialTypeText": "Texto",
+  "materialTypeFile": "Archivo",
+  "materialAddedDate": "Agregado el {date}",
+  "@materialAddedDate": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "materialUploaded": "Material subido a esta clase.",
+  "materialUploadFailed": "La carga falló. Inténtalo de nuevo.",
+  "selectedFileUnavailable": "No se pudo acceder al archivo seleccionado.",
+  "addImage": "Agregar imagen",
+  "addImageDescription": "Sube una foto o imagen desde tu galería.",
+  "addFile": "Agregar archivo",
+  "addFileDescription": "PDF, Word, PowerPoint, Excel, TXT o CSV. Los archivos TXT y CSV se pueden extraer para las guías de estudio.",
+  "addMaterial": "Agregar material",
+  "couldNotLoadMaterials": "No se pudieron cargar los materiales de la clase.",
+  "noClassMaterials": "Aún no hay materiales de clase",
+  "noClassMaterialsDescription": "Agrega aquí imágenes de apuntes, hojas de trabajo, PDF o documentos.",
+  "materialFallbackName": "Material",
+  "deleteMaterialTitle": "¿Eliminar material?",
+  "deleteMaterialMessage": "Esto eliminará el material de esta clase y borrará el archivo subido.",
+  "deleteMaterialTooltip": "Eliminar material",
+  "deleteFailed": "No se pudo eliminar. Inténtalo de nuevo.",
+  "delete": "Eliminar",
+  "imageLoadFailed": "No se pudo cargar la imagen.",
+  "docxPreviewFailed": "No se pudo obtener la vista previa del archivo DOCX.",
+  "docxNoReadableText": "No se encontró texto legible en este archivo DOCX.",
+  "unknownSize": "Tamaño desconocido",
+  "materialTypeValue": "Tipo: {value}",
+  "@materialTypeValue": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "materialSizeValue": "Tamaño: {value}",
+  "@materialSizeValue": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "materialPreviewUnavailable": "Este archivo está guardado como material de la clase. La vista previa aún no está disponible para este tipo de archivo.",
+  "materialDeleted": "Material eliminado."
 }

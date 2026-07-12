@@ -1291,6 +1291,210 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Could not load the transcript.'**
   String get transcriptLoadFailed;
+
+  /// No description provided for @materialsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{className} Materials'**
+  String materialsTitle(String className);
+
+  /// No description provided for @materialTypeImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Image'**
+  String get materialTypeImage;
+
+  /// No description provided for @materialTypePdf.
+  ///
+  /// In en, this message translates to:
+  /// **'PDF'**
+  String get materialTypePdf;
+
+  /// No description provided for @materialTypeSpreadsheet.
+  ///
+  /// In en, this message translates to:
+  /// **'Spreadsheet'**
+  String get materialTypeSpreadsheet;
+
+  /// No description provided for @materialTypePresentation.
+  ///
+  /// In en, this message translates to:
+  /// **'Presentation'**
+  String get materialTypePresentation;
+
+  /// No description provided for @materialTypeDocument.
+  ///
+  /// In en, this message translates to:
+  /// **'Document'**
+  String get materialTypeDocument;
+
+  /// No description provided for @materialTypeText.
+  ///
+  /// In en, this message translates to:
+  /// **'Text'**
+  String get materialTypeText;
+
+  /// No description provided for @materialTypeFile.
+  ///
+  /// In en, this message translates to:
+  /// **'File'**
+  String get materialTypeFile;
+
+  /// No description provided for @materialAddedDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Added {date}'**
+  String materialAddedDate(String date);
+
+  /// No description provided for @materialUploaded.
+  ///
+  /// In en, this message translates to:
+  /// **'Material uploaded to this class.'**
+  String get materialUploaded;
+
+  /// No description provided for @materialUploadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload failed. Please try again.'**
+  String get materialUploadFailed;
+
+  /// No description provided for @selectedFileUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not access the selected file.'**
+  String get selectedFileUnavailable;
+
+  /// No description provided for @addImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Add image'**
+  String get addImage;
+
+  /// No description provided for @addImageDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload a photo or image from your gallery.'**
+  String get addImageDescription;
+
+  /// No description provided for @addFile.
+  ///
+  /// In en, this message translates to:
+  /// **'Add file'**
+  String get addFile;
+
+  /// No description provided for @addFileDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'PDF, Word, PowerPoint, Excel, TXT, or CSV. TXT and CSV can be extracted for Study Guides.'**
+  String get addFileDescription;
+
+  /// No description provided for @addMaterial.
+  ///
+  /// In en, this message translates to:
+  /// **'Add material'**
+  String get addMaterial;
+
+  /// No description provided for @couldNotLoadMaterials.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load class materials.'**
+  String get couldNotLoadMaterials;
+
+  /// No description provided for @noClassMaterials.
+  ///
+  /// In en, this message translates to:
+  /// **'No class materials yet'**
+  String get noClassMaterials;
+
+  /// No description provided for @noClassMaterialsDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Add images of notes, worksheets, PDFs, or documents here.'**
+  String get noClassMaterialsDescription;
+
+  /// No description provided for @materialFallbackName.
+  ///
+  /// In en, this message translates to:
+  /// **'Material'**
+  String get materialFallbackName;
+
+  /// No description provided for @deleteMaterialTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete material?'**
+  String get deleteMaterialTitle;
+
+  /// No description provided for @deleteMaterialMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'This will remove the material from this class and delete the uploaded file.'**
+  String get deleteMaterialMessage;
+
+  /// No description provided for @deleteMaterialTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete material'**
+  String get deleteMaterialTooltip;
+
+  /// No description provided for @deleteFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete failed. Please try again.'**
+  String get deleteFailed;
+
+  /// No description provided for @delete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get delete;
+
+  /// No description provided for @imageLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load the image.'**
+  String get imageLoadFailed;
+
+  /// No description provided for @docxPreviewFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not preview the DOCX file.'**
+  String get docxPreviewFailed;
+
+  /// No description provided for @docxNoReadableText.
+  ///
+  /// In en, this message translates to:
+  /// **'No readable text was found in this DOCX file.'**
+  String get docxNoReadableText;
+
+  /// No description provided for @unknownSize.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown size'**
+  String get unknownSize;
+
+  /// No description provided for @materialTypeValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Type: {value}'**
+  String materialTypeValue(String value);
+
+  /// No description provided for @materialSizeValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Size: {value}'**
+  String materialSizeValue(String value);
+
+  /// No description provided for @materialPreviewUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'This file is saved as class material. Preview is not available for this file type yet.'**
+  String get materialPreviewUnavailable;
+
+  /// No description provided for @materialDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Material deleted.'**
+  String get materialDeleted;
 }
 
 class _AppLocalizationsDelegate

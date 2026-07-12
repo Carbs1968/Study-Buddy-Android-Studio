@@ -701,4 +701,120 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get transcriptLoadFailed => 'Could not load the transcript.';
+
+  @override
+  String materialsTitle(String className) {
+    return '$className Materials';
+  }
+
+  @override
+  String get materialTypeImage => 'Image';
+
+  @override
+  String get materialTypePdf => 'PDF';
+
+  @override
+  String get materialTypeSpreadsheet => 'Spreadsheet';
+
+  @override
+  String get materialTypePresentation => 'Presentation';
+
+  @override
+  String get materialTypeDocument => 'Document';
+
+  @override
+  String get materialTypeText => 'Text';
+
+  @override
+  String get materialTypeFile => 'File';
+
+  @override
+  String materialAddedDate(String date) {
+    return 'Added $date';
+  }
+
+  @override
+  String get materialUploaded => 'Material uploaded to this class.';
+
+  @override
+  String get materialUploadFailed => 'Upload failed. Please try again.';
+
+  @override
+  String get selectedFileUnavailable => 'Could not access the selected file.';
+
+  @override
+  String get addImage => 'Add image';
+
+  @override
+  String get addImageDescription =>
+      'Upload a photo or image from your gallery.';
+
+  @override
+  String get addFile => 'Add file';
+
+  @override
+  String get addFileDescription =>
+      'PDF, Word, PowerPoint, Excel, TXT, or CSV. TXT and CSV can be extracted for Study Guides.';
+
+  @override
+  String get addMaterial => 'Add material';
+
+  @override
+  String get couldNotLoadMaterials => 'Could not load class materials.';
+
+  @override
+  String get noClassMaterials => 'No class materials yet';
+
+  @override
+  String get noClassMaterialsDescription =>
+      'Add images of notes, worksheets, PDFs, or documents here.';
+
+  @override
+  String get materialFallbackName => 'Material';
+
+  @override
+  String get deleteMaterialTitle => 'Delete material?';
+
+  @override
+  String get deleteMaterialMessage =>
+      'This will remove the material from this class and delete the uploaded file.';
+
+  @override
+  String get deleteMaterialTooltip => 'Delete material';
+
+  @override
+  String get deleteFailed => 'Delete failed. Please try again.';
+
+  @override
+  String get delete => 'Delete';
+
+  @override
+  String get imageLoadFailed => 'Could not load the image.';
+
+  @override
+  String get docxPreviewFailed => 'Could not preview the DOCX file.';
+
+  @override
+  String get docxNoReadableText =>
+      'No readable text was found in this DOCX file.';
+
+  @override
+  String get unknownSize => 'Unknown size';
+
+  @override
+  String materialTypeValue(String value) {
+    return 'Type: $value';
+  }
+
+  @override
+  String materialSizeValue(String value) {
+    return 'Size: $value';
+  }
+
+  @override
+  String get materialPreviewUnavailable =>
+      'This file is saved as class material. Preview is not available for this file type yet.';
+
+  @override
+  String get materialDeleted => 'Material deleted.';
 }

@@ -718,4 +718,122 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get transcriptLoadFailed => 'No se pudo cargar la transcripción.';
+
+  @override
+  String materialsTitle(String className) {
+    return 'Materiales de $className';
+  }
+
+  @override
+  String get materialTypeImage => 'Imagen';
+
+  @override
+  String get materialTypePdf => 'PDF';
+
+  @override
+  String get materialTypeSpreadsheet => 'Hoja de cálculo';
+
+  @override
+  String get materialTypePresentation => 'Presentación';
+
+  @override
+  String get materialTypeDocument => 'Documento';
+
+  @override
+  String get materialTypeText => 'Texto';
+
+  @override
+  String get materialTypeFile => 'Archivo';
+
+  @override
+  String materialAddedDate(String date) {
+    return 'Agregado el $date';
+  }
+
+  @override
+  String get materialUploaded => 'Material subido a esta clase.';
+
+  @override
+  String get materialUploadFailed => 'La carga falló. Inténtalo de nuevo.';
+
+  @override
+  String get selectedFileUnavailable =>
+      'No se pudo acceder al archivo seleccionado.';
+
+  @override
+  String get addImage => 'Agregar imagen';
+
+  @override
+  String get addImageDescription => 'Sube una foto o imagen desde tu galería.';
+
+  @override
+  String get addFile => 'Agregar archivo';
+
+  @override
+  String get addFileDescription =>
+      'PDF, Word, PowerPoint, Excel, TXT o CSV. Los archivos TXT y CSV se pueden extraer para las guías de estudio.';
+
+  @override
+  String get addMaterial => 'Agregar material';
+
+  @override
+  String get couldNotLoadMaterials =>
+      'No se pudieron cargar los materiales de la clase.';
+
+  @override
+  String get noClassMaterials => 'Aún no hay materiales de clase';
+
+  @override
+  String get noClassMaterialsDescription =>
+      'Agrega aquí imágenes de apuntes, hojas de trabajo, PDF o documentos.';
+
+  @override
+  String get materialFallbackName => 'Material';
+
+  @override
+  String get deleteMaterialTitle => '¿Eliminar material?';
+
+  @override
+  String get deleteMaterialMessage =>
+      'Esto eliminará el material de esta clase y borrará el archivo subido.';
+
+  @override
+  String get deleteMaterialTooltip => 'Eliminar material';
+
+  @override
+  String get deleteFailed => 'No se pudo eliminar. Inténtalo de nuevo.';
+
+  @override
+  String get delete => 'Eliminar';
+
+  @override
+  String get imageLoadFailed => 'No se pudo cargar la imagen.';
+
+  @override
+  String get docxPreviewFailed =>
+      'No se pudo obtener la vista previa del archivo DOCX.';
+
+  @override
+  String get docxNoReadableText =>
+      'No se encontró texto legible en este archivo DOCX.';
+
+  @override
+  String get unknownSize => 'Tamaño desconocido';
+
+  @override
+  String materialTypeValue(String value) {
+    return 'Tipo: $value';
+  }
+
+  @override
+  String materialSizeValue(String value) {
+    return 'Tamaño: $value';
+  }
+
+  @override
+  String get materialPreviewUnavailable =>
+      'Este archivo está guardado como material de la clase. La vista previa aún no está disponible para este tipo de archivo.';
+
+  @override
+  String get materialDeleted => 'Material eliminado.';
 }

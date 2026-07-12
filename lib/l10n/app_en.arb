@@ -310,5 +310,67 @@
       }
     }
   },
-  "transcriptLoadFailed": "Could not load the transcript."
+  "transcriptLoadFailed": "Could not load the transcript.",
+  "materialsTitle": "{className} Materials",
+  "@materialsTitle": {
+    "placeholders": {
+      "className": {
+        "type": "String"
+      }
+    }
+  },
+  "materialTypeImage": "Image",
+  "materialTypePdf": "PDF",
+  "materialTypeSpreadsheet": "Spreadsheet",
+  "materialTypePresentation": "Presentation",
+  "materialTypeDocument": "Document",
+  "materialTypeText": "Text",
+  "materialTypeFile": "File",
+  "materialAddedDate": "Added {date}",
+  "@materialAddedDate": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "materialUploaded": "Material uploaded to this class.",
+  "materialUploadFailed": "Upload failed. Please try again.",
+  "selectedFileUnavailable": "Could not access the selected file.",
+  "addImage": "Add image",
+  "addImageDescription": "Upload a photo or image from your gallery.",
+  "addFile": "Add file",
+  "addFileDescription": "PDF, Word, PowerPoint, Excel, TXT, or CSV. TXT and CSV can be extracted for Study Guides.",
+  "addMaterial": "Add material",
+  "couldNotLoadMaterials": "Could not load class materials.",
+  "noClassMaterials": "No class materials yet",
+  "noClassMaterialsDescription": "Add images of notes, worksheets, PDFs, or documents here.",
+  "materialFallbackName": "Material",
+  "deleteMaterialTitle": "Delete material?",
+  "deleteMaterialMessage": "This will remove the material from this class and delete the uploaded file.",
+  "deleteMaterialTooltip": "Delete material",
+  "deleteFailed": "Delete failed. Please try again.",
+  "delete": "Delete",
+  "imageLoadFailed": "Could not load the image.",
+  "docxPreviewFailed": "Could not preview the DOCX file.",
+  "docxNoReadableText": "No readable text was found in this DOCX file.",
+  "unknownSize": "Unknown size",
+  "materialTypeValue": "Type: {value}",
+  "@materialTypeValue": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "materialSizeValue": "Size: {value}",
+  "@materialSizeValue": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "materialPreviewUnavailable": "This file is saved as class material. Preview is not available for this file type yet.",
+  "materialDeleted": "Material deleted."
 }
