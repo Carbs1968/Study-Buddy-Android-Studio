@@ -576,4 +576,146 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get studyGuideAlreadyRequested =>
       'Ya se solicitó una guía de estudio a partir de las transcripciones completadas.';
+
+  @override
+  String get close => 'Cerrar';
+
+  @override
+  String get transcript => 'Transcripción';
+
+  @override
+  String get playback => 'Reproducción';
+
+  @override
+  String get couldNotOpenLink => 'No se pudo abrir el enlace.';
+
+  @override
+  String get openFromFirebaseStorage => 'Abrir desde Firebase Storage';
+
+  @override
+  String get noPlaybackLinkAvailable =>
+      'No hay un enlace de reproducción disponible.';
+
+  @override
+  String get viewTranscript => 'Ver transcripción';
+
+  @override
+  String get transcriptIsEmpty => 'La transcripción está vacía.';
+
+  @override
+  String get transcriptError => 'Error de transcripción';
+
+  @override
+  String get ok => 'Aceptar';
+
+  @override
+  String get requestTranscription => 'Solicitar transcripción';
+
+  @override
+  String get transcriptionRequested => 'Transcripción solicitada.';
+
+  @override
+  String get aiOutputs => 'Resultados de IA';
+
+  @override
+  String get generateSummary => 'Generar resumen';
+
+  @override
+  String get generateNotes => 'Generar notas';
+
+  @override
+  String get generatePracticeTest => 'Generar prueba práctica';
+
+  @override
+  String get status => 'Estado';
+
+  @override
+  String get view => 'Ver';
+
+  @override
+  String get request => 'Solicitar';
+
+  @override
+  String levelValue(String value) {
+    return 'Nivel: $value';
+  }
+
+  @override
+  String fileValue(String value) {
+    return 'Archivo: $value';
+  }
+
+  @override
+  String transcriptStatusValue(String value) {
+    return 'Estado de la transcripción: $value';
+  }
+
+  @override
+  String statusValue(String value) {
+    return 'Estado: $value';
+  }
+
+  @override
+  String get transcriptionRequiredForAi =>
+      'La transcripción debe estar lista antes de generar un resumen, notas o una prueba práctica.';
+
+  @override
+  String get requestTranscriptionFailed =>
+      'No se pudo solicitar la transcripción. Inténtalo de nuevo.';
+
+  @override
+  String get lectureDetailLoadFailed => 'No se pudo cargar esta clase.';
+
+  @override
+  String get aiReady => 'Listo';
+
+  @override
+  String get aiQueued => 'En cola';
+
+  @override
+  String get aiNotStartedLabel => 'No iniciado';
+
+  @override
+  String get noAiOutputTitle => 'Aún no hay resultados';
+
+  @override
+  String get noAiOutputMessage =>
+      'El resultado de IA está vacío o no está disponible.';
+
+  @override
+  String get copiedJsonToClipboard => 'JSON copiado al portapapeles';
+
+  @override
+  String get copy => 'Copiar';
+
+  @override
+  String get aiOutputError => 'Error del resultado de IA';
+
+  @override
+  String get aiOutputLoadFailed => 'No se pudo cargar el resultado de IA.';
+
+  @override
+  String get keyPoints => 'Puntos clave';
+
+  @override
+  String get terms => 'Términos';
+
+  @override
+  String get equations => 'Ecuaciones';
+
+  @override
+  String get references => 'Referencias';
+
+  @override
+  String answerValue(String value) {
+    return 'Respuesta: $value';
+  }
+
+  @override
+  String whyValue(String value) {
+    return 'Por qué: $value';
+  }
+
+  @override
+  String get transcriptLoadFailed => 'No se pudo cargar la transcripción.';
 }

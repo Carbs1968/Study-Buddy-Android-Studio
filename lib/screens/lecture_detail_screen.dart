@@ -7,8 +7,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../l10n/strings.dart';
+import '../l10n/app_localizations.dart';
 import '../utils/app_logger.dart';
+import '../utils/helper.dart';
 import '../utils/utils.dart';
 
 class LectureDetailScreen extends StatelessWidget {
@@ -21,19 +22,24 @@ class LectureDetailScreen extends StatelessWidget {
 
 
 
-  String _formatTranscriptStatus(String status) {
+  String _formatTranscriptStatus(
+    BuildContext context,
+    String status,
+  ) {
+    final strings = AppLocalizations.of(context);
+
     switch (status.toLowerCase()) {
       case 'done':
-        return 'Transcript ready';
+        return strings.transcriptReady;
       case 'processing':
-        return 'Processing';
+        return strings.transcriptProcessing;
       case 'pending':
-        return 'Queued';
+        return strings.transcriptQueued;
       case 'error':
-        return 'Failed';
+        return strings.transcriptFailed;
       case 'none':
       case '':
-        return 'No transcript';
+        return strings.noTranscript;
       default:
         return status;
     }
@@ -76,12 +82,12 @@ class LectureDetailScreen extends StatelessWidget {
         showDialog(
           context: context,
           builder: (_) => AlertDialog(
-            title: const Text('No output yet'),
-            content: const Text('The AI output is empty or missing.'),
+            title: Text(AppLocalizations.of(context).noAiOutputTitle),
+            content: Text(AppLocalizations.of(context).noAiOutputMessage),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context),
-                child: const Text('OK'),
+                child: Text(AppLocalizations.of(context).ok),
               ),
             ],
           ),
@@ -108,7 +114,7 @@ class LectureDetailScreen extends StatelessWidget {
             child: Scrollbar(
               thumbVisibility: true,
               child: SingleChildScrollView(
-                child: _formatAiOutput(type, parsed),
+                child: _formatAiOutput(context, type, parsed),
               ),
             ),
           ),
@@ -118,15 +124,15 @@ class LectureDetailScreen extends StatelessWidget {
                 await Clipboard.setData(ClipboardData(text: prettyForCopy));
                 if (context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Copied JSON to clipboard')),
+                    SnackBar(content: Text(AppLocalizations.of(context).copiedJsonToClipboard)),
                   );
                 }
               },
-              child: const Text('Copy'),
+              child: Text(AppLocalizations.of(context).copy),
             ),
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('Close'),
+              child: Text(AppLocalizations.of(context).close),
             ),
           ],
         ),
@@ -140,12 +146,12 @@ class LectureDetailScreen extends StatelessWidget {
       showDialog(
         context: context,
         builder: (_) => AlertDialog(
-          title: const Text('AI output error'),
-          content: Text(e.toString()),
+          title: Text(AppLocalizations.of(context).aiOutputError),
+          content: Text(AppLocalizations.of(context).aiOutputLoadFailed),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('OK'),
+              child: Text(AppLocalizations.of(context).ok),
             ),
           ],
         ),
@@ -153,7 +159,11 @@ class LectureDetailScreen extends StatelessWidget {
     }
   }
 
-  Widget _formatAiOutput(String type, Map<String, dynamic> data) {
+  Widget _formatAiOutput(
+    BuildContext context,
+    String type,
+    Map<String, dynamic> data,
+  ) {
     switch (type) {
       case 'summary':
         final summary = data['summary'];
@@ -177,7 +187,10 @@ class LectureDetailScreen extends StatelessWidget {
             ],
             if (keyPoints.isNotEmpty) ...[
               const SizedBox(height: 12),
-              const Text('Key Points', style: TextStyle(fontWeight: FontWeight.bold)),
+              Text(
+                AppLocalizations.of(context).keyPoints,
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
               const SizedBox(height: 4),
               ...keyPoints.map(
                     (p) => Padding(
@@ -188,7 +201,10 @@ class LectureDetailScreen extends StatelessWidget {
             ],
             if (terms.isNotEmpty) ...[
               const SizedBox(height: 12),
-              const Text('Terms', style: TextStyle(fontWeight: FontWeight.bold)),
+              Text(
+                AppLocalizations.of(context).terms,
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
               const SizedBox(height: 4),
               ...terms.map((t) => Text('- $t')),
             ],
@@ -220,13 +236,19 @@ class LectureDetailScreen extends StatelessWidget {
               const SizedBox(height: 10),
             ],
             if (equations.isNotEmpty) ...[
-              const Text('Equations', style: TextStyle(fontWeight: FontWeight.bold)),
+              Text(
+                AppLocalizations.of(context).equations,
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
               const SizedBox(height: 4),
               ...equations.map((e) => Text(e)),
             ],
             if (refs.isNotEmpty) ...[
               const SizedBox(height: 12),
-              const Text('References', style: TextStyle(fontWeight: FontWeight.bold)),
+              Text(
+                AppLocalizations.of(context).references,
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
               const SizedBox(height: 4),
               ...refs.map((r) => Text(r)),
             ],
@@ -260,10 +282,16 @@ class LectureDetailScreen extends StatelessWidget {
                         ),
                       ],
                       const SizedBox(height: 8),
-                      Text('Answer: ${q['answer']?.toString() ?? ''}'),
+                      Text(
+                        AppLocalizations.of(context).answerValue(
+                          q['answer']?.toString() ?? '',
+                        ),
+                      ),
                       if (q['explanation'] != null || q['rationale'] != null)
                         Text(
-                          'Why: ${(q['explanation'] ?? q['rationale']).toString()}',
+                          AppLocalizations.of(context).whyValue(
+                            (q['explanation'] ?? q['rationale']).toString(),
+                          ),
                           style: const TextStyle(color: Colors.black54),
                         ),
                     ],
@@ -289,7 +317,7 @@ class LectureDetailScreen extends StatelessWidget {
   }
 
   Future<void> _openUrl(BuildContext context, String url) async {
-    final strings = SBStrings.of(context);
+    final strings = AppLocalizations.of(context);
     final uri = Uri.parse(url);
     if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
       if (context.mounted) {
@@ -303,7 +331,7 @@ class LectureDetailScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final uid = FirebaseAuth.instance.currentUser?.uid;
-    final strings = SBStrings.of(context);
+    final strings = AppLocalizations.of(context);
 
     if (uid == null) {
       return Scaffold(
@@ -355,11 +383,21 @@ class LectureDetailScreen extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      if (levelName.isNotEmpty) Text('Level: $levelName'),
-                      if (semesterName.isNotEmpty) Text('Semester: $semesterName'),
-                      if (filename.isNotEmpty) Text('File: $filename'),
-                      Text('Duration: $durationSeconds sec'),
-                      Text('Transcript status: ${_formatTranscriptStatus(transcriptStatus)}'),
+                      if (levelName.isNotEmpty) Text(strings.levelValue(levelName)),
+                      if (semesterName.isNotEmpty) Text(strings.semesterValue(semesterName)),
+                      if (filename.isNotEmpty) Text(strings.fileValue(filename)),
+                      Text(
+                        strings.durationValue(
+                          formatDuration(
+                            Duration(seconds: durationSeconds),
+                          ),
+                        ),
+                      ),
+                      Text(
+                        strings.transcriptStatusValue(
+                          _formatTranscriptStatus(context, transcriptStatus),
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -463,7 +501,7 @@ class LectureDetailScreen extends StatelessWidget {
                         context: context,
                         builder: (_) => AlertDialog(
                           title: Text(strings.transcriptError),
-                          content: Text(msg),
+                          content: Text(strings.transcriptLoadFailed),
                           actions: [
                             TextButton(
                               onPressed: () => Navigator.pop(context),
@@ -513,7 +551,7 @@ class LectureDetailScreen extends StatelessWidget {
                     } catch (e) {
                       if (context.mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Could not request transcription. Please try again.')),
+                          SnackBar(content: Text(strings.requestTranscriptionFailed)),
                         );
                       }
                     }
@@ -530,7 +568,7 @@ class LectureDetailScreen extends StatelessWidget {
               if (transcriptStatus != 'done') ...[
                 const SizedBox(height: 8),
                 Text(
-                  'Transcription must be ready before generating summary, notes, or practice test.',
+                  strings.transcriptionRequiredForAi,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                         color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
@@ -638,19 +676,24 @@ class _AiActionRow extends StatelessWidget {
     this.viewAiOutput,
   });
 
-  String _formatAiOutputStatus(String status) {
+  String _formatAiOutputStatus(
+    BuildContext context,
+    String status,
+  ) {
+    final strings = AppLocalizations.of(context);
+
     switch (status.toLowerCase()) {
       case 'done':
-        return 'Ready';
+        return strings.aiReady;
       case 'processing':
-        return 'Processing';
+        return strings.transcriptProcessing;
       case 'pending':
-        return 'Queued';
+        return strings.aiQueued;
       case 'error':
-        return 'Failed';
+        return strings.transcriptFailed;
       case 'none':
       case '':
-        return 'Not started';
+        return strings.aiNotStartedLabel;
       default:
         return status;
     }
@@ -658,12 +701,16 @@ class _AiActionRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final strings = SBStrings.of(context);
+    final strings = AppLocalizations.of(context);
 
     return ListTile(
       leading: const Icon(Icons.auto_awesome),
       title: Text(title),
-      subtitle: Text('${strings.status}: ${_formatAiOutputStatus(status)}'),
+      subtitle: Text(
+        strings.statusValue(
+          _formatAiOutputStatus(context, status),
+        ),
+      ),
       trailing: ElevatedButton(
         onPressed: !transcriptReady
             ? null

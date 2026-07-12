@@ -226,5 +226,89 @@
   },
   "studyGuideOpenFailed": "No se pudo abrir la guía de estudio.",
   "studyGuideRequesting": "Solicitando una guía de estudio a partir de las transcripciones completadas...",
-  "studyGuideAlreadyRequested": "Ya se solicitó una guía de estudio a partir de las transcripciones completadas."
+  "studyGuideAlreadyRequested": "Ya se solicitó una guía de estudio a partir de las transcripciones completadas.",
+  "close": "Cerrar",
+  "transcript": "Transcripción",
+  "playback": "Reproducción",
+  "couldNotOpenLink": "No se pudo abrir el enlace.",
+  "openFromFirebaseStorage": "Abrir desde Firebase Storage",
+  "noPlaybackLinkAvailable": "No hay un enlace de reproducción disponible.",
+  "viewTranscript": "Ver transcripción",
+  "transcriptIsEmpty": "La transcripción está vacía.",
+  "transcriptError": "Error de transcripción",
+  "ok": "Aceptar",
+  "requestTranscription": "Solicitar transcripción",
+  "transcriptionRequested": "Transcripción solicitada.",
+  "aiOutputs": "Resultados de IA",
+  "generateSummary": "Generar resumen",
+  "generateNotes": "Generar notas",
+  "generatePracticeTest": "Generar prueba práctica",
+  "status": "Estado",
+  "view": "Ver",
+  "request": "Solicitar",
+  "levelValue": "Nivel: {value}",
+  "@levelValue": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "fileValue": "Archivo: {value}",
+  "@fileValue": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "transcriptStatusValue": "Estado de la transcripción: {value}",
+  "@transcriptStatusValue": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "statusValue": "Estado: {value}",
+  "@statusValue": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "transcriptionRequiredForAi": "La transcripción debe estar lista antes de generar un resumen, notas o una prueba práctica.",
+  "requestTranscriptionFailed": "No se pudo solicitar la transcripción. Inténtalo de nuevo.",
+  "lectureDetailLoadFailed": "No se pudo cargar esta clase.",
+  "aiReady": "Listo",
+  "aiQueued": "En cola",
+  "aiNotStartedLabel": "No iniciado",
+  "noAiOutputTitle": "Aún no hay resultados",
+  "noAiOutputMessage": "El resultado de IA está vacío o no está disponible.",
+  "copiedJsonToClipboard": "JSON copiado al portapapeles",
+  "copy": "Copiar",
+  "aiOutputError": "Error del resultado de IA",
+  "aiOutputLoadFailed": "No se pudo cargar el resultado de IA.",
+  "keyPoints": "Puntos clave",
+  "terms": "Términos",
+  "equations": "Ecuaciones",
+  "references": "Referencias",
+  "answerValue": "Respuesta: {value}",
+  "@answerValue": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "whyValue": "Por qué: {value}",
+  "@whyValue": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "transcriptLoadFailed": "No se pudo cargar la transcripción."
 }

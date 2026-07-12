@@ -226,5 +226,89 @@
   },
   "studyGuideOpenFailed": "Could not open the study guide.",
   "studyGuideRequesting": "Requesting a study guide from completed transcripts...",
-  "studyGuideAlreadyRequested": "A study guide has already been requested from the completed transcripts."
+  "studyGuideAlreadyRequested": "A study guide has already been requested from the completed transcripts.",
+  "close": "Close",
+  "transcript": "Transcript",
+  "playback": "Playback",
+  "couldNotOpenLink": "Could not open link.",
+  "openFromFirebaseStorage": "Open from Firebase Storage",
+  "noPlaybackLinkAvailable": "No playback link available.",
+  "viewTranscript": "View transcript",
+  "transcriptIsEmpty": "The transcript is empty.",
+  "transcriptError": "Transcript error",
+  "ok": "OK",
+  "requestTranscription": "Request transcription",
+  "transcriptionRequested": "Transcription requested.",
+  "aiOutputs": "AI outputs",
+  "generateSummary": "Generate summary",
+  "generateNotes": "Generate notes",
+  "generatePracticeTest": "Generate practice test",
+  "status": "Status",
+  "view": "View",
+  "request": "Request",
+  "levelValue": "Level: {value}",
+  "@levelValue": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "fileValue": "File: {value}",
+  "@fileValue": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "transcriptStatusValue": "Transcript status: {value}",
+  "@transcriptStatusValue": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "statusValue": "Status: {value}",
+  "@statusValue": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "transcriptionRequiredForAi": "Transcription must be ready before generating a summary, notes, or practice test.",
+  "requestTranscriptionFailed": "Could not request transcription. Please try again.",
+  "lectureDetailLoadFailed": "Could not load this lecture.",
+  "aiReady": "Ready",
+  "aiQueued": "Queued",
+  "aiNotStartedLabel": "Not started",
+  "noAiOutputTitle": "No output yet",
+  "noAiOutputMessage": "The AI output is empty or missing.",
+  "copiedJsonToClipboard": "Copied JSON to clipboard",
+  "copy": "Copy",
+  "aiOutputError": "AI output error",
+  "aiOutputLoadFailed": "Could not load the AI output.",
+  "keyPoints": "Key Points",
+  "terms": "Terms",
+  "equations": "Equations",
+  "references": "References",
+  "answerValue": "Answer: {value}",
+  "@answerValue": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "whyValue": "Why: {value}",
+  "@whyValue": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "transcriptLoadFailed": "Could not load the transcript."
 }

@@ -561,4 +561,144 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get studyGuideAlreadyRequested =>
       'A study guide has already been requested from the completed transcripts.';
+
+  @override
+  String get close => 'Close';
+
+  @override
+  String get transcript => 'Transcript';
+
+  @override
+  String get playback => 'Playback';
+
+  @override
+  String get couldNotOpenLink => 'Could not open link.';
+
+  @override
+  String get openFromFirebaseStorage => 'Open from Firebase Storage';
+
+  @override
+  String get noPlaybackLinkAvailable => 'No playback link available.';
+
+  @override
+  String get viewTranscript => 'View transcript';
+
+  @override
+  String get transcriptIsEmpty => 'The transcript is empty.';
+
+  @override
+  String get transcriptError => 'Transcript error';
+
+  @override
+  String get ok => 'OK';
+
+  @override
+  String get requestTranscription => 'Request transcription';
+
+  @override
+  String get transcriptionRequested => 'Transcription requested.';
+
+  @override
+  String get aiOutputs => 'AI outputs';
+
+  @override
+  String get generateSummary => 'Generate summary';
+
+  @override
+  String get generateNotes => 'Generate notes';
+
+  @override
+  String get generatePracticeTest => 'Generate practice test';
+
+  @override
+  String get status => 'Status';
+
+  @override
+  String get view => 'View';
+
+  @override
+  String get request => 'Request';
+
+  @override
+  String levelValue(String value) {
+    return 'Level: $value';
+  }
+
+  @override
+  String fileValue(String value) {
+    return 'File: $value';
+  }
+
+  @override
+  String transcriptStatusValue(String value) {
+    return 'Transcript status: $value';
+  }
+
+  @override
+  String statusValue(String value) {
+    return 'Status: $value';
+  }
+
+  @override
+  String get transcriptionRequiredForAi =>
+      'Transcription must be ready before generating a summary, notes, or practice test.';
+
+  @override
+  String get requestTranscriptionFailed =>
+      'Could not request transcription. Please try again.';
+
+  @override
+  String get lectureDetailLoadFailed => 'Could not load this lecture.';
+
+  @override
+  String get aiReady => 'Ready';
+
+  @override
+  String get aiQueued => 'Queued';
+
+  @override
+  String get aiNotStartedLabel => 'Not started';
+
+  @override
+  String get noAiOutputTitle => 'No output yet';
+
+  @override
+  String get noAiOutputMessage => 'The AI output is empty or missing.';
+
+  @override
+  String get copiedJsonToClipboard => 'Copied JSON to clipboard';
+
+  @override
+  String get copy => 'Copy';
+
+  @override
+  String get aiOutputError => 'AI output error';
+
+  @override
+  String get aiOutputLoadFailed => 'Could not load the AI output.';
+
+  @override
+  String get keyPoints => 'Key Points';
+
+  @override
+  String get terms => 'Terms';
+
+  @override
+  String get equations => 'Equations';
+
+  @override
+  String get references => 'References';
+
+  @override
+  String answerValue(String value) {
+    return 'Answer: $value';
+  }
+
+  @override
+  String whyValue(String value) {
+    return 'Why: $value';
+  }
+
+  @override
+  String get transcriptLoadFailed => 'Could not load the transcript.';
 }

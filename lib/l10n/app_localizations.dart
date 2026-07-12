@@ -1039,6 +1039,258 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'A study guide has already been requested from the completed transcripts.'**
   String get studyGuideAlreadyRequested;
+
+  /// No description provided for @close.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get close;
+
+  /// No description provided for @transcript.
+  ///
+  /// In en, this message translates to:
+  /// **'Transcript'**
+  String get transcript;
+
+  /// No description provided for @playback.
+  ///
+  /// In en, this message translates to:
+  /// **'Playback'**
+  String get playback;
+
+  /// No description provided for @couldNotOpenLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not open link.'**
+  String get couldNotOpenLink;
+
+  /// No description provided for @openFromFirebaseStorage.
+  ///
+  /// In en, this message translates to:
+  /// **'Open from Firebase Storage'**
+  String get openFromFirebaseStorage;
+
+  /// No description provided for @noPlaybackLinkAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'No playback link available.'**
+  String get noPlaybackLinkAvailable;
+
+  /// No description provided for @viewTranscript.
+  ///
+  /// In en, this message translates to:
+  /// **'View transcript'**
+  String get viewTranscript;
+
+  /// No description provided for @transcriptIsEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'The transcript is empty.'**
+  String get transcriptIsEmpty;
+
+  /// No description provided for @transcriptError.
+  ///
+  /// In en, this message translates to:
+  /// **'Transcript error'**
+  String get transcriptError;
+
+  /// No description provided for @ok.
+  ///
+  /// In en, this message translates to:
+  /// **'OK'**
+  String get ok;
+
+  /// No description provided for @requestTranscription.
+  ///
+  /// In en, this message translates to:
+  /// **'Request transcription'**
+  String get requestTranscription;
+
+  /// No description provided for @transcriptionRequested.
+  ///
+  /// In en, this message translates to:
+  /// **'Transcription requested.'**
+  String get transcriptionRequested;
+
+  /// No description provided for @aiOutputs.
+  ///
+  /// In en, this message translates to:
+  /// **'AI outputs'**
+  String get aiOutputs;
+
+  /// No description provided for @generateSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate summary'**
+  String get generateSummary;
+
+  /// No description provided for @generateNotes.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate notes'**
+  String get generateNotes;
+
+  /// No description provided for @generatePracticeTest.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate practice test'**
+  String get generatePracticeTest;
+
+  /// No description provided for @status.
+  ///
+  /// In en, this message translates to:
+  /// **'Status'**
+  String get status;
+
+  /// No description provided for @view.
+  ///
+  /// In en, this message translates to:
+  /// **'View'**
+  String get view;
+
+  /// No description provided for @request.
+  ///
+  /// In en, this message translates to:
+  /// **'Request'**
+  String get request;
+
+  /// No description provided for @levelValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Level: {value}'**
+  String levelValue(String value);
+
+  /// No description provided for @fileValue.
+  ///
+  /// In en, this message translates to:
+  /// **'File: {value}'**
+  String fileValue(String value);
+
+  /// No description provided for @transcriptStatusValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Transcript status: {value}'**
+  String transcriptStatusValue(String value);
+
+  /// No description provided for @statusValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Status: {value}'**
+  String statusValue(String value);
+
+  /// No description provided for @transcriptionRequiredForAi.
+  ///
+  /// In en, this message translates to:
+  /// **'Transcription must be ready before generating a summary, notes, or practice test.'**
+  String get transcriptionRequiredForAi;
+
+  /// No description provided for @requestTranscriptionFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not request transcription. Please try again.'**
+  String get requestTranscriptionFailed;
+
+  /// No description provided for @lectureDetailLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load this lecture.'**
+  String get lectureDetailLoadFailed;
+
+  /// No description provided for @aiReady.
+  ///
+  /// In en, this message translates to:
+  /// **'Ready'**
+  String get aiReady;
+
+  /// No description provided for @aiQueued.
+  ///
+  /// In en, this message translates to:
+  /// **'Queued'**
+  String get aiQueued;
+
+  /// No description provided for @aiNotStartedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Not started'**
+  String get aiNotStartedLabel;
+
+  /// No description provided for @noAiOutputTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No output yet'**
+  String get noAiOutputTitle;
+
+  /// No description provided for @noAiOutputMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'The AI output is empty or missing.'**
+  String get noAiOutputMessage;
+
+  /// No description provided for @copiedJsonToClipboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Copied JSON to clipboard'**
+  String get copiedJsonToClipboard;
+
+  /// No description provided for @copy.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy'**
+  String get copy;
+
+  /// No description provided for @aiOutputError.
+  ///
+  /// In en, this message translates to:
+  /// **'AI output error'**
+  String get aiOutputError;
+
+  /// No description provided for @aiOutputLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load the AI output.'**
+  String get aiOutputLoadFailed;
+
+  /// No description provided for @keyPoints.
+  ///
+  /// In en, this message translates to:
+  /// **'Key Points'**
+  String get keyPoints;
+
+  /// No description provided for @terms.
+  ///
+  /// In en, this message translates to:
+  /// **'Terms'**
+  String get terms;
+
+  /// No description provided for @equations.
+  ///
+  /// In en, this message translates to:
+  /// **'Equations'**
+  String get equations;
+
+  /// No description provided for @references.
+  ///
+  /// In en, this message translates to:
+  /// **'References'**
+  String get references;
+
+  /// No description provided for @answerValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Answer: {value}'**
+  String answerValue(String value);
+
+  /// No description provided for @whyValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Why: {value}'**
+  String whyValue(String value);
+
+  /// No description provided for @transcriptLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load the transcript.'**
+  String get transcriptLoadFailed;
 }
 
 class _AppLocalizationsDelegate
