@@ -53,9 +53,14 @@ class _AcademicSettingsScreenState extends State<AcademicSettingsScreen> {
         _semesterCtl.text = (data['semesterName'] ?? data['termName'] ?? '').toString();
       }
     } catch (e) {
+      appLogger('Academic settings load failed: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('${AppLocalizations.of(context).academicSettingsLoadFailed} $e')),
+          SnackBar(
+            content: Text(
+              AppLocalizations.of(context).academicSettingsLoadFailed,
+            ),
+          ),
         );
       }
     } finally {
@@ -104,9 +109,14 @@ class _AcademicSettingsScreenState extends State<AcademicSettingsScreen> {
       );
       Navigator.pop(context);
     } catch (e) {
+      appLogger('Academic settings save failed: $e');
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('${AppLocalizations.of(context).academicSettingsSaveFailed} $e')),
+        SnackBar(
+          content: Text(
+            AppLocalizations.of(context).academicSettingsSaveFailed,
+          ),
+        ),
       );
     } finally {
       if (mounted) setState(() => _saving = false);
