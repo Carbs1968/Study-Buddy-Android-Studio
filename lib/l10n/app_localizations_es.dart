@@ -880,4 +880,41 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get readyToRecordDescription =>
       'Listo para grabar. Esta clase se guardará en la clase y el tema seleccionados.';
+
+  @override
+  String get onboardingSkip => 'Omitir';
+
+  @override
+  String get onboardingContinue => 'Continuar';
+
+  @override
+  String get onboardingWelcomeTitle => 'Bienvenido a Study Buddy';
+
+  @override
+  String get onboardingWelcomeDescription =>
+      'Graba tus clases, organiza tu trabajo escolar y convierte tu material de estudio en herramientas útiles para aprender.';
+
+  @override
+  String get onboardingCaptureTitle => 'Captura y aprende';
+
+  @override
+  String get onboardingCaptureDescription =>
+      'Graba clases o sube material escolar. Study Buddy puede crear transcripciones, resúmenes, notas y cuestionarios a partir de tu contenido.';
+
+  @override
+  String get onboardingOrganizeTitle => 'Mantén tus estudios organizados';
+
+  @override
+  String get onboardingOrganizeDescription =>
+      'Tu trabajo se organiza por año académico, semestre, clase y tema, para que cada grabación y archivo tenga un lugar claro.';
+
+  @override
+  String get onboardingSetupTitle => 'Configura tu espacio de estudio';
+
+  @override
+  String get onboardingSetupDescription =>
+      'A continuación, elige tu año académico y semestre actuales. Después podrás agregar clases y temas desde la aplicación.';
+
+  @override
+  String get onboardingSetupButton => 'Configurar mi espacio';
 }

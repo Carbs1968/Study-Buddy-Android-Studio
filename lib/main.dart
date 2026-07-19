@@ -1,4 +1,3 @@
-
 // lib/main.dart
 
 // --------------------
@@ -18,6 +17,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 // --------------------
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart' as fb;
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:cloud_functions/cloud_functions.dart'; // ✅ NEW
 import 'package:firebase_app_check/firebase_app_check.dart';
@@ -31,10 +31,12 @@ import 'l10n/app_localizations.dart';
 // Added import for AcademicSettingsScreen at top-level to avoid misplaced directives.
 import 'screens/home_shell/home_shell.dart';
 import 'screens/login_screen.dart';
+import 'screens/onboarding/onboarding_screen.dart';
+import 'screens/academic_settings_screen.dart';
 import 'utils/app_logger.dart';
 import 'utils/constants.dart';
 
-final ValueNotifier<Locale> appLocale = ValueNotifier(const Locale('en'));
+final ValueNotifier<Locale?> appLocale = ValueNotifier(null);
 
 // // ✅ Single Functions handle (same app-wide region as your backend)
 // late FirebaseFunctions functions;
@@ -56,15 +58,17 @@ Future<void> main() async {
   appLogger('Preparing to activate App Check...');
   try {
     await FirebaseAppCheck.instance.activate(
-      androidProvider: kReleaseMode ? AndroidProvider.playIntegrity : AndroidProvider.debug,
-      appleProvider: kReleaseMode ? AppleProvider.appAttest : AppleProvider.debug,
+      androidProvider:
+          kReleaseMode ? AndroidProvider.playIntegrity : AndroidProvider.debug,
+      appleProvider:
+          kReleaseMode ? AppleProvider.appAttest : AppleProvider.debug,
     );
-    appLogger('AppCheck activated with ${kReleaseMode ? 'production' : 'debug'} providers');
+    appLogger(
+        'AppCheck activated with ${kReleaseMode ? 'production' : 'debug'} providers');
   } catch (e) {
     appLogger('AppCheck activation skipped/failed: $e');
   }
   appLogger('App Check activation complete.');
-
 
   appLogger('Using Storage bucket: ${FirebaseStorage.instance.bucket}');
 
@@ -78,7 +82,7 @@ class MyApp extends StatelessWidget {
   const MyApp({super.key});
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<Locale>(
+    return ValueListenableBuilder<Locale?>(
       valueListenable: appLocale,
       builder: (context, locale, _) {
         return MaterialApp(
@@ -117,8 +121,10 @@ class MyApp extends StatelessWidget {
                 backgroundColor: kBrandPrimary,
                 foregroundColor: Colors.white,
                 shape: const StadiumBorder(),
-                padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 20),
-                textStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+                padding:
+                    const EdgeInsets.symmetric(vertical: 14, horizontal: 20),
+                textStyle:
+                    const TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
               ),
             ),
             textButtonTheme: TextButtonThemeData(
@@ -128,14 +134,34 @@ class MyApp extends StatelessWidget {
               ),
             ),
             textTheme: const TextTheme(
-              headlineLarge: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.black87),
-              headlineMedium: TextStyle(fontSize: 24, fontWeight: FontWeight.w700, color: Colors.black87),
-              headlineSmall: TextStyle(fontSize: 20, fontWeight: FontWeight.w600, color: Colors.black87),
-              titleLarge: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Colors.black87),
-              bodyLarge: TextStyle(fontSize: 16, color: Colors.black87, height: 1.4),
-              bodyMedium: TextStyle(fontSize: 14, color: Colors.black87, height: 1.4),
-              labelLarge: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.white),
-              labelMedium: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: Colors.black87),
+              headlineLarge: TextStyle(
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black87),
+              headlineMedium: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.w700,
+                  color: Colors.black87),
+              headlineSmall: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.black87),
+              titleLarge: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.black87),
+              bodyLarge:
+                  TextStyle(fontSize: 16, color: Colors.black87, height: 1.4),
+              bodyMedium:
+                  TextStyle(fontSize: 14, color: Colors.black87, height: 1.4),
+              labelLarge: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white),
+              labelMedium: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.black87),
             ),
           ),
           darkTheme: ThemeData(
@@ -178,8 +204,10 @@ class MyApp extends StatelessWidget {
                 backgroundColor: kBrandAccent,
                 foregroundColor: Colors.black87,
                 shape: const StadiumBorder(),
-                padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 20),
-                textStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+                padding:
+                    const EdgeInsets.symmetric(vertical: 14, horizontal: 20),
+                textStyle:
+                    const TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
               ),
             ),
             textButtonTheme: TextButtonThemeData(
@@ -189,14 +217,34 @@ class MyApp extends StatelessWidget {
               ),
             ),
             textTheme: const TextTheme(
-              headlineLarge: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.white),
-              headlineMedium: TextStyle(fontSize: 24, fontWeight: FontWeight.w700, color: Colors.white),
-              headlineSmall: TextStyle(fontSize: 20, fontWeight: FontWeight.w600, color: Colors.white),
-              titleLarge: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Colors.white),
-              bodyLarge: TextStyle(fontSize: 16, color: Colors.white70, height: 1.4),
-              bodyMedium: TextStyle(fontSize: 14, color: Colors.white70, height: 1.4),
-              labelLarge: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.black87),
-              labelMedium: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: Colors.white),
+              headlineLarge: TextStyle(
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white),
+              headlineMedium: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.w700,
+                  color: Colors.white),
+              headlineSmall: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white),
+              titleLarge: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white),
+              bodyLarge:
+                  TextStyle(fontSize: 16, color: Colors.white70, height: 1.4),
+              bodyMedium:
+                  TextStyle(fontSize: 14, color: Colors.white70, height: 1.4),
+              labelLarge: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.black87),
+              labelMedium: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.white),
             ),
           ),
           themeMode: ThemeMode.system,
@@ -223,17 +271,60 @@ class AuthGate extends StatelessWidget {
   Widget build(BuildContext context) {
     return StreamBuilder<fb.User?>(
       stream: fb.FirebaseAuth.instance.authStateChanges(),
-      builder: (context, snap) {
-        if (snap.connectionState == ConnectionState.waiting) {
+      builder: (context, authSnapshot) {
+        if (authSnapshot.connectionState == ConnectionState.waiting) {
           return const Scaffold(
             body: Center(child: CircularProgressIndicator()),
           );
         }
-        if (snap.data == null) return const LoginScreen();
-        // SAFE: route to the tab shell; RecorderPage is still the first tab.
-        return const HomeShell();
+
+        final user = authSnapshot.data;
+        if (user == null) {
+          return const LoginScreen();
+        }
+
+        final settingsDocument = FirebaseFirestore.instance
+            .collection('users')
+            .doc(user.uid)
+            .collection('academicSettings')
+            .doc('current');
+
+        return StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+          stream: settingsDocument.snapshots(),
+          builder: (context, settingsSnapshot) {
+            if (settingsSnapshot.connectionState == ConnectionState.waiting) {
+              return const Scaffold(
+                body: Center(child: CircularProgressIndicator()),
+              );
+            }
+
+            if (settingsSnapshot.hasError) {
+              return const Scaffold(
+                body: Center(
+                  child: Text('Unable to load academic settings.'),
+                ),
+              );
+            }
+
+            final hasAcademicSettings = settingsSnapshot.data?.exists ?? false;
+
+            if (!hasAcademicSettings) {
+              return OnboardingScreen(
+                onComplete: () async {
+                  await Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) => const AcademicSettingsScreen(),
+                    ),
+                  );
+                },
+              );
+            }
+
+            // RecorderPage remains the first HomeShell tab.
+            return const HomeShell();
+          },
+        );
       },
     );
   }
 }
-

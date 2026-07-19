@@ -861,4 +861,41 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get readyToRecordDescription =>
       'Ready to record. This lecture will be saved to the selected class and topic.';
+
+  @override
+  String get onboardingSkip => 'Skip';
+
+  @override
+  String get onboardingContinue => 'Continue';
+
+  @override
+  String get onboardingWelcomeTitle => 'Welcome to Study Buddy';
+
+  @override
+  String get onboardingWelcomeDescription =>
+      'Record your classes, organize your schoolwork, and turn your study material into useful learning tools.';
+
+  @override
+  String get onboardingCaptureTitle => 'Capture and learn';
+
+  @override
+  String get onboardingCaptureDescription =>
+      'Record lectures or upload class material. Study Buddy can create transcripts, summaries, notes, and quizzes from your content.';
+
+  @override
+  String get onboardingOrganizeTitle => 'Keep school organized';
+
+  @override
+  String get onboardingOrganizeDescription =>
+      'Your work stays arranged by academic year, semester, class, and topic, so every recording and file has a clear home.';
+
+  @override
+  String get onboardingSetupTitle => 'Set up your workspace';
+
+  @override
+  String get onboardingSetupDescription =>
+      'Next, choose your current academic year and semester. You can add classes and topics from the app afterward.';
+
+  @override
+  String get onboardingSetupButton => 'Set up my workspace';
 }

@@ -1573,6 +1573,72 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Ready to record. This lecture will be saved to the selected class and topic.'**
   String get readyToRecordDescription;
+
+  /// No description provided for @onboardingSkip.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip'**
+  String get onboardingSkip;
+
+  /// No description provided for @onboardingContinue.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue'**
+  String get onboardingContinue;
+
+  /// No description provided for @onboardingWelcomeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Welcome to Study Buddy'**
+  String get onboardingWelcomeTitle;
+
+  /// No description provided for @onboardingWelcomeDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Record your classes, organize your schoolwork, and turn your study material into useful learning tools.'**
+  String get onboardingWelcomeDescription;
+
+  /// No description provided for @onboardingCaptureTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Capture and learn'**
+  String get onboardingCaptureTitle;
+
+  /// No description provided for @onboardingCaptureDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Record lectures or upload class material. Study Buddy can create transcripts, summaries, notes, and quizzes from your content.'**
+  String get onboardingCaptureDescription;
+
+  /// No description provided for @onboardingOrganizeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep school organized'**
+  String get onboardingOrganizeTitle;
+
+  /// No description provided for @onboardingOrganizeDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Your work stays arranged by academic year, semester, class, and topic, so every recording and file has a clear home.'**
+  String get onboardingOrganizeDescription;
+
+  /// No description provided for @onboardingSetupTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Set up your workspace'**
+  String get onboardingSetupTitle;
+
+  /// No description provided for @onboardingSetupDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Next, choose your current academic year and semester. You can add classes and topics from the app afterward.'**
+  String get onboardingSetupDescription;
+
+  /// No description provided for @onboardingSetupButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Set up my workspace'**
+  String get onboardingSetupButton;
 }
 
 class _AppLocalizationsDelegate

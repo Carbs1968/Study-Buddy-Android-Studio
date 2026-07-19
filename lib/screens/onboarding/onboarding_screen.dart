@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../l10n/app_localizations.dart';
+
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({
     super.key,
@@ -16,32 +18,32 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   final PageController _pageController = PageController();
   int _currentPage = 0;
 
-  static const List<_OnboardingPageData> _pages = [
-    _OnboardingPageData(
-      title: 'Welcome to Study Buddy',
-      description:
-          'Record your classes, organize your schoolwork, and turn your study material into useful learning tools.',
-      imageAsset: 'assets/images/onboarding_hero_en.png',
-    ),
-    _OnboardingPageData(
-      title: 'Capture and learn',
-      description:
-          'Record lectures or upload class material. Study Buddy can create transcripts, summaries, notes, and quizzes from your content.',
-      icon: Icons.auto_awesome_rounded,
-    ),
-    _OnboardingPageData(
-      title: 'Keep school organized',
-      description:
-          'Your work stays arranged by academic year, semester, class, and topic, so every recording and file has a clear home.',
-      icon: Icons.account_tree_rounded,
-    ),
-    _OnboardingPageData(
-      title: 'Set up your workspace',
-      description:
-          'Next, choose your current academic year and semester. You can add classes and topics from the app afterward.',
-      icon: Icons.school_rounded,
-    ),
-  ];
+  static const int _pageCount = 4;
+
+  List<_OnboardingPageData> _pages(AppLocalizations l10n) {
+    return [
+      _OnboardingPageData(
+        title: l10n.onboardingWelcomeTitle,
+        description: l10n.onboardingWelcomeDescription,
+        imageAsset: 'assets/images/onboarding_hero_en.png',
+      ),
+      _OnboardingPageData(
+        title: l10n.onboardingCaptureTitle,
+        description: l10n.onboardingCaptureDescription,
+        icon: Icons.auto_awesome_rounded,
+      ),
+      _OnboardingPageData(
+        title: l10n.onboardingOrganizeTitle,
+        description: l10n.onboardingOrganizeDescription,
+        icon: Icons.account_tree_rounded,
+      ),
+      _OnboardingPageData(
+        title: l10n.onboardingSetupTitle,
+        description: l10n.onboardingSetupDescription,
+        icon: Icons.school_rounded,
+      ),
+    ];
+  }
 
   @override
   void dispose() {
@@ -50,7 +52,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 
   Future<void> _goForward() async {
-    if (_currentPage == _pages.length - 1) {
+    if (_currentPage == _pageCount - 1) {
       widget.onComplete();
       return;
     }
@@ -63,7 +65,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   Future<void> _skip() async {
     await _pageController.animateToPage(
-      _pages.length - 1,
+      _pageCount - 1,
       duration: const Duration(milliseconds: 320),
       curve: Curves.easeOutCubic,
     );
@@ -72,7 +74,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isLastPage = _currentPage == _pages.length - 1;
+    final l10n = AppLocalizations.of(context);
+    final pages = _pages(l10n);
+    final isLastPage = _currentPage == _pageCount - 1;
 
     return Scaffold(
       body: SafeArea(
@@ -84,19 +88,19 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 padding: const EdgeInsets.only(top: 8, right: 12),
                 child: TextButton(
                   onPressed: isLastPage ? null : _skip,
-                  child: const Text('Skip'),
+                  child: Text(l10n.onboardingSkip),
                 ),
               ),
             ),
             Expanded(
               child: PageView.builder(
                 controller: _pageController,
-                itemCount: _pages.length,
+                itemCount: _pageCount,
                 onPageChanged: (index) {
                   setState(() => _currentPage = index);
                 },
                 itemBuilder: (context, index) {
-                  return _OnboardingPage(data: _pages[index]);
+                  return _OnboardingPage(data: pages[index]);
                 },
               ),
             ),
@@ -107,7 +111,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: List.generate(
-                      _pages.length,
+                      _pageCount,
                       (index) => AnimatedContainer(
                         duration: const Duration(milliseconds: 220),
                         width: index == _currentPage ? 24 : 8,
@@ -127,7 +131,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     width: double.infinity,
                     child: ElevatedButton(
                       onPressed: _goForward,
-                      child: Text(isLastPage ? 'Set up my workspace' : 'Continue'),
+                      child: Text(isLastPage
+                          ? l10n.onboardingSetupButton
+                          : l10n.onboardingContinue),
                     ),
                   ),
                 ],

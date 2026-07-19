@@ -5,7 +5,6 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../l10n/app_localizations.dart';
-import '../main.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -100,7 +99,8 @@ class _LoginScreenState extends State<LoginScreen> {
       'photoURL': u.photoURL,
       'provider': 'google',
       'providers': FieldValue.arrayUnion(['google']),
-      'locale': appLocale.value.languageCode, // Save user's language
+      'locale': Localizations.localeOf(context)
+          .languageCode, // Save resolved app language
       'updatedAt': FieldValue.serverTimestamp(),
       'lastLoginAt': FieldValue.serverTimestamp(),
     }, SetOptions(merge: true));

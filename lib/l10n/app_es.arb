@@ -392,5 +392,16 @@
   "aiSummaryTitle": "Resumen de IA",
   "aiNotesTitle": "Notas de IA",
   "aiQuizTitle": "Prueba práctica de IA",
-  "readyToRecordDescription": "Listo para grabar. Esta clase se guardará en la clase y el tema seleccionados."
+  "readyToRecordDescription": "Listo para grabar. Esta clase se guardará en la clase y el tema seleccionados.",
+  "onboardingSkip": "Omitir",
+  "onboardingContinue": "Continuar",
+  "onboardingWelcomeTitle": "Bienvenido a Study Buddy",
+  "onboardingWelcomeDescription": "Graba tus clases, organiza tu trabajo escolar y convierte tu material de estudio en herramientas útiles para aprender.",
+  "onboardingCaptureTitle": "Captura y aprende",
+  "onboardingCaptureDescription": "Graba clases o sube material escolar. Study Buddy puede crear transcripciones, resúmenes, notas y cuestionarios a partir de tu contenido.",
+  "onboardingOrganizeTitle": "Mantén tus estudios organizados",
+  "onboardingOrganizeDescription": "Tu trabajo se organiza por año académico, semestre, clase y tema, para que cada grabación y archivo tenga un lugar claro.",
+  "onboardingSetupTitle": "Configura tu espacio de estudio",
+  "onboardingSetupDescription": "A continuación, elige tu año académico y semestre actuales. Después podrás agregar clases y temas desde la aplicación.",
+  "onboardingSetupButton": "Configurar mi espacio"
 }

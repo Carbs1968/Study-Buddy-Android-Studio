@@ -80,7 +80,8 @@ class SettingsPage extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 16),
-                    Text(AppLocalizations.of(context).deleteAccountTypeToken('DELETE')),
+                    Text(AppLocalizations.of(context)
+                        .deleteAccountTypeToken('DELETE')),
                     const SizedBox(height: 8),
                     TextField(
                       controller: confirmationController,
@@ -118,7 +119,8 @@ class SettingsPage extends StatelessWidget {
                           Navigator.of(dialogContext).pop(true);
                         }
                       : null,
-                  child: Text(AppLocalizations.of(context).deleteAccountPermanently),
+                  child: Text(
+                      AppLocalizations.of(context).deleteAccountPermanently),
                 ),
               ],
             );
@@ -375,30 +377,34 @@ class SettingsPage extends StatelessWidget {
                           Text(
                             strings.academicYear,
                             style: theme.textTheme.labelMedium?.copyWith(
+                              fontSize: 13,
                               color: theme.colorScheme.onSurfaceVariant,
-                              fontWeight: FontWeight.w700,
+                              fontWeight: FontWeight.w600,
                             ),
                           ),
                           const SizedBox(height: 4),
                           Text(
                             academicYear,
                             style: theme.textTheme.bodyLarge?.copyWith(
-                              fontWeight: FontWeight.w700,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
                             ),
                           ),
                           const SizedBox(height: 12),
                           Text(
                             strings.semester,
                             style: theme.textTheme.labelMedium?.copyWith(
+                              fontSize: 13,
                               color: theme.colorScheme.onSurfaceVariant,
-                              fontWeight: FontWeight.w700,
+                              fontWeight: FontWeight.w600,
                             ),
                           ),
                           const SizedBox(height: 4),
                           Text(
                             semester,
                             style: theme.textTheme.bodyLarge?.copyWith(
-                              fontWeight: FontWeight.w700,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
                             ),
                           ),
                         ],

@@ -392,5 +392,16 @@
   "aiSummaryTitle": "AI Summary",
   "aiNotesTitle": "AI Notes",
   "aiQuizTitle": "AI Practice Test",
-  "readyToRecordDescription": "Ready to record. This lecture will be saved to the selected class and topic."
+  "readyToRecordDescription": "Ready to record. This lecture will be saved to the selected class and topic.",
+  "onboardingSkip": "Skip",
+  "onboardingContinue": "Continue",
+  "onboardingWelcomeTitle": "Welcome to Study Buddy",
+  "onboardingWelcomeDescription": "Record your classes, organize your schoolwork, and turn your study material into useful learning tools.",
+  "onboardingCaptureTitle": "Capture and learn",
+  "onboardingCaptureDescription": "Record lectures or upload class material. Study Buddy can create transcripts, summaries, notes, and quizzes from your content.",
+  "onboardingOrganizeTitle": "Keep school organized",
+  "onboardingOrganizeDescription": "Your work stays arranged by academic year, semester, class, and topic, so every recording and file has a clear home.",
+  "onboardingSetupTitle": "Set up your workspace",
+  "onboardingSetupDescription": "Next, choose your current academic year and semester. You can add classes and topics from the app afterward.",
+  "onboardingSetupButton": "Set up my workspace"
 }
