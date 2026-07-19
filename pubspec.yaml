@@ -63,6 +63,7 @@ flutter:
   assets:
     - assets/icons/app_icon.png
     - assets/icons/study_buddy_logo.png
+    - assets/images/onboarding_hero_en.png
 
 # flutter_launcher_icons configuration
 flutter_icons:
