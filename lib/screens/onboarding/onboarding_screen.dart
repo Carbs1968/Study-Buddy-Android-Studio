@@ -100,7 +100,18 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   setState(() => _currentPage = index);
                 },
                 itemBuilder: (context, index) {
-                  return _OnboardingPage(data: pages[index]);
+                  switch (index) {
+                    case 0:
+                      return _OnboardingPage(data: pages[0]);
+                    case 1:
+                      return _FeaturesOnboardingPage(l10n: l10n);
+                    case 2:
+                      return _OrganizationOnboardingPage(l10n: l10n);
+                    case 3:
+                      return _OnboardingPage(data: pages[3]);
+                    default:
+                      return const SizedBox.shrink();
+                  }
                 },
               ),
             ),
@@ -211,6 +222,280 @@ class _OnboardingPage extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+class _FeaturesOnboardingPage extends StatelessWidget {
+  const _FeaturesOnboardingPage({required this.l10n});
+
+  final AppLocalizations l10n;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return SingleChildScrollView(
+      padding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
+      child: Column(
+        children: [
+          Text(
+            l10n.onboardingFeaturesTitle,
+            textAlign: TextAlign.center,
+            style: theme.textTheme.headlineMedium?.copyWith(
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+          const SizedBox(height: 12),
+          ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 520),
+            child: Text(
+              l10n.onboardingFeaturesDescription,
+              textAlign: TextAlign.center,
+              style: theme.textTheme.bodyLarge?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ),
+          const SizedBox(height: 38),
+          _OnboardingFeatureCard(
+            icon: Icons.mic_rounded,
+            title: l10n.onboardingRecordLecturesTitle,
+            description: l10n.onboardingRecordLecturesDescription,
+          ),
+          const SizedBox(height: 14),
+          _OnboardingFeatureCard(
+            icon: Icons.upload_file_rounded,
+            title: l10n.onboardingUploadMaterialsTitle,
+            description: l10n.onboardingUploadMaterialsDescription,
+          ),
+          const SizedBox(height: 14),
+          _OnboardingFeatureCard(
+            icon: Icons.auto_awesome_rounded,
+            title: l10n.onboardingAiToolsTitle,
+            description: l10n.onboardingAiToolsDescription,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _OnboardingFeatureCard extends StatelessWidget {
+  const _OnboardingFeatureCard({
+    required this.icon,
+    required this.title,
+    required this.description,
+  });
+
+  final IconData icon;
+  final String title;
+  final String description;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return ConstrainedBox(
+      constraints: const BoxConstraints(maxWidth: 560),
+      child: Card(
+        elevation: 0,
+        color: theme.colorScheme.surfaceContainerLow,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+          side: BorderSide(color: theme.colorScheme.outlineVariant),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(18),
+          child: Row(
+            children: [
+              Container(
+                width: 60,
+                height: 60,
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.primaryContainer,
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Icon(
+                  icon,
+                  size: 28,
+                  color: theme.colorScheme.onPrimaryContainer,
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      description,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        height: 1.35,
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _OrganizationOnboardingPage extends StatelessWidget {
+  const _OrganizationOnboardingPage({required this.l10n});
+
+  final AppLocalizations l10n;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return SingleChildScrollView(
+      padding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
+      child: Column(
+        children: [
+          Text(
+            l10n.onboardingOrganizationTitle,
+            textAlign: TextAlign.center,
+            style: theme.textTheme.headlineMedium?.copyWith(
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+          const SizedBox(height: 12),
+          ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 520),
+            child: Text(
+              l10n.onboardingOrganizationDescription,
+              textAlign: TextAlign.center,
+              style: theme.textTheme.bodyLarge?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ),
+          const SizedBox(height: 24),
+          ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 520),
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                l10n.onboardingWorkspaceHierarchyLabel.toUpperCase(),
+                style: theme.textTheme.labelMedium?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 0.8,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 10),
+          ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 520),
+            child: Card(
+              elevation: 0,
+              color: theme.colorScheme.surfaceContainerLow,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(22),
+                side: BorderSide(color: theme.colorScheme.outlineVariant),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 18,
+                ),
+                child: Column(
+                  children: [
+                    _HierarchyStep(
+                      icon: Icons.calendar_month_rounded,
+                      label: l10n.onboardingAcademicYearLabel,
+                    ),
+                    const _HierarchyConnector(),
+                    _HierarchyStep(
+                      icon: Icons.date_range_rounded,
+                      label: l10n.onboardingSemesterLabel,
+                    ),
+                    const _HierarchyConnector(),
+                    _HierarchyStep(
+                      icon: Icons.school_rounded,
+                      label: l10n.onboardingClassesLabel,
+                    ),
+                    const _HierarchyConnector(),
+                    _HierarchyStep(
+                      icon: Icons.topic_rounded,
+                      label: l10n.onboardingTopicsLabel,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _HierarchyStep extends StatelessWidget {
+  const _HierarchyStep({
+    required this.icon,
+    required this.label,
+  });
+
+  final IconData icon;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 11),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.primaryContainer,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            icon,
+            size: 22,
+            color: theme.colorScheme.onPrimaryContainer,
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Text(
+              label,
+              style: theme.textTheme.titleMedium?.copyWith(
+                color: theme.colorScheme.onPrimaryContainer,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _HierarchyConnector extends StatelessWidget {
+  const _HierarchyConnector();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Padding(
+      padding: EdgeInsets.symmetric(vertical: 2),
+      child: Icon(Icons.keyboard_arrow_down_rounded),
     );
   }
 }

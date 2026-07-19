@@ -898,4 +898,54 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get onboardingSetupButton => 'Set up my workspace';
+
+  @override
+  String get onboardingFeaturesTitle => 'Everything in one place';
+
+  @override
+  String get onboardingFeaturesDescription =>
+      'Capture your classes, keep your materials together, and turn them into useful study tools.';
+
+  @override
+  String get onboardingRecordLecturesTitle => 'Record lectures';
+
+  @override
+  String get onboardingRecordLecturesDescription =>
+      'Capture class audio without leaving Study Buddy.';
+
+  @override
+  String get onboardingUploadMaterialsTitle => 'Upload study materials';
+
+  @override
+  String get onboardingUploadMaterialsDescription =>
+      'Keep class documents and learning resources with your recordings.';
+
+  @override
+  String get onboardingAiToolsTitle => 'Study smarter with AI';
+
+  @override
+  String get onboardingAiToolsDescription =>
+      'Create transcripts, summaries, notes, quizzes, and study guides.';
+
+  @override
+  String get onboardingOrganizationTitle => 'Let\'s organize your studies';
+
+  @override
+  String get onboardingOrganizationDescription =>
+      'Everything you record, upload, and generate with AI is organized into your academic workspace.';
+
+  @override
+  String get onboardingAcademicYearLabel => 'Academic Year';
+
+  @override
+  String get onboardingSemesterLabel => 'Semester';
+
+  @override
+  String get onboardingClassesLabel => 'Classes';
+
+  @override
+  String get onboardingTopicsLabel => 'Topics';
+
+  @override
+  String get onboardingWorkspaceHierarchyLabel => 'Your workspace hierarchy';
 }

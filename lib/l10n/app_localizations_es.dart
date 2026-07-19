@@ -917,4 +917,55 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get onboardingSetupButton => 'Configurar mi espacio';
+
+  @override
+  String get onboardingFeaturesTitle => 'Todo en un solo lugar';
+
+  @override
+  String get onboardingFeaturesDescription =>
+      'Captura tus clases, mantén tus materiales juntos y conviértelos en herramientas útiles de estudio.';
+
+  @override
+  String get onboardingRecordLecturesTitle => 'Graba tus clases';
+
+  @override
+  String get onboardingRecordLecturesDescription =>
+      'Captura el audio de tus clases sin salir de Study Buddy.';
+
+  @override
+  String get onboardingUploadMaterialsTitle => 'Sube materiales de estudio';
+
+  @override
+  String get onboardingUploadMaterialsDescription =>
+      'Mantén documentos y recursos de aprendizaje junto con tus grabaciones.';
+
+  @override
+  String get onboardingAiToolsTitle => 'Estudia mejor con IA';
+
+  @override
+  String get onboardingAiToolsDescription =>
+      'Crea transcripciones, resúmenes, notas, cuestionarios y guías de estudio.';
+
+  @override
+  String get onboardingOrganizationTitle => 'Organicemos tus estudios';
+
+  @override
+  String get onboardingOrganizationDescription =>
+      'Todo lo que grabas, subes y generas con IA se organiza dentro de tu espacio académico.';
+
+  @override
+  String get onboardingAcademicYearLabel => 'Año académico';
+
+  @override
+  String get onboardingSemesterLabel => 'Semestre';
+
+  @override
+  String get onboardingClassesLabel => 'Clases';
+
+  @override
+  String get onboardingTopicsLabel => 'Temas';
+
+  @override
+  String get onboardingWorkspaceHierarchyLabel =>
+      'Jerarquía de tu espacio de trabajo';
 }

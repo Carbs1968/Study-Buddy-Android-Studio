@@ -1639,6 +1639,96 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Set up my workspace'**
   String get onboardingSetupButton;
+
+  /// No description provided for @onboardingFeaturesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Everything in one place'**
+  String get onboardingFeaturesTitle;
+
+  /// No description provided for @onboardingFeaturesDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Capture your classes, keep your materials together, and turn them into useful study tools.'**
+  String get onboardingFeaturesDescription;
+
+  /// No description provided for @onboardingRecordLecturesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Record lectures'**
+  String get onboardingRecordLecturesTitle;
+
+  /// No description provided for @onboardingRecordLecturesDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Capture class audio without leaving Study Buddy.'**
+  String get onboardingRecordLecturesDescription;
+
+  /// No description provided for @onboardingUploadMaterialsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload study materials'**
+  String get onboardingUploadMaterialsTitle;
+
+  /// No description provided for @onboardingUploadMaterialsDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep class documents and learning resources with your recordings.'**
+  String get onboardingUploadMaterialsDescription;
+
+  /// No description provided for @onboardingAiToolsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Study smarter with AI'**
+  String get onboardingAiToolsTitle;
+
+  /// No description provided for @onboardingAiToolsDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Create transcripts, summaries, notes, quizzes, and study guides.'**
+  String get onboardingAiToolsDescription;
+
+  /// No description provided for @onboardingOrganizationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Let\'s organize your studies'**
+  String get onboardingOrganizationTitle;
+
+  /// No description provided for @onboardingOrganizationDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Everything you record, upload, and generate with AI is organized into your academic workspace.'**
+  String get onboardingOrganizationDescription;
+
+  /// No description provided for @onboardingAcademicYearLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Academic Year'**
+  String get onboardingAcademicYearLabel;
+
+  /// No description provided for @onboardingSemesterLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Semester'**
+  String get onboardingSemesterLabel;
+
+  /// No description provided for @onboardingClassesLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Classes'**
+  String get onboardingClassesLabel;
+
+  /// No description provided for @onboardingTopicsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Topics'**
+  String get onboardingTopicsLabel;
+
+  /// No description provided for @onboardingWorkspaceHierarchyLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Your workspace hierarchy'**
+  String get onboardingWorkspaceHierarchyLabel;
 }
 
 class _AppLocalizationsDelegate

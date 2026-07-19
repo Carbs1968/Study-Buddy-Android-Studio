@@ -403,5 +403,20 @@
   "onboardingOrganizeDescription": "Your work stays arranged by academic year, semester, class, and topic, so every recording and file has a clear home.",
   "onboardingSetupTitle": "Set up your workspace",
   "onboardingSetupDescription": "Next, choose your current academic year and semester. You can add classes and topics from the app afterward.",
-  "onboardingSetupButton": "Set up my workspace"
+  "onboardingSetupButton": "Set up my workspace",
+  "onboardingFeaturesTitle": "Everything in one place",
+  "onboardingFeaturesDescription": "Capture your classes, keep your materials together, and turn them into useful study tools.",
+  "onboardingRecordLecturesTitle": "Record lectures",
+  "onboardingRecordLecturesDescription": "Capture class audio without leaving Study Buddy.",
+  "onboardingUploadMaterialsTitle": "Upload study materials",
+  "onboardingUploadMaterialsDescription": "Keep class documents and learning resources with your recordings.",
+  "onboardingAiToolsTitle": "Study smarter with AI",
+  "onboardingAiToolsDescription": "Create transcripts, summaries, notes, quizzes, and study guides.",
+  "onboardingOrganizationTitle": "Let's organize your studies",
+  "onboardingOrganizationDescription": "Everything you record, upload, and generate with AI is organized into your academic workspace.",
+  "onboardingAcademicYearLabel": "Academic Year",
+  "onboardingSemesterLabel": "Semester",
+  "onboardingClassesLabel": "Classes",
+  "onboardingTopicsLabel": "Topics",
+  "onboardingWorkspaceHierarchyLabel": "Your workspace hierarchy"
 }

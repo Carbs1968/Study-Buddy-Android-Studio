@@ -403,5 +403,20 @@
   "onboardingOrganizeDescription": "Tu trabajo se organiza por año académico, semestre, clase y tema, para que cada grabación y archivo tenga un lugar claro.",
   "onboardingSetupTitle": "Configura tu espacio de estudio",
   "onboardingSetupDescription": "A continuación, elige tu año académico y semestre actuales. Después podrás agregar clases y temas desde la aplicación.",
-  "onboardingSetupButton": "Configurar mi espacio"
+  "onboardingSetupButton": "Configurar mi espacio",
+  "onboardingFeaturesTitle": "Todo en un solo lugar",
+  "onboardingFeaturesDescription": "Captura tus clases, mantén tus materiales juntos y conviértelos en herramientas útiles de estudio.",
+  "onboardingRecordLecturesTitle": "Graba tus clases",
+  "onboardingRecordLecturesDescription": "Captura el audio de tus clases sin salir de Study Buddy.",
+  "onboardingUploadMaterialsTitle": "Sube materiales de estudio",
+  "onboardingUploadMaterialsDescription": "Mantén documentos y recursos de aprendizaje junto con tus grabaciones.",
+  "onboardingAiToolsTitle": "Estudia mejor con IA",
+  "onboardingAiToolsDescription": "Crea transcripciones, resúmenes, notas, cuestionarios y guías de estudio.",
+  "onboardingOrganizationTitle": "Organicemos tus estudios",
+  "onboardingOrganizationDescription": "Todo lo que grabas, subes y generas con IA se organiza dentro de tu espacio académico.",
+  "onboardingAcademicYearLabel": "Año académico",
+  "onboardingSemesterLabel": "Semestre",
+  "onboardingClassesLabel": "Clases",
+  "onboardingTopicsLabel": "Temas",
+  "onboardingWorkspaceHierarchyLabel": "Jerarquía de tu espacio de trabajo"
 }
