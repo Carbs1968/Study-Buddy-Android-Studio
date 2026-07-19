@@ -3572,3 +3572,43 @@ Source-of-truth confirmation:
   - `lib/l10n/app_es.arb`
   - generated localization files
 - Confirmed patch applied to current `dev`: yes
+
+## Completed Academic Settings Hint Localization
+
+Completed:
+- July 19, 2026
+
+Commit:
+- `d8a9156 Localize academic settings hints`
+
+Summary:
+- Replaced the two remaining hardcoded English placeholder hints in Academic Settings with existing localized getters.
+- Updated:
+  - Academic level/year hint
+  - Semester/term hint
+- English and Spanish now use the same localized Academic Settings UI path.
+
+Files changed:
+- `lib/screens/academic_settings_screen.dart`
+
+Localization getters used:
+- `strings.academicLevelYearHint`
+- `strings.currentSemesterTermHint`
+
+Validation:
+- `flutter analyze` passed with no issues.
+- `git diff --check` passed.
+- Tested diff was limited to the two `InputDecoration` blocks.
+- Commit pushed to `origin/dev`.
+- Working tree clean.
+
+Safety:
+- No Firestore save logic changed.
+- No academic settings document path changed.
+- No Firebase Auth behavior changed.
+- No recording, upload, playback, or AI logic changed.
+- No academic hierarchy fields changed.
+- Google Drive was not reintroduced.
+
+Tracker follow-up update:
+- Remove `Localize Academic Settings placeholder/example text` from the remaining onboarding localization follow-up list.
