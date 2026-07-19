@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../utils/constants.dart';
-
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({
     super.key,
