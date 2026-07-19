@@ -3505,3 +3505,70 @@ Separate follow-up work:
 4. Continue verifying that backend and SDK errors are converted into safe localized UI messages.
 5. Decide whether future AI generation should explicitly request the user's selected language; existing AI output remains displayed as generated.
 
+
+## Completed First-Time Onboarding
+
+Commit:
+- `b52a5be Add first-time onboarding flow`
+
+Summary:
+- Added a four-step first-time onboarding flow.
+- Added onboarding presentation in English and Spanish.
+- App language now follows the resolved device locale when no manual language override is set.
+- Added onboarding actions:
+  - Continue advances one screen at a time.
+  - Skip jumps directly to workspace setup.
+  - Set up my workspace opens the existing Academic Settings screen.
+- Academic Settings remains the onboarding completion flag:
+  - `users/{uid}/academicSettings/current`
+- Users without that document see onboarding.
+- Users with existing academic settings go directly to `HomeShell`.
+- Academic Year and Semester save through the existing Academic Settings flow.
+- Saved academic-period values appear on the Record and Settings screens.
+- Reduced the Current Academic Period label/value typography on Settings for better visual hierarchy.
+
+Product decisions:
+- No language picker is shown during onboarding.
+- Language follows the device locale initially.
+- Users can change language later in Settings.
+- Onboarding does not write academic data directly.
+- The existing Academic Settings screen remains responsible for Firestore writes.
+- Onboarding completion is inferred from the existence of:
+  - `users/{uid}/academicSettings/current`
+
+Manual test results:
+- Tested on a physical Android phone.
+- A deleted/recreated test account entered onboarding correctly.
+- English device locale displayed English onboarding.
+- Continue worked across all four onboarding screens.
+- Skip jumped to the final setup screen.
+- Set up my workspace opened Academic Settings.
+- Academic Year and Semester saved successfully.
+- Saved values appeared on Record and Settings.
+- Returning users with academic settings bypassed onboarding.
+- Settings scrolling remained functional.
+- `flutter analyze` passed with no issues.
+
+Safety:
+- Firebase Auth login/logout behavior preserved.
+- Existing Academic Settings Firestore save contract preserved.
+- No recorder internals changed.
+- No Android foreground recording behavior changed.
+- No Firebase Storage upload path changed.
+- No session metadata write path changed.
+- No AI job or Cloud Function contract changed.
+- No academic hierarchy fields were renamed.
+- Google Drive was not reintroduced.
+
+Source-of-truth confirmation:
+- Branch reviewed: `dev`
+- Commit pushed: `b52a5be`
+- Active files changed:
+  - `lib/main.dart`
+  - `lib/screens/login_screen.dart`
+  - `lib/screens/onboarding/onboarding_screen.dart`
+  - `lib/screens/home_shell/pages/settings_page.dart`
+  - `lib/l10n/app_en.arb`
+  - `lib/l10n/app_es.arb`
+  - generated localization files
+- Confirmed patch applied to current `dev`: yes
