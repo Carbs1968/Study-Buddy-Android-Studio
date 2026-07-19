@@ -148,9 +148,9 @@ class _AcademicSettingsScreenState extends State<AcademicSettingsScreen> {
             TextField(
               controller: _levelCtl,
               textInputAction: TextInputAction.next,
-              decoration: const InputDecoration(
-                border: OutlineInputBorder(),
-                hintText: 'Examples: Senior, Prepa, Primaria, Year 2',
+              decoration: InputDecoration(
+                border: const OutlineInputBorder(),
+                hintText: strings.academicLevelYearHint,
               ),
             ),
             const SizedBox(height: 8),
@@ -169,9 +169,9 @@ class _AcademicSettingsScreenState extends State<AcademicSettingsScreen> {
             TextField(
               controller: _semesterCtl,
               textInputAction: TextInputAction.done,
-              decoration: const InputDecoration(
-                border: OutlineInputBorder(),
-                hintText: 'Examples: Fall 2026, 5to semestre, Term 1',
+              decoration: InputDecoration(
+                border: const OutlineInputBorder(),
+                hintText: strings.currentSemesterTermHint,
               ),
               onSubmitted: (_) {
                 if (!_saving) _saveSettings();
