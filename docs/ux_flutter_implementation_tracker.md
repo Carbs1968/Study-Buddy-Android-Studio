@@ -3609,6 +3609,3 @@ Safety:
 - No recording, upload, playback, or AI logic changed.
 - No academic hierarchy fields changed.
 - Google Drive was not reintroduced.
-
-Tracker follow-up update:
-- Remove `Localize Academic Settings placeholder/example text` from the remaining onboarding localization follow-up list.
