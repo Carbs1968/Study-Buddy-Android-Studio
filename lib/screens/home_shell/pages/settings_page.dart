@@ -147,6 +147,8 @@ class SettingsPage extends StatelessWidget {
           FirebaseFunctions.instance.httpsCallable('deleteMyAccount');
       await callable.call();
 
+      messenger.removeCurrentSnackBar();
+
       try {
         await FirebaseAuth.instance.signOut();
       } catch (_) {}
