@@ -105,7 +105,11 @@ class _RecorderPageState extends State<RecorderPage> with WidgetsBindingObserver
     _classCtl.addListener(_recomputeReady);
     _topicCtl.addListener(_recomputeReady);
     _watchAcademicSettings();
-    unawaited(_restoreRecoverableRecordingState());
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        unawaited(_restoreRecoverableRecordingState());
+      }
+    });
   }
 
   @override
