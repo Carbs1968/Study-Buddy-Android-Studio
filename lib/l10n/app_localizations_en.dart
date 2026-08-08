@@ -948,4 +948,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get onboardingWorkspaceHierarchyLabel => 'Your workspace hierarchy';
+
+  @override
+  String get changeAcademicPeriodTitle => 'Change current academic period?';
+
+  @override
+  String get changeAcademicPeriodMessage =>
+      'Your existing recordings, materials, and study data will not be deleted. Study Buddy will use the new academic year and semester as your current period.';
+
+  @override
+  String get changeAcademicPeriodConfirm => 'Change Period';
 }

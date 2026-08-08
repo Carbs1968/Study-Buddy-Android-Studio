@@ -418,5 +418,8 @@
   "onboardingSemesterLabel": "Semestre",
   "onboardingClassesLabel": "Clases",
   "onboardingTopicsLabel": "Temas",
-  "onboardingWorkspaceHierarchyLabel": "Jerarquía de tu espacio de trabajo"
+  "onboardingWorkspaceHierarchyLabel": "Jerarquía de tu espacio de trabajo",
+  "changeAcademicPeriodTitle": "¿Cambiar el periodo académico actual?",
+  "changeAcademicPeriodMessage": "Tus grabaciones, materiales y datos de estudio existentes no se eliminarán. Study Buddy usará el nuevo año académico y semestre como tu periodo actual.",
+  "changeAcademicPeriodConfirm": "Cambiar periodo"
 }

@@ -1729,6 +1729,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Your workspace hierarchy'**
   String get onboardingWorkspaceHierarchyLabel;
+
+  /// No description provided for @changeAcademicPeriodTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Change current academic period?'**
+  String get changeAcademicPeriodTitle;
+
+  /// No description provided for @changeAcademicPeriodMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Your existing recordings, materials, and study data will not be deleted. Study Buddy will use the new academic year and semester as your current period.'**
+  String get changeAcademicPeriodMessage;
+
+  /// No description provided for @changeAcademicPeriodConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Change Period'**
+  String get changeAcademicPeriodConfirm;
 }
 
 class _AppLocalizationsDelegate

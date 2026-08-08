@@ -19,6 +19,9 @@ class _AcademicSettingsScreenState extends State<AcademicSettingsScreen> {
   bool _saving = false;
   bool _loading = true;
 
+  String? _savedLevelName;
+  String? _savedSemesterName;
+
   @override
   void initState() {
     super.initState();
@@ -51,7 +54,10 @@ class _AcademicSettingsScreenState extends State<AcademicSettingsScreen> {
       if (doc.exists) {
         final data = doc.data()!;
         _levelCtl.text = (data['levelName'] ?? '').toString();
-        _semesterCtl.text = (data['semesterName'] ?? data['termName'] ?? '').toString();
+        _semesterCtl.text =
+            (data['semesterName'] ?? data['termName'] ?? '').toString();
+        _savedLevelName = _levelCtl.text.trim();
+        _savedSemesterName = _semesterCtl.text.trim();
       }
     } catch (e) {
       appLogger('Academic settings load failed: $e');
@@ -83,6 +89,41 @@ class _AcademicSettingsScreenState extends State<AcademicSettingsScreen> {
         ),
       );
       return;
+    }
+
+    final hasExistingSettings = (_savedLevelName?.isNotEmpty ?? false) &&
+        (_savedSemesterName?.isNotEmpty ?? false);
+    final academicPeriodChanged =
+        levelName != _savedLevelName || semesterName != _savedSemesterName;
+
+    if (hasExistingSettings && academicPeriodChanged) {
+      final confirmed = await showDialog<bool>(
+        context: context,
+        builder: (dialogContext) => AlertDialog(
+          title: Text(
+            AppLocalizations.of(context).changeAcademicPeriodTitle,
+          ),
+          content: Text(
+            AppLocalizations.of(context).changeAcademicPeriodMessage,
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(false),
+              child: Text(AppLocalizations.of(context).cancel),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.of(dialogContext).pop(true),
+              child: Text(
+                AppLocalizations.of(context).changeAcademicPeriodConfirm,
+              ),
+            ),
+          ],
+        ),
+      );
+
+      if (confirmed != true || !mounted) {
+        return;
+      }
     }
 
     setState(() => _saving = true);
@@ -136,77 +177,77 @@ class _AcademicSettingsScreenState extends State<AcademicSettingsScreen> {
       body: _loading
           ? const Center(child: CircularProgressIndicator())
           : Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              strings.academicLevelYear,
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
-            const SizedBox(height: 8),
-            TextField(
-              controller: _levelCtl,
-              textInputAction: TextInputAction.next,
-              decoration: InputDecoration(
-                border: const OutlineInputBorder(),
-                hintText: strings.academicLevelYearHint,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              strings.academicLevelYearHelp,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Colors.black54,
-              ),
-            ),
-            const SizedBox(height: 24),
-            Text(
-              strings.currentSemesterTerm,
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
-            const SizedBox(height: 8),
-            TextField(
-              controller: _semesterCtl,
-              textInputAction: TextInputAction.done,
-              decoration: InputDecoration(
-                border: const OutlineInputBorder(),
-                hintText: strings.currentSemesterTermHint,
-              ),
-              onSubmitted: (_) {
-                if (!_saving) _saveSettings();
-              },
-            ),
-            const SizedBox(height: 8),
-            Text(
-              strings.currentSemesterTermHelp,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Colors.black54,
-              ),
-            ),
-            const SizedBox(height: 40),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton.icon(
-                onPressed: _saving ? null : _saveSettings,
-                icon: _saving
-                    ? const SizedBox(
-                  width: 18,
-                  height: 18,
-                  child: CircularProgressIndicator(
-                    color: Colors.white,
-                    strokeWidth: 2,
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    strings.academicLevelYear,
+                    style: Theme.of(context).textTheme.titleLarge,
                   ),
-                )
-                    : const Icon(Icons.save),
-                label: Text(
-                  _saving ? strings.saving : strings.saveChanges,
-                ),
+                  const SizedBox(height: 8),
+                  TextField(
+                    controller: _levelCtl,
+                    textInputAction: TextInputAction.next,
+                    decoration: InputDecoration(
+                      border: const OutlineInputBorder(),
+                      hintText: strings.academicLevelYearHint,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    strings.academicLevelYearHelp,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Colors.black54,
+                        ),
+                  ),
+                  const SizedBox(height: 24),
+                  Text(
+                    strings.currentSemesterTerm,
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
+                  const SizedBox(height: 8),
+                  TextField(
+                    controller: _semesterCtl,
+                    textInputAction: TextInputAction.done,
+                    decoration: InputDecoration(
+                      border: const OutlineInputBorder(),
+                      hintText: strings.currentSemesterTermHint,
+                    ),
+                    onSubmitted: (_) {
+                      if (!_saving) _saveSettings();
+                    },
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    strings.currentSemesterTermHelp,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Colors.black54,
+                        ),
+                  ),
+                  const SizedBox(height: 40),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton.icon(
+                      onPressed: _saving ? null : _saveSettings,
+                      icon: _saving
+                          ? const SizedBox(
+                              width: 18,
+                              height: 18,
+                              child: CircularProgressIndicator(
+                                color: Colors.white,
+                                strokeWidth: 2,
+                              ),
+                            )
+                          : const Icon(Icons.save),
+                      label: Text(
+                        _saving ? strings.saving : strings.saveChanges,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
-          ],
-        ),
-      ),
     );
   }
 }

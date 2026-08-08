@@ -968,4 +968,15 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get onboardingWorkspaceHierarchyLabel =>
       'Jerarquía de tu espacio de trabajo';
+
+  @override
+  String get changeAcademicPeriodTitle =>
+      '¿Cambiar el periodo académico actual?';
+
+  @override
+  String get changeAcademicPeriodMessage =>
+      'Tus grabaciones, materiales y datos de estudio existentes no se eliminarán. Study Buddy usará el nuevo año académico y semestre como tu periodo actual.';
+
+  @override
+  String get changeAcademicPeriodConfirm => 'Cambiar periodo';
 }
