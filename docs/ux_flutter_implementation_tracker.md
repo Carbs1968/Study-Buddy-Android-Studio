@@ -3609,3 +3609,262 @@ Safety:
 - No recording, upload, playback, or AI logic changed.
 - No academic hierarchy fields changed.
 - Google Drive was not reintroduced.
+
+---
+
+## 2026-08-08 — Google Play Launch Readiness and v1.0.9 Release Candidate
+
+### Source-of-truth checkpoint
+
+- Repository: `Carbs1968/Study-Buddy-Android-Studio`
+- Branch: `dev`
+- GitHub `origin/dev` confirmed as source of truth.
+- Working tree was clean before release-version work.
+- Release candidate version updated:
+  - `versionName: 1.0.9`
+  - `versionCode: 11`
+- Version commit:
+  - `08ea776 Bump app version to 1.0.9`
+- `flutter analyze` passed with no issues.
+- Current release candidate tested on physical Samsung Galaxy S24 / Android 16.
+
+### Launch fixes completed before release-candidate QA
+
+Recorder initialization:
+- Fixed localization access occurring too early during recorder recovery initialization.
+- Recovery check now starts after the first Flutter frame.
+- Physical Android recording regression test passed.
+- Commit:
+  - `d5ebdf2 Fix recorder recovery initialization`
+
+Account deletion progress message:
+- Fixed the account-deletion progress snackbar remaining visible after returning to login.
+- Physical Android account deletion test passed.
+- Commit:
+  - `5bfb2c3 Dismiss account deletion progress message`
+
+### Onboarding
+
+Status:
+- Screens 1–4 visually reviewed and accepted for launch.
+- Physical Android test passed.
+- Continue / Skip / final setup flow passed.
+- English/Spanish localization passed.
+- No controls blocked by Android system bars.
+
+Decision:
+- Onboarding is launch-ready.
+- Do not add additional onboarding polish before the closed-test release unless a regression is discovered.
+
+### Firebase App Check
+
+Debug configuration:
+- Captured Galaxy S24 Firebase App Check debug token.
+- Registered token in Firebase Console.
+- Previous `403 App attestation failed` messages stopped after registration.
+
+Production configuration:
+- Android production provider confirmed as Play Integrity.
+- No application code change was required for the debug-token registration.
+- Debug token remains Firebase-console configuration only and must not be committed.
+
+### Google Play signing
+
+Finding:
+- Existing Google Play upload private key was no longer available on the development Mac.
+- Google Play App Signing remains enabled; Google's production app-signing key was not changed.
+
+Completed:
+- Created new upload keystore:
+  - `~/.android/upload-keys/study-buddy-upload.jks`
+- Alias:
+  - `study-buddy-upload`
+- Exported new public PEM certificate.
+- Submitted Google Play upload-key reset request.
+- Google accepted the new certificate.
+- New upload key becomes valid after Google's mandatory waiting period.
+- Local `android/key.properties` configured and confirmed ignored by Git.
+- Signed release AAB generation was successfully tested with the new keystore.
+
+Do not:
+- Change the Play app-signing key.
+- Commit `android/key.properties`.
+- Commit the upload keystore or passwords.
+
+### Google Play compliance / App content
+
+Completed or verified:
+- Foreground service microphone declaration:
+  - `Background audio input`
+  - YouTube demonstration video supplied.
+- Data Safety questionnaire updated.
+- Health apps declaration reviewed; Study Buddy is not a health app.
+- Target audience remains:
+  - 16–17
+  - 18 and over
+- Content Rating remains completed; no content-rating-relevant product change identified.
+- Ads declaration:
+  - app does not contain ads.
+- Advertising ID:
+  - declared No.
+- Privacy Policy URL present.
+- Delete Account website page updated:
+  - `https://studybuddynote.com/delete-account`
+- Website deletion page now documents:
+  - Settings → Delete Account in-app flow
+  - external email deletion request path
+  - data deleted
+  - Google account is unaffected.
+
+### Data Safety declaration
+
+Current disclosed collected data:
+- Name
+- Email address
+- User IDs
+- Photos
+- Voice or sound recordings
+- Files and docs
+
+Current disclosed sharing:
+- Voice or sound recordings:
+  - shared for App functionality / AI processing
+- Files and docs:
+  - shared for App functionality / AI processing
+
+Other important declarations:
+- Data encrypted in transit.
+- Account deletion URL provided.
+- No separate partial-data-deletion mechanism is claimed.
+- No location data declared.
+- No financial data declared.
+- No advertising/marketing purposes declared.
+- No personalization purpose declared for recordings/material uploads.
+
+### Google Play reviewer access
+
+Problem found:
+- Previous Play Console credentials referenced a Firebase email/password account.
+- Current Study Buddy UI does not expose email/password login, so those credentials would not let a Google reviewer sign into the app.
+
+Resolution:
+- Dedicated real Google test account selected:
+  - `studybuddynote.1@gmail.com`
+- Exact Google Sign-In flow tested successfully in the physical Android app.
+- Play Console reviewer instructions updated to use:
+  - Continue with Google
+  - dedicated Google reviewer account
+- Google reviewers do not require Firebase Console access.
+- Reviewer receives normal Study Buddy user access only.
+
+### v1.0.9+11 physical Android release-candidate QA
+
+Passed on physical Galaxy S24:
+
+Authentication:
+- Google Sign-In with reviewer account.
+- Normal Home screen reached.
+
+Academic data:
+- Academic Settings load.
+- Academic year and semester load.
+- Classes/topics/session library load.
+
+Recorder:
+- Start.
+- Pause.
+- Resume.
+- Stop.
+- Timer.
+- Foreground recording notification.
+- Screen-locked recording.
+- Recording continuity after lock/unlock.
+
+Recording persistence:
+- `.m4a` created successfully.
+- Filename verified:
+  - `ClassName - Topic - yyyy-mm-dd_hh-mm.m4a`
+- Firebase Storage upload passed.
+- Firestore session metadata passed.
+- Playback passed.
+- Local temporary recording cleanup passed after successful upload.
+
+AI:
+- Transcript request passed.
+- Transcript completion passed.
+- Summary passed.
+- Notes passed.
+- Quiz passed.
+
+Study materials:
+- PDF/DOCX upload path tested.
+- Material appeared in correct academic location.
+- In-app material viewing passed.
+- AI/study-guide use of uploaded material passed.
+
+Account deletion:
+- Delete Account UI accessible.
+- Confirmation UI passed.
+- Cancel path passed.
+- No controls blocked by system bars.
+- Full destructive deletion had already been separately tested successfully.
+
+Onboarding:
+- Screens 1–4 passed.
+- Navigation passed.
+- English/Spanish passed.
+- Responsive/system-bar layout passed.
+
+Release decision:
+- Treat `1.0.9+11` as feature-frozen for the closed-test release.
+- Only genuine release blockers/regressions should change this candidate.
+
+### Academic Settings concern discovered during release QA
+
+Current implementation:
+- Academic Settings writes to:
+  - `users/{uid}/academicSettings/current`
+- Saving a new academic year or semester updates the single current academic-period document.
+- Existing recordings, uploads, sessions, transcripts, AI outputs, and historical Firestore data are not deleted by this action.
+
+Risk:
+- A student can overwrite the currently selected academic year/semester.
+- Existing data remains stored, but changing the current academic context can create UX/navigation confusion.
+- The current v1 model does not yet provide a proper historical academic-period switcher.
+
+Existing tracker direction remains valid:
+- Required hierarchy stays:
+  - `Academic Year → Semester → Class → Topic`
+- Multiple academic periods and an academic-period switcher require a dedicated data-model/UX pass.
+- Do not perform a broad academic hierarchy migration inside the closed-test release candidate.
+
+Closed-test decision:
+- Keep the v1.0.9 release candidate frozen.
+- Tell closed testers not to change Academic Year/Semester except when deliberately testing Academic Settings.
+- Record this as a high-priority post-closed-test / pre-production product issue.
+- Before broad student launch, define behavior for:
+  - creating a new academic period
+  - activating/switching periods
+  - preserving historical periods
+  - routing Library/Recorder/uploads to the active period
+  - keeping legacy sessions/materials visible
+- Any implementation must preserve existing Firestore data and migration compatibility.
+
+### Current launch position
+
+Ready:
+- Core physical-device QA passed.
+- Play Console compliance work substantially completed.
+- Reviewer login corrected.
+- v1.0.9+11 source-of-truth committed and pushed.
+- Release candidate feature-frozen.
+
+Pending:
+- Google Play upload key activation.
+- Build final fresh signed `1.0.9+11` AAB from clean `origin/dev`.
+- Upload AAB to Closed testing.
+- Preview/confirm closed-test release.
+- Send closed-test release to Google for review.
+- Complete Google Play closed-testing eligibility requirements.
+- Continue ASO/store-listing optimization separately.
+- Academic-period overwrite/switching model remains a pre-production follow-up.
