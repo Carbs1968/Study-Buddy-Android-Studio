@@ -4,10 +4,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../l10n/app_localizations.dart';
+import 'ai_output_screen.dart';
 import '../utils/app_logger.dart';
 import '../utils/helper.dart';
 import '../utils/utils.dart';
@@ -19,8 +19,6 @@ class LectureDetailScreen extends StatelessWidget {
     super.key,
     required this.sessionId,
   });
-
-
 
   String _formatTranscriptStatus(
     BuildContext context,
@@ -46,10 +44,12 @@ class LectureDetailScreen extends StatelessWidget {
   }
 
   Future<void> _viewAiOutput(
-      BuildContext context,
-      String sessionId,
-      String type,
-      ) async {
+    BuildContext context,
+    String sessionId,
+    String type,
+    String className,
+    String topic,
+  ) async {
     try {
       showDialog(
         context: context,
@@ -103,45 +103,15 @@ class LectureDetailScreen extends StatelessWidget {
         parsed = (json.decode(prettyJson) as Map).cast<String, dynamic>();
       }
 
-      final prettyForCopy = const JsonEncoder.withIndent('  ').convert(parsed);
-
-      showDialog(
-        context: context,
-        builder: (_) => AlertDialog(
-          title: Text(
-            switch (type) {
-              'summary' => AppLocalizations.of(context).aiSummaryTitle,
-              'notes' => AppLocalizations.of(context).aiNotesTitle,
-              'quiz' => AppLocalizations.of(context).aiQuizTitle,
-              _ => AppLocalizations.of(context).aiOutputs,
-            },
+      await Navigator.of(context).push(
+        MaterialPageRoute<void>(
+          builder: (_) => AiOutputScreen(
+            sessionId: sessionId,
+            type: type,
+            data: parsed,
+            className: className,
+            topic: topic,
           ),
-          content: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 800, maxHeight: 520),
-            child: Scrollbar(
-              thumbVisibility: true,
-              child: SingleChildScrollView(
-                child: _formatAiOutput(context, type, parsed),
-              ),
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () async {
-                await Clipboard.setData(ClipboardData(text: prettyForCopy));
-                if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(AppLocalizations.of(context).copiedJsonToClipboard)),
-                  );
-                }
-              },
-              child: Text(AppLocalizations.of(context).copy),
-            ),
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: Text(AppLocalizations.of(context).close),
-            ),
-          ],
         ),
       );
     } catch (e) {
@@ -163,153 +133,6 @@ class LectureDetailScreen extends StatelessWidget {
           ],
         ),
       );
-    }
-  }
-
-  Widget _formatAiOutput(
-    BuildContext context,
-    String type,
-    Map<String, dynamic> data,
-  ) {
-    switch (type) {
-      case 'summary':
-        final summary = data['summary'];
-        final title = data['title'];
-        final abstract = data['abstract'];
-        final keyPoints = List<String>.from(data['key_points'] ?? const []);
-        final terms = List<String>.from(data['terms'] ?? const []);
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            if (summary != null)
-              Text(summary.toString()),
-            if (title != null)
-              Text(
-                title.toString(),
-                style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-              ),
-            if (abstract != null) ...[
-              const SizedBox(height: 8),
-              Text(abstract.toString()),
-            ],
-            if (keyPoints.isNotEmpty) ...[
-              const SizedBox(height: 12),
-              Text(
-                AppLocalizations.of(context).keyPoints,
-                style: const TextStyle(fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 4),
-              ...keyPoints.map(
-                    (p) => Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 2),
-                  child: Text('• $p'),
-                ),
-              ),
-            ],
-            if (terms.isNotEmpty) ...[
-              const SizedBox(height: 12),
-              Text(
-                AppLocalizations.of(context).terms,
-                style: const TextStyle(fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 4),
-              ...terms.map((t) => Text('- $t')),
-            ],
-          ],
-        );
-
-      case 'notes':
-        final rawNotes = data['notes'] ?? data['outline'] ?? const [];
-        final outline = List<Map<String, dynamic>>.from(
-          (rawNotes as List).map((e) => Map<String, dynamic>.from(e as Map)),
-        );
-        final equations = List<String>.from(data['equations'] ?? const []);
-        final refs = List<String>.from(data['references'] ?? const []);
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            for (final sec in outline) ...[
-              Text(
-                sec['heading']?.toString() ?? '',
-                style: const TextStyle(fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 4),
-              ...List<String>.from(sec['bullets'] ?? const []).map(
-                    (b) => Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 2),
-                  child: Text('• $b'),
-                ),
-              ),
-              const SizedBox(height: 10),
-            ],
-            if (equations.isNotEmpty) ...[
-              Text(
-                AppLocalizations.of(context).equations,
-                style: const TextStyle(fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 4),
-              ...equations.map((e) => Text(e)),
-            ],
-            if (refs.isNotEmpty) ...[
-              const SizedBox(height: 12),
-              Text(
-                AppLocalizations.of(context).references,
-                style: const TextStyle(fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 4),
-              ...refs.map((r) => Text(r)),
-            ],
-          ],
-        );
-
-      case 'quiz':
-        final questions = List<Map<String, dynamic>>.from(
-          (data['questions'] as List? ?? const [])
-              .map((e) => Map<String, dynamic>.from(e as Map)),
-        );
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            for (final q in questions)
-              Card(
-                margin: const EdgeInsets.symmetric(vertical: 6),
-                child: Padding(
-                  padding: const EdgeInsets.all(12),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        (q['question'] ?? q['prompt'] ?? '').toString(),
-                        style: const TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      if ((q['choices'] as List?)?.isNotEmpty ?? false) ...[
-                        const SizedBox(height: 6),
-                        ...List<String>.from(q['choices'] ?? const []).map(
-                              (c) => Text('○ $c'),
-                        ),
-                      ],
-                      const SizedBox(height: 8),
-                      Text(
-                        AppLocalizations.of(context).answerValue(
-                          q['answer']?.toString() ?? '',
-                        ),
-                      ),
-                      if (q['explanation'] != null || q['rationale'] != null)
-                        Text(
-                          AppLocalizations.of(context).whyValue(
-                            (q['explanation'] ?? q['rationale']).toString(),
-                          ),
-                          style: const TextStyle(color: Colors.black54),
-                        ),
-                    ],
-                  ),
-                ),
-              ),
-          ],
-        );
-
-      default:
-        return Text(data.toString());
     }
   }
 
@@ -390,9 +213,12 @@ class LectureDetailScreen extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      if (levelName.isNotEmpty) Text(strings.levelValue(levelName)),
-                      if (semesterName.isNotEmpty) Text(strings.semesterValue(semesterName)),
-                      if (filename.isNotEmpty) Text(strings.fileValue(filename)),
+                      if (levelName.isNotEmpty)
+                        Text(strings.levelValue(levelName)),
+                      if (semesterName.isNotEmpty)
+                        Text(strings.semesterValue(semesterName)),
+                      if (filename.isNotEmpty)
+                        Text(strings.fileValue(filename)),
                       Text(
                         strings.durationValue(
                           formatDuration(
@@ -410,7 +236,6 @@ class LectureDetailScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 16),
-
               Text(
                 strings.playback,
                 style: const TextStyle(fontWeight: FontWeight.bold),
@@ -425,7 +250,8 @@ class LectureDetailScreen extends StatelessWidget {
                 FutureBuilder<String?>(
                   future: _getPlaybackUrl(audioStoragePath),
                   builder: (context, playbackSnap) {
-                    if (playbackSnap.connectionState == ConnectionState.waiting) {
+                    if (playbackSnap.connectionState ==
+                        ConnectionState.waiting) {
                       return const SizedBox(
                         height: 44,
                         child: Center(child: CircularProgressIndicator()),
@@ -446,10 +272,8 @@ class LectureDetailScreen extends StatelessWidget {
                     );
                   },
                 ),
-
               const SizedBox(height: 16),
               const Divider(),
-
               if (transcriptStatus == 'done') ...[
                 ElevatedButton(
                   onPressed: () async {
@@ -552,20 +376,22 @@ class LectureDetailScreen extends StatelessWidget {
 
                       if (context.mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text(strings.transcriptionRequested)),
+                          SnackBar(
+                              content: Text(strings.transcriptionRequested)),
                         );
                       }
                     } catch (e) {
                       if (context.mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text(strings.requestTranscriptionFailed)),
+                          SnackBar(
+                              content:
+                                  Text(strings.requestTranscriptionFailed)),
                         );
                       }
                     }
                   },
                 ),
               ],
-
               const SizedBox(height: 24),
               const Divider(),
               Text(
@@ -582,7 +408,6 @@ class LectureDetailScreen extends StatelessWidget {
                 ),
               ],
               const SizedBox(height: 8),
-
               _AiActionRow(
                 title: strings.generateSummary,
                 type: 'summary',
@@ -605,7 +430,13 @@ class LectureDetailScreen extends StatelessWidget {
                   });
                 },
                 sessionId: sessionId,
-                viewAiOutput: _viewAiOutput,
+                viewAiOutput: (context, sessionId, type) => _viewAiOutput(
+                  context,
+                  sessionId,
+                  type,
+                  className,
+                  topic,
+                ),
               ),
               _AiActionRow(
                 title: strings.generateNotes,
@@ -629,7 +460,13 @@ class LectureDetailScreen extends StatelessWidget {
                   });
                 },
                 sessionId: sessionId,
-                viewAiOutput: _viewAiOutput,
+                viewAiOutput: (context, sessionId, type) => _viewAiOutput(
+                  context,
+                  sessionId,
+                  type,
+                  className,
+                  topic,
+                ),
               ),
               _AiActionRow(
                 title: strings.generatePracticeTest,
@@ -653,7 +490,13 @@ class LectureDetailScreen extends StatelessWidget {
                   });
                 },
                 sessionId: sessionId,
-                viewAiOutput: _viewAiOutput,
+                viewAiOutput: (context, sessionId, type) => _viewAiOutput(
+                  context,
+                  sessionId,
+                  type,
+                  className,
+                  topic,
+                ),
               ),
               const SizedBox(height: 8),
             ],
