@@ -49,7 +49,7 @@ android {
     defaultConfig {
         applicationId = "com.carbs.studybuddy.study_buddy"
         minSdk = 24
-        targetSdk = 35
+        targetSdk = 36
 
         versionCode = resolvedVersionCode
         versionName = resolvedVersionName
