@@ -127,9 +127,12 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     final strings = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF7F4FC),
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) {
@@ -168,20 +171,20 @@ class _LoginScreenState extends State<LoginScreen> {
                         Text(
                           strings.appTitle,
                           textAlign: TextAlign.center,
-                          style: const TextStyle(
+                          style: theme.textTheme.headlineLarge?.copyWith(
                             fontSize: 34,
                             fontWeight: FontWeight.w800,
-                            color: Color(0xFF1F2937),
+                            color: colors.onSurface,
                           ),
                         ),
                         const SizedBox(height: 14),
                         Text(
                           strings.loginTagline,
                           textAlign: TextAlign.center,
-                          style: TextStyle(
+                          style: theme.textTheme.bodyLarge?.copyWith(
                             fontSize: 17,
                             height: 1.35,
-                            color: Color(0xFF667085),
+                            color: colors.onSurfaceVariant,
                           ),
                         ),
                         const SizedBox(height: 40),
@@ -191,13 +194,15 @@ class _LoginScreenState extends State<LoginScreen> {
                             margin: const EdgeInsets.only(bottom: 14),
                             padding: const EdgeInsets.all(12),
                             decoration: BoxDecoration(
-                              color: const Color(0xFFFFEBEE),
+                              color: colors.errorContainer,
                               borderRadius: BorderRadius.circular(14),
                             ),
                             child: Text(
                               _error!,
                               textAlign: TextAlign.center,
-                              style: const TextStyle(color: Color(0xFFC62828)),
+                              style: TextStyle(
+                                color: colors.onErrorContainer,
+                              ),
                             ),
                           ),
                         SizedBox(
@@ -205,15 +210,20 @@ class _LoginScreenState extends State<LoginScreen> {
                           child: ElevatedButton(
                             onPressed: _loading ? null : _signInWithGoogle,
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.white,
-                              foregroundColor: const Color(0xFF1F2937),
+                              backgroundColor: isDark
+                                  ? colors.surfaceContainerHighest
+                                  : Colors.white,
+                              foregroundColor: colors.onSurface,
                               elevation: 3,
-                              shadowColor: const Color(0x22000000),
+                              shadowColor: isDark
+                                  ? Colors.black54
+                                  : const Color(0x22000000),
                               padding: const EdgeInsets.symmetric(vertical: 16),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(28),
-                                side:
-                                    const BorderSide(color: Color(0xFFE5E7EB)),
+                                side: BorderSide(
+                                  color: colors.outlineVariant,
+                                ),
                               ),
                             ),
                             child: _loading
@@ -256,7 +266,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             Text(
                               strings.legalAgreementPrefix,
                               style: TextStyle(
-                                color: Color(0xFF98A2B3),
+                                color: colors.onSurfaceVariant,
                                 fontSize: 13,
                               ),
                             ),
@@ -279,7 +289,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             Text(
                               strings.legalAgreementMiddle,
                               style: TextStyle(
-                                color: Color(0xFF98A2B3),
+                                color: colors.onSurfaceVariant,
                                 fontSize: 13,
                               ),
                             ),
@@ -300,10 +310,10 @@ class _LoginScreenState extends State<LoginScreen> {
                                 ),
                               ),
                             ),
-                            const Text(
+                            Text(
                               '.',
                               style: TextStyle(
-                                color: Color(0xFF98A2B3),
+                                color: colors.onSurfaceVariant,
                                 fontSize: 13,
                               ),
                             ),
