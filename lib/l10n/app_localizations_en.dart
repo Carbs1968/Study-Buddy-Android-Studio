@@ -958,4 +958,43 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get changeAcademicPeriodConfirm => 'Change Period';
+
+  @override
+  String get askAi => 'Ask AI';
+
+  @override
+  String get lectureChatTitle => 'Ask AI about this lecture';
+
+  @override
+  String get lectureChatIntro =>
+      'Ask a question about this lecture. Study Buddy will answer from the lecture transcript.';
+
+  @override
+  String get lectureChatHint => 'Ask about this lecture...';
+
+  @override
+  String get lectureChatError =>
+      'Study Buddy could not answer that question. Please try again.';
+
+  @override
+  String get send => 'Send';
+
+  @override
+  String get lectureChatTemporaryTitle => 'Chat is temporary';
+
+  @override
+  String get lectureChatTemporaryBody =>
+      'This conversation won\'t be saved. If it improves your study material, you can update it before leaving.';
+
+  @override
+  String get lectureChatTemporarySummaryBody =>
+      'This conversation won\'t be saved. If it improves your summary, you can update it before leaving.';
+
+  @override
+  String get lectureChatTemporaryNotesBody =>
+      'This conversation won\'t be saved. If it improves your notes, you can update them before leaving.';
+
+  @override
+  String get lectureChatTemporaryQuizBody =>
+      'This conversation won\'t be saved. If it improves your practice test, you can update it before leaving.';
 }

@@ -1747,6 +1747,72 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Change Period'**
   String get changeAcademicPeriodConfirm;
+
+  /// No description provided for @askAi.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask AI'**
+  String get askAi;
+
+  /// No description provided for @lectureChatTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask AI about this lecture'**
+  String get lectureChatTitle;
+
+  /// No description provided for @lectureChatIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask a question about this lecture. Study Buddy will answer from the lecture transcript.'**
+  String get lectureChatIntro;
+
+  /// No description provided for @lectureChatHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask about this lecture...'**
+  String get lectureChatHint;
+
+  /// No description provided for @lectureChatError.
+  ///
+  /// In en, this message translates to:
+  /// **'Study Buddy could not answer that question. Please try again.'**
+  String get lectureChatError;
+
+  /// No description provided for @send.
+  ///
+  /// In en, this message translates to:
+  /// **'Send'**
+  String get send;
+
+  /// No description provided for @lectureChatTemporaryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Chat is temporary'**
+  String get lectureChatTemporaryTitle;
+
+  /// No description provided for @lectureChatTemporaryBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This conversation won\'t be saved. If it improves your study material, you can update it before leaving.'**
+  String get lectureChatTemporaryBody;
+
+  /// No description provided for @lectureChatTemporarySummaryBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This conversation won\'t be saved. If it improves your summary, you can update it before leaving.'**
+  String get lectureChatTemporarySummaryBody;
+
+  /// No description provided for @lectureChatTemporaryNotesBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This conversation won\'t be saved. If it improves your notes, you can update them before leaving.'**
+  String get lectureChatTemporaryNotesBody;
+
+  /// No description provided for @lectureChatTemporaryQuizBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This conversation won\'t be saved. If it improves your practice test, you can update it before leaving.'**
+  String get lectureChatTemporaryQuizBody;
 }
 
 class _AppLocalizationsDelegate

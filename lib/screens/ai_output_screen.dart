@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../l10n/app_localizations.dart';
+import 'lecture_chat_screen.dart';
 
 class AiOutputScreen extends StatelessWidget {
   final String sessionId;
@@ -281,6 +282,23 @@ class AiOutputScreen extends StatelessWidget {
                   const SizedBox(height: 16),
                 ],
                 _buildOutput(context),
+                const SizedBox(height: 28),
+                FilledButton.icon(
+                  onPressed: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute<void>(
+                        builder: (_) => LectureChatScreen(
+                          sessionId: sessionId,
+                          artifactType: type,
+                          className: className,
+                          topic: topic,
+                        ),
+                      ),
+                    );
+                  },
+                  icon: const Icon(Icons.chat_bubble_outline),
+                  label: Text(strings.askAi),
+                ),
               ],
             ),
           ),

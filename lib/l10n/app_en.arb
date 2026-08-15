@@ -421,5 +421,16 @@
   "onboardingWorkspaceHierarchyLabel": "Your workspace hierarchy",
   "changeAcademicPeriodTitle": "Change current academic period?",
   "changeAcademicPeriodMessage": "Your existing recordings, materials, and study data will not be deleted. Study Buddy will use the new academic year and semester as your current period.",
-  "changeAcademicPeriodConfirm": "Change Period"
+  "changeAcademicPeriodConfirm": "Change Period",
+  "askAi": "Ask AI",
+  "lectureChatTitle": "Ask AI about this lecture",
+  "lectureChatIntro": "Ask a question about this lecture. Study Buddy will answer from the lecture transcript.",
+  "lectureChatHint": "Ask about this lecture...",
+  "lectureChatError": "Study Buddy could not answer that question. Please try again.",
+  "send": "Send",
+  "lectureChatTemporaryTitle": "Chat is temporary",
+  "lectureChatTemporaryBody": "This conversation won't be saved. If it improves your study material, you can update it before leaving.",
+  "lectureChatTemporarySummaryBody": "This conversation won't be saved. If it improves your summary, you can update it before leaving.",
+  "lectureChatTemporaryNotesBody": "This conversation won't be saved. If it improves your notes, you can update them before leaving.",
+  "lectureChatTemporaryQuizBody": "This conversation won't be saved. If it improves your practice test, you can update it before leaving."
 }

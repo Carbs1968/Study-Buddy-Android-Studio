@@ -979,4 +979,43 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get changeAcademicPeriodConfirm => 'Cambiar periodo';
+
+  @override
+  String get askAi => 'Preguntar a la IA';
+
+  @override
+  String get lectureChatTitle => 'Preguntar a la IA sobre esta clase';
+
+  @override
+  String get lectureChatIntro =>
+      'Haz una pregunta sobre esta clase. Study Buddy responderá usando la transcripción de la clase.';
+
+  @override
+  String get lectureChatHint => 'Pregunta sobre esta clase...';
+
+  @override
+  String get lectureChatError =>
+      'Study Buddy no pudo responder esa pregunta. Inténtalo de nuevo.';
+
+  @override
+  String get send => 'Enviar';
+
+  @override
+  String get lectureChatTemporaryTitle => 'El chat es temporal';
+
+  @override
+  String get lectureChatTemporaryBody =>
+      'Esta conversación no se guardará. Si mejora tu material de estudio, podrás actualizarlo antes de salir.';
+
+  @override
+  String get lectureChatTemporarySummaryBody =>
+      'Esta conversación no se guardará. Si mejora tu resumen, podrás actualizarlo antes de salir.';
+
+  @override
+  String get lectureChatTemporaryNotesBody =>
+      'Esta conversación no se guardará. Si mejora tus notas, podrás actualizarlas antes de salir.';
+
+  @override
+  String get lectureChatTemporaryQuizBody =>
+      'Esta conversación no se guardará. Si mejora tu prueba práctica, podrás actualizarla antes de salir.';
 }
