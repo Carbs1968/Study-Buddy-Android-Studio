@@ -36,6 +36,8 @@ class _LoginScreenState extends State<LoginScreen> {
   String? _error;
 
   Future<void> _signInWithGoogle() async {
+    final languageCode = Localizations.localeOf(context).languageCode;
+
     setState(() {
       _loading = true;
       _error = null;
@@ -65,7 +67,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
       await FirebaseAuth.instance.signInWithCredential(credential);
       final user = FirebaseAuth.instance.currentUser;
-      await _createUserIfNeeded(user);
+      await _createUserIfNeeded(user, languageCode);
     } catch (error, stackTrace) {
       debugPrint('Google sign-in failed: $error');
       debugPrintStack(stackTrace: stackTrace);
@@ -84,7 +86,10 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
-  Future<void> _createUserIfNeeded(User? u) async {
+  Future<void> _createUserIfNeeded(
+    User? u,
+    String languageCode,
+  ) async {
     if (u == null) return;
 
     final ref = FirebaseFirestore.instance.collection('users').doc(u.uid);
@@ -99,8 +104,7 @@ class _LoginScreenState extends State<LoginScreen> {
       'photoURL': u.photoURL,
       'provider': 'google',
       'providers': FieldValue.arrayUnion(['google']),
-      'locale': Localizations.localeOf(context)
-          .languageCode, // Save resolved app language
+      'locale': languageCode, // Save resolved app language
       'updatedAt': FieldValue.serverTimestamp(),
       'lastLoginAt': FieldValue.serverTimestamp(),
     }, SetOptions(merge: true));
