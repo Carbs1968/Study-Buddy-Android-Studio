@@ -3868,3 +3868,157 @@ Pending:
 - Complete Google Play closed-testing eligibility requirements.
 - Continue ASO/store-listing optimization separately.
 - Academic-period overwrite/switching model remains a pre-production follow-up.
+
+## Completed Launch / AI / Android Compliance Pass — August 15, 2026
+
+### Dedicated AI Output Screens
+
+Commit:
+- `7b6f9a2 Add dedicated AI output screens`
+
+Summary:
+- Replaced the Summary, Notes, and Practice Test result popups with dedicated full-screen result views.
+- Preserved the existing `getAiJobOutput` Cloud Function contract and AI output schemas.
+- Added responsive layout, SafeArea handling, Copy action, dark/light theme support, and English/Spanish localization.
+- Kept transcript as the canonical lecture source of truth.
+
+Manual validation:
+- Summary opens in its own screen.
+- Notes opens in its own screen.
+- Practice Test opens in its own screen.
+- Back navigation works.
+- Physical Android phone test passed.
+
+### Transcript-Grounded Lecture Chat
+
+Backend commit:
+- `0f4fbaf Add transcript-grounded lecture AI chat`
+
+Flutter commit:
+- `ba79428 Add transcript-grounded lecture chat UI`
+
+Cloud Function deployed:
+- `askLectureAi` in `us-central1`
+
+Architecture:
+- Transcript is the canonical source of truth.
+- Summary, Notes, and Practice Test are derivative artifacts only.
+- Chat may inspect the current artifact when the student questions it, but transcript content wins if there is a conflict.
+- Chat answers in the language of the student's latest question unless another language is requested.
+- Chat history is temporary and is not persisted to Firestore.
+- The chat UI explicitly tells students that the conversation is temporary.
+- Temporary-chat copy is artifact-specific for Summary, Notes, and Practice Test.
+
+Manual validation:
+- Chat opened from Summary, Notes, and Practice Test.
+- Transcript-grounded answers worked correctly.
+- Follow-up conversation history worked.
+- English/Spanish and dark-mode UI were validated on a physical Android phone.
+
+### Student-Guided Artifact Revision and Replacement
+
+Backend commit:
+- `bcc5683 Add lecture artifact revision workflow`
+
+Flutter commit:
+- `e4885f2 Add lecture artifact revision UI`
+
+Cloud Functions deployed:
+- `generateRevisedLectureArtifact`
+- `replaceLectureArtifact`
+
+Product decision:
+- Each lecture has one current Summary, one current Notes artifact, and one current Practice Test.
+- Student-requested revisions replace the current artifact rather than creating visible version history.
+- Replacement is never automatic.
+- Student must explicitly review and confirm before replacing the current artifact.
+
+Revision flow:
+- Student discusses issues or preferences in temporary chat.
+- Student chooses Create revised Summary / Notes / Practice Test.
+- Backend generates a candidate using:
+  - transcript as canonical truth
+  - current artifact
+  - relevant temporary conversation/student revision intent
+- Candidate is stored separately and does not change the live artifact.
+- Student previews candidate.
+- Student explicitly confirms Replace.
+- Replacement updates both the session output and the existing latest completed AI job output so the current retrieval path continues to work.
+- Stale-candidate protection prevents an old revision candidate from overwriting a newer artifact.
+
+UI validation:
+- Revision candidate preview worked.
+- Replace confirmation worked.
+- Revised artifact appeared immediately after confirmation.
+- Cancel leaves the current artifact unchanged.
+- Spanish button layout was cleaned up so long labels remain centered and readable.
+- Confirmation wording uses `Confirm / Confirmar` instead of repeating `Replace / Reemplazar` multiple times.
+- Physical Android phone test passed.
+
+### Google Play Android 16 / API 36 Compliance
+
+Commit:
+- `dafa18d Target Android API 36`
+
+Change:
+- `android/app/build.gradle.kts`
+- `targetSdk` changed from `35` to `36`.
+- `compileSdk` was already `36`.
+- `minSdk` remains `24`.
+
+Reason:
+- Google Play requires new app updates to target Android 16 / API 36 starting August 31, 2026.
+
+Manual Android 16 validation:
+- App opened successfully on physical Samsung Android 16 / API 36 device.
+- Google sign-in worked.
+- Start / pause / resume / stop recording worked.
+- Foreground recording notification worked.
+- Locked-screen recording worked.
+- Wakelock behavior remained correct.
+- Firebase Storage upload worked.
+- Playback worked.
+- Firestore session metadata save worked.
+- AI flow worked.
+
+Safety:
+- Only `targetSdk` changed.
+- No `minSdk`, Gradle, Flutter, Firebase package, recorder, upload, Firestore, or AI logic was changed as part of the compliance update.
+
+### Firebase App Check Debug Attestation Fix
+
+Status:
+- Resolved through Firebase Console configuration; no code change required.
+
+Finding:
+- App code already correctly uses:
+  - `AndroidProvider.debug` for debug/local builds
+  - `AndroidProvider.playIntegrity` for release builds
+- Repeated local warnings were caused by the physical phone's current App Check debug secret not being registered in Firebase Console.
+
+Fix:
+- Located the phone's existing Firebase App Check debug secret from Android app shared preferences.
+- Registered the current Galaxy S24 debug token in Firebase Console under App Check debug tokens.
+
+Validation:
+- Previous errors disappeared:
+  - `App attestation failed`
+  - `Too many attempts`
+  - `using placeholder token instead`
+- Recording/upload flow continued to work after registration.
+- No Study Buddy source-code change was needed.
+- Git working tree remained clean.
+
+Separate log note:
+- Intermittent `Unable to resolve host firestore.googleapis.com` / `UnknownHostException` messages were observed during device/network state changes.
+- These are network/DNS connectivity events, not App Check failures.
+- No code change is planned unless a reproducible user-facing Firestore connectivity problem appears on a stable network.
+
+### End-of-Day Source-of-Truth Status
+
+- Branch: `dev`
+- GitHub `origin/dev` is current source of truth.
+- All feature/config code changes from this pass were committed and pushed.
+- App Check fix was Firebase Console configuration only and required no commit.
+- Working tree was clean at wrap-up.
+- `flutter analyze` passed after the committed Flutter changes.
