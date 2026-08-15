@@ -432,5 +432,21 @@
   "lectureChatTemporaryBody": "Esta conversación no se guardará. Si mejora tu material de estudio, podrás actualizarlo antes de salir.",
   "lectureChatTemporarySummaryBody": "Esta conversación no se guardará. Si mejora tu resumen, podrás actualizarlo antes de salir.",
   "lectureChatTemporaryNotesBody": "Esta conversación no se guardará. Si mejora tus notas, podrás actualizarlas antes de salir.",
-  "lectureChatTemporaryQuizBody": "Esta conversación no se guardará. Si mejora tu prueba práctica, podrás actualizarla antes de salir."
+  "lectureChatTemporaryQuizBody": "Esta conversación no se guardará. Si mejora tu prueba práctica, podrás actualizarla antes de salir.",
+  "createRevisedSummary": "Crear resumen revisado",
+  "createRevisedNotes": "Crear notas revisadas",
+  "createRevisedPracticeTest": "Crear prueba práctica revisada",
+  "creatingRevision": "Creando versión revisada...",
+  "revisionGenerationError": "Study Buddy no pudo crear una versión revisada. Inténtalo de nuevo.",
+  "revisionPreviewTitle": "Revisar versión revisada",
+  "replaceSummary": "Reemplazar resumen",
+  "replaceNotes": "Reemplazar notas",
+  "replacePracticeTest": "Reemplazar prueba práctica",
+  "replaceArtifactConfirmTitle": "¿Reemplazar la versión actual?",
+  "replaceSummaryConfirmBody": "Esto reemplazará el resumen actual de esta clase con la versión revisada.",
+  "replaceNotesConfirmBody": "Esto reemplazará las notas actuales de esta clase con la versión revisada.",
+  "replacePracticeTestConfirmBody": "Esto reemplazará la prueba práctica actual de esta clase con la versión revisada.",
+  "replaceArtifactError": "Study Buddy no pudo reemplazar la versión actual. Inténtalo de nuevo.",
+  "replaceArtifactSuccess": "Versión revisada guardada.",
+  "confirm": "Confirmar"
 }

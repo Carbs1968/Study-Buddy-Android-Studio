@@ -1018,4 +1018,57 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get lectureChatTemporaryQuizBody =>
       'Esta conversación no se guardará. Si mejora tu prueba práctica, podrás actualizarla antes de salir.';
+
+  @override
+  String get createRevisedSummary => 'Crear resumen revisado';
+
+  @override
+  String get createRevisedNotes => 'Crear notas revisadas';
+
+  @override
+  String get createRevisedPracticeTest => 'Crear prueba práctica revisada';
+
+  @override
+  String get creatingRevision => 'Creando versión revisada...';
+
+  @override
+  String get revisionGenerationError =>
+      'Study Buddy no pudo crear una versión revisada. Inténtalo de nuevo.';
+
+  @override
+  String get revisionPreviewTitle => 'Revisar versión revisada';
+
+  @override
+  String get replaceSummary => 'Reemplazar resumen';
+
+  @override
+  String get replaceNotes => 'Reemplazar notas';
+
+  @override
+  String get replacePracticeTest => 'Reemplazar prueba práctica';
+
+  @override
+  String get replaceArtifactConfirmTitle => '¿Reemplazar la versión actual?';
+
+  @override
+  String get replaceSummaryConfirmBody =>
+      'Esto reemplazará el resumen actual de esta clase con la versión revisada.';
+
+  @override
+  String get replaceNotesConfirmBody =>
+      'Esto reemplazará las notas actuales de esta clase con la versión revisada.';
+
+  @override
+  String get replacePracticeTestConfirmBody =>
+      'Esto reemplazará la prueba práctica actual de esta clase con la versión revisada.';
+
+  @override
+  String get replaceArtifactError =>
+      'Study Buddy no pudo reemplazar la versión actual. Inténtalo de nuevo.';
+
+  @override
+  String get replaceArtifactSuccess => 'Versión revisada guardada.';
+
+  @override
+  String get confirm => 'Confirmar';
 }

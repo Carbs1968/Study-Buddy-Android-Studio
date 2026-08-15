@@ -1813,6 +1813,102 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'This conversation won\'t be saved. If it improves your practice test, you can update it before leaving.'**
   String get lectureChatTemporaryQuizBody;
+
+  /// No description provided for @createRevisedSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Create revised summary'**
+  String get createRevisedSummary;
+
+  /// No description provided for @createRevisedNotes.
+  ///
+  /// In en, this message translates to:
+  /// **'Create revised notes'**
+  String get createRevisedNotes;
+
+  /// No description provided for @createRevisedPracticeTest.
+  ///
+  /// In en, this message translates to:
+  /// **'Create revised practice test'**
+  String get createRevisedPracticeTest;
+
+  /// No description provided for @creatingRevision.
+  ///
+  /// In en, this message translates to:
+  /// **'Creating revised version...'**
+  String get creatingRevision;
+
+  /// No description provided for @revisionGenerationError.
+  ///
+  /// In en, this message translates to:
+  /// **'Study Buddy could not create a revised version. Please try again.'**
+  String get revisionGenerationError;
+
+  /// No description provided for @revisionPreviewTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Review revised version'**
+  String get revisionPreviewTitle;
+
+  /// No description provided for @replaceSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Replace summary'**
+  String get replaceSummary;
+
+  /// No description provided for @replaceNotes.
+  ///
+  /// In en, this message translates to:
+  /// **'Replace notes'**
+  String get replaceNotes;
+
+  /// No description provided for @replacePracticeTest.
+  ///
+  /// In en, this message translates to:
+  /// **'Replace practice test'**
+  String get replacePracticeTest;
+
+  /// No description provided for @replaceArtifactConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Replace current version?'**
+  String get replaceArtifactConfirmTitle;
+
+  /// No description provided for @replaceSummaryConfirmBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This will replace the current summary for this lecture with the revised version.'**
+  String get replaceSummaryConfirmBody;
+
+  /// No description provided for @replaceNotesConfirmBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This will replace the current notes for this lecture with the revised version.'**
+  String get replaceNotesConfirmBody;
+
+  /// No description provided for @replacePracticeTestConfirmBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This will replace the current practice test for this lecture with the revised version.'**
+  String get replacePracticeTestConfirmBody;
+
+  /// No description provided for @replaceArtifactError.
+  ///
+  /// In en, this message translates to:
+  /// **'Study Buddy could not replace the current version. Please try again.'**
+  String get replaceArtifactError;
+
+  /// No description provided for @replaceArtifactSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Revised version saved.'**
+  String get replaceArtifactSuccess;
+
+  /// No description provided for @confirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm'**
+  String get confirm;
 }
 
 class _AppLocalizationsDelegate

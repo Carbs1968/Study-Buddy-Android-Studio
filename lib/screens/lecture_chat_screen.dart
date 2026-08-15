@@ -28,6 +28,7 @@ class _LectureChatScreenState extends State<LectureChatScreen> {
   final List<Map<String, String>> _messages = [];
 
   bool _sending = false;
+  bool _creatingRevision = false;
 
   @override
   void dispose() {
@@ -104,6 +105,63 @@ class _LectureChatScreenState extends State<LectureChatScreen> {
       if (mounted) {
         setState(() {
           _sending = false;
+        });
+      }
+    }
+  }
+
+  String _createRevisionLabel(AppLocalizations strings) {
+    return switch (widget.artifactType) {
+      'summary' => strings.createRevisedSummary,
+      'notes' => strings.createRevisedNotes,
+      'quiz' => strings.createRevisedPracticeTest,
+      _ => strings.createRevisedSummary,
+    };
+  }
+
+  Future<void> _createRevision() async {
+    if (_messages.isEmpty || _creatingRevision || _sending) return;
+
+    final strings = AppLocalizations.of(context);
+
+    setState(() {
+      _creatingRevision = true;
+    });
+
+    try {
+      final callable =
+          functions.httpsCallable('generateRevisedLectureArtifact');
+
+      final result = await callable.call({
+        'sessionId': widget.sessionId,
+        'artifactType': widget.artifactType,
+        'history': _messages,
+      });
+
+      final resultData = result.data as Map?;
+      final candidateId = resultData?['candidateId']?.toString() ?? '';
+      final rawOutput = resultData?['data'];
+
+      if (!mounted) return;
+
+      if (candidateId.isEmpty || rawOutput is! Map) {
+        throw StateError('Invalid revision candidate response');
+      }
+
+      Navigator.of(context).pop(<String, dynamic>{
+        'candidateId': candidateId,
+        'data': Map<String, dynamic>.from(rawOutput),
+      });
+    } catch (_) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(strings.revisionGenerationError)),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _creatingRevision = false;
         });
       }
     }
@@ -244,6 +302,37 @@ class _LectureChatScreenState extends State<LectureChatScreen> {
                 ),
               ),
             ),
+            if (_messages.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(12, 4, 12, 8),
+                child: Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 800),
+                    child: SizedBox(
+                      width: double.infinity,
+                      child: FilledButton.icon(
+                        onPressed: (_sending || _creatingRevision)
+                            ? null
+                            : _createRevision,
+                        icon: _creatingRevision
+                            ? const SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
+                              )
+                            : const Icon(Icons.auto_awesome_outlined),
+                        label: Text(
+                          _creatingRevision
+                              ? strings.creatingRevision
+                              : _createRevisionLabel(strings),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
             Container(
               padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
               decoration: BoxDecoration(

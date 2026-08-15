@@ -997,4 +997,57 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get lectureChatTemporaryQuizBody =>
       'This conversation won\'t be saved. If it improves your practice test, you can update it before leaving.';
+
+  @override
+  String get createRevisedSummary => 'Create revised summary';
+
+  @override
+  String get createRevisedNotes => 'Create revised notes';
+
+  @override
+  String get createRevisedPracticeTest => 'Create revised practice test';
+
+  @override
+  String get creatingRevision => 'Creating revised version...';
+
+  @override
+  String get revisionGenerationError =>
+      'Study Buddy could not create a revised version. Please try again.';
+
+  @override
+  String get revisionPreviewTitle => 'Review revised version';
+
+  @override
+  String get replaceSummary => 'Replace summary';
+
+  @override
+  String get replaceNotes => 'Replace notes';
+
+  @override
+  String get replacePracticeTest => 'Replace practice test';
+
+  @override
+  String get replaceArtifactConfirmTitle => 'Replace current version?';
+
+  @override
+  String get replaceSummaryConfirmBody =>
+      'This will replace the current summary for this lecture with the revised version.';
+
+  @override
+  String get replaceNotesConfirmBody =>
+      'This will replace the current notes for this lecture with the revised version.';
+
+  @override
+  String get replacePracticeTestConfirmBody =>
+      'This will replace the current practice test for this lecture with the revised version.';
+
+  @override
+  String get replaceArtifactError =>
+      'Study Buddy could not replace the current version. Please try again.';
+
+  @override
+  String get replaceArtifactSuccess => 'Revised version saved.';
+
+  @override
+  String get confirm => 'Confirm';
 }
